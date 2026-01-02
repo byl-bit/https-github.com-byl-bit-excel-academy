@@ -1,0 +1,67 @@
+name: Publish Roster Integration Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  publish-roster-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Reset & seed test DB
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node ./scripts/ci_reset_db.js
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: npm run build
+
+      - name: Start server
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          nohup npm run start &
+          # wait for server to be available
+          for i in {1..30}; do
+            if curl -sSf http://127.0.0.1:3000/ || true; then break; fi
+            sleep 1
+          done
+
+      - name: Run publish-roster test
+        env:
+          BASE: http://127.0.0.1:3000
+        run: npm run test:publish-roster
+
+      - name: Run login gender normalization test
+        env:
+          BASE: http://127.0.0.1:3000
+        run: npm run test:login-gender
+
+      - name: Generate a sample report PDF
+        env:
+          BASE: http://127.0.0.1:3000
+        run: node ./scripts/generate_report_pdf.js
+
+      - name: Upload PDFs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-pdfs
+          path: artifacts/*.pdf

@@ -1,0 +1,74 @@
+﻿
+> excel-academy@0.1.0 build
+> next build
+
+node.exe : [baseline-browser-mapping] The data in 
+this module is over two months old.  To ensure 
+accurate Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([bas 
+   eline-brows...ping@latest -D`:String) [], Rem  
+  oteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ ⚠ Warning: Next.js inferred your workspace root, 
+but it may not be correct.
+ We detected multiple lockfiles and selected the 
+directory of C:\Users\BYL\package-lock.json as 
+the root directory.
+ To silence this warning, set `turbopack.root` in 
+your Next.js config, or consider removing one of 
+the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/c
+onfig/next-config-js/turbopack#root-directory for 
+more information.
+ Detected additional lockfiles: 
+   * C:\Users\BYL\Desktop\excel-academy\package-lo
+ck.json
+
+   ▲ Next.js 16.0.4 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this 
+module is over two months old.  To ensure 
+accurate Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully in 16.4s
+   Running TypeScript ...
+Failed to compile.
+
+./src/lib/mockData.ts:128:19
+Type error: Property 'status' is missing in type 
+'{ id: string; studentId: string; studentName: 
+string; grade: string; section: string; subjects: 
+SubjectResult[]; total: number; average: number; 
+rank: number; conduct: string; result: "PASS" | 
+"FAIL"; promotedOrDetained: "PROMOTED" | 
+"DETAINED"; }' but required in type 
+'StudentResult'.
+
+[0m [90m 126 |[39m             [36mconst[39m 
+isPass [33m=[39m average [33m>=[39m 
+[35m50[39m[33m;[39m
+ [90m 127 |[39m
+[31m[1m>[22m[39m[90m 128 |[39m             
+[36mconst[39m resultData[33m:[39m 
+[33mStudentResult[39m [33m=[39m {
+ [90m     |[39m                   
+[31m[1m^[22m[39m
+ [90m 129 |[39m                 id[33m:[39m 
+[32m`r${index + 1}`[39m[33m,[39m
+ [90m 130 |[39m                 
+studentId[33m:[39m 
+student[33m.[39mstudentId[33m![39m[33m,[39m
+ [90m 131 |[39m                 
+studentName[33m:[39m 
+student[33m.[39mname[33m,[39m[0m
+Next.js build worker exited with code: 1 and 
+signal: null

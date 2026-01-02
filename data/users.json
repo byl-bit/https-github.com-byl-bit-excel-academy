@@ -1,0 +1,13 @@
+[
+  {
+    "id": "admin-001",
+    "name": "Admin User",
+    "fullName": "Admin User",
+    "email": "admin@excel.edu",
+    "password": "Admin123",
+    "role": "admin",
+    "status": "active",
+    "updatedAt": "2025-12-18T16:31:24.608Z",
+    "updatedBy": "admin-001"
+  }
+]

@@ -1,0 +1,58 @@
+﻿
+> excel-academy@0.1.0 build
+> next build
+
+node.exe : [baseline-browser-mapping] The data in this module is over 
+two months old.  To ensure accurate Baseline data, please update: `npm 
+i baseline-browser-mapping@latest -D`
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([baseline-brows...ping@la 
+   test -D`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be 
+correct.
+ We detected multiple lockfiles and selected the directory of 
+C:\Users\BYL\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, 
+or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/
+turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\BYL\Desktop\excel-academy\package-lock.json
+
+   ▲ Next.js 16.0.4 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months 
+old.  To ensure accurate Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully in 15.7s
+   Running TypeScript ...
+Failed to compile.
+
+./src/components/teacher/ResultTable.tsx:404:34
+Type error: This comparison appears to be unintentional because the 
+types '"pending" | "published" | "subject-pending" | "pending_admin"' 
+and '""' have no overlap.
+
+[0m [90m 402 |[39m         [36mconst[39m isLocked [33m=[39m 
+(isPublished [33m||[39m (isPendingAdmin [33m&&[39m 
+[33m![39mallowEditSubmitted)) [33m&&[39m
+ [90m 403 |[39m             [33m![39misLocalEditing [33m&&[39m
+[31m[1m>[22m[39m[90m 404 |[39m             
+([33m![39misActuallyDraft [33m&&[39m resStatus [33m!==[39m 
+[32m''[39m) [33m&&[39m
+ [90m     |[39m                                  [31m[1m^[22m[39m
+ [90m 405 |[39m             (isHomeroomView [33m||[39m 
+isSubjectLocked)[33m;[39m
+ [90m 406 |[39m
+ [90m 407 |[39m         [36mreturn[39m { sid[33m,[39m 
+existingResult[33m,[39m resStatus[33m,[39m isPublished[33m,[39m 
+isPendingAdmin[33m,[39m isLocked[33m,[39m 
+isLocalEditing[33m,[39m allowEditSubmitted }[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null

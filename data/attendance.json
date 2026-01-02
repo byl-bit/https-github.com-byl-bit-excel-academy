@@ -1,0 +1,40 @@
+[
+  {
+    "id": "2025-12-24-11-A",
+    "date": "2025-12-24",
+    "grade": "11",
+    "section": "A",
+    "presentStudentIds": [
+      "user-1766559990245",
+      "user-1766553475179"
+    ],
+    "teacherId": "teacher-1766553543099",
+    "updatedAt": "2025-12-24T13:05:14.099Z"
+  },
+  {
+    "id": "2025-12-18-12-A",
+    "date": "2025-12-18",
+    "grade": "12",
+    "section": "A",
+    "presentStudentIds": [
+      "user-1766648222380",
+      "user-1766648266620"
+    ],
+    "teacherId": "teacher-1766648299951",
+    "updatedAt": "2025-12-25T07:46:21.533Z"
+  },
+  {
+    "id": "2025-12-25-12-A",
+    "date": "2025-12-25",
+    "grade": "12",
+    "section": "A",
+    "presentStudentIds": [
+      "user-1766648266620",
+      "user-1766648123719",
+      "user-1766652554430",
+      "user-1766652468343"
+    ],
+    "teacherId": "teacher-1766652568138",
+    "updatedAt": "2025-12-25T11:51:06.076Z"
+  }
+]

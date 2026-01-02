@@ -1,0 +1,63 @@
+﻿
+> excel-academy@0.1.0 build
+> next build
+
+node.exe : [baseline-browser-mapping] The data in 
+this module is over two months old.  To ensure 
+accurate Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([bas 
+   eline-brows...ping@latest -D`:String) [], Rem  
+  oteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ ⚠ Warning: Next.js inferred your workspace root, 
+but it may not be correct.
+ We detected multiple lockfiles and selected the 
+directory of C:\Users\BYL\package-lock.json as 
+the root directory.
+ To silence this warning, set `turbopack.root` in 
+your Next.js config, or consider removing one of 
+the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/c
+onfig/next-config-js/turbopack#root-directory for 
+more information.
+ Detected additional lockfiles: 
+   * C:\Users\BYL\Desktop\excel-academy\package-lo
+ck.json
+
+   ▲ Next.js 16.0.4 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this 
+module is over two months old.  To ensure 
+accurate Baseline data, please update: `npm i 
+baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully in 16.9s
+   Running TypeScript ...
+Failed to compile.
+
+./scripts/verify-supabase.ts:1:26
+Type error: Cannot find module 
+'../src/lib/supabase.js' or its corresponding 
+type declarations.
+
+[0m[31m[1m>[22m[39m[90m 1 |[39m 
+[36mimport[39m { supabase } [36mfrom[39m 
+[32m'../src/lib/supabase.js'[39m[33m;[39m
+ [90m   |[39m                          
+[31m[1m^[22m[39m
+ [90m 2 |[39m
+ [90m 3 |[39m [36masync[39m 
+[36mfunction[39m verifyConnection() {
+ [90m 4 |[39m     
+console[33m.[39mlog([32m'🔍 Verifying Supabase 
+Connection...\n'[39m)[33m;[39m[0m
+Next.js build worker exited with code: 1 and 
+signal: null
