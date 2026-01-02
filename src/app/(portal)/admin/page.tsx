@@ -13,7 +13,7 @@ import { useAdminData } from '@/hooks/useAdminData';
 import {
     LogOut, Users, CheckCircle, Award, Library,
     Settings, Clock, Megaphone, Shield, LayoutDashboard,
-    AlertCircle, RefreshCw, BookOpen, ShieldAlert, Menu, X
+    AlertCircle, RefreshCw, BookOpen, ShieldAlert, Menu, X, Trophy
 } from "lucide-react";
 
 import { AdminOverview } from '@/components/admin/AdminOverview';
@@ -28,6 +28,7 @@ import { Notifications } from '@/components/admin/Notifications';
 import { SubjectAllocations } from '@/components/admin/SubjectAllocations';
 import { AnnouncementManager } from '@/components/AnnouncementManager';
 import { ResetApprovals } from '@/components/admin/ResetApprovals';
+import { AppreciationLetters } from '@/components/admin/AppreciationLetters';
 import { Button } from "@/components/ui/button";
 import { logActivity } from "@/lib/utils/activityLog";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
@@ -637,6 +638,7 @@ export default function AdminPage() {
         { id: 'students', label: 'Students', icon: Users },
         { id: 'teachers', label: 'Teachers', icon: Shield },
         { id: 'announcements', label: 'News', icon: Megaphone },
+        { id: 'letters', label: 'Certificates', icon: Trophy },
         { id: 'library', label: 'Library', icon: Library },
         { id: 'notifications', label: 'Notifications', icon: AlertCircle, badge: unreadNotifications },
         { id: 'activity', label: 'Logs', icon: Clock },
@@ -666,7 +668,7 @@ export default function AdminPage() {
         {
             label: 'Academic',
             icon: Award,
-            items: ['results', 'allocations', 'announcements']
+            items: ['results', 'allocations', 'letters', 'announcements']
         },
         {
             label: 'Governance',
@@ -832,6 +834,13 @@ export default function AdminPage() {
 
                 {activeTab === 'announcements' && (
                     <AnnouncementManager isAdmin={true} initialData={announcements} />
+                )}
+
+                {activeTab === 'letters' && (
+                    <AppreciationLetters
+                        students={users.filter(u => u.role === 'student' && u.status === 'active')}
+                        results={allResults}
+                    />
                 )}
 
                 {activeTab === 'library' && (

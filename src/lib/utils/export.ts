@@ -415,3 +415,13 @@ const escapeCSV = (val: unknown): string => {
     return cellValue;
 };
 
+export const parseExcel = async (file: File): Promise<string[][]> => {
+    const xlsx = await import('xlsx');
+    const buffer = await file.arrayBuffer();
+    const wb = xlsx.read(buffer, { type: 'array' });
+    const wsName = wb.SheetNames[0];
+    const ws = wb.Sheets[wsName];
+    const data = xlsx.utils.sheet_to_json(ws, { header: 1 }) as string[][];
+    return data.map(row => row.map(cell => String(cell ?? '')));
+};
+

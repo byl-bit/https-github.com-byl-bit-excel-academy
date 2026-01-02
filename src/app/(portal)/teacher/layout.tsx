@@ -84,42 +84,18 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
     const navItems = [
         { href: '/teacher', label: 'Dashboard', icon: LayoutDashboard, show: true },
         { href: '/teacher/subjects', label: 'Subject Portal', icon: BookOpen, show: hasAllocations },
-        { href: '/teacher/homeroom', label: 'Homeroom Portal', icon: Users, show: isHomeroomTeacher },
+        { href: '/teacher/homeroom', label: 'Homeroom', icon: Users, show: isHomeroomTeacher },
         { href: '/teacher/attendance', label: 'Attendance', icon: CalendarCheck, show: true },
         { href: '/teacher/profile', label: 'My Profile', icon: UserIcon, show: true },
     ];
 
-    const TeacherHeaderMenus = (
-        <div className="flex items-center gap-3 w-full max-w-4xl mx-auto">
-            {navItems.filter(i => i.show !== false).map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        className={cn(
-                            "flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm ring-1 ring-blue-100/50 whitespace-nowrap",
-                            isActive
-                                ? "bg-blue-600 text-white shadow-lg shadow-blue-200 ring-blue-600"
-                                : "bg-blue-50/50 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
-                        )}
-                    >
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        <span className="truncate">{item.label}</span>
-                    </Link>
-                );
-            })}
-        </div>
-    );
-
     return (
         <PortalSidebarLayout
             role="teacher"
-            title="Teacher Portal"
+            title="Faculty Portal"
             user={user}
             navItems={navItems}
-            headerContent={TeacherHeaderMenus}
-            hideSidebar={true}
+            hideSidebar={false}
             logout={logout}
             notificationCount={unreadCount}
         >

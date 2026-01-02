@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { TeacherDashboard } from '@/components/teacher/TeacherDashboard';
 import { Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 export default function TeacherPage() {
-    const { user } = useAuth();
+    // Ensure role is teacher
+    const { user } = useRequireAuth(['teacher']) as any;
+
     const [loading, setLoading] = useState(true);
     const [allocations, setAllocations] = useState<any[]>([]);
     const [currentAllocation, setCurrentAllocation] = useState<any>(null);
@@ -43,20 +46,22 @@ export default function TeacherPage() {
                 });
                 setAllocations(myAllocations);
 
+                // Determine "Primary" context for the dashboard welcome screen
+                // Homeroom takes precedence, then first subject allocation
                 const isHomeroomTeacher = !!user.grade && !!user.section;
                 const contextGrade = isHomeroomTeacher ? user.grade : myAllocations[0]?.grade;
                 const contextSection = isHomeroomTeacher ? user.section : myAllocations[0]?.section;
 
                 const activeAlloc = isHomeroomTeacher
-                    ? myAllocations.find((a: any) => String(a.grade) === String(user.grade) && String(a.section) === String(user.section)) || myAllocations[0]
+                    ? { ...myAllocations[0], grade: user.grade, section: user.section, type: 'homeroom', subject: 'Homeroom' }
                     : myAllocations[0];
 
                 setCurrentAllocation(activeAlloc);
 
                 if (contextGrade && contextSection) {
-                    // Parallelize students and results fetching with server-side filters
+                    // Fetch data for the primary context (Dashboard Stats)
                     const [usersRes, resRes] = await Promise.all([
-                        fetch(`/api/users?role=student&grade=${contextGrade}&section=${contextSection}`),
+                        fetch(`/api/users?role=student&grade=${contextGrade}&section=${contextSection}&status=active`),
                         fetch(`/api/results?grade=${contextGrade}&section=${contextSection}`, {
                             headers: { 'x-actor-role': 'teacher', 'x-actor-id': user.id }
                         })
@@ -64,7 +69,7 @@ export default function TeacherPage() {
 
                     if (usersRes.ok) {
                         const classStudents = await usersRes.json();
-                        setStudents(classStudents.filter((u: any) => u.status === 'active'));
+                        setStudents(classStudents);
                     }
 
                     if (resRes.ok) {
@@ -75,11 +80,11 @@ export default function TeacherPage() {
 
                         Object.keys(published).forEach(k => {
                             const r = published[k];
-                            arr.push({ id: k, studentId: r.student_id || k, ...r, status: 'published' });
+                            arr.push({ id: k, ...r, status: 'published' });
                         });
                         Object.keys(pending).forEach(k => {
                             const r = pending[k];
-                            arr.push({ id: k, studentId: r.student_id || k, ...r, status: 'pending' });
+                            arr.push({ id: k, ...r, status: 'pending' });
                         });
                         setClassResults(arr);
                     }
@@ -108,9 +113,11 @@ export default function TeacherPage() {
 
     if (!hasResponsibility) {
         return (
-            <Card className="text-center py-16 flex flex-col items-center justify-center border-dashed border-2 border-blue-200 bg-blue-50/30">
-                <h3 className="text-xl font-bold text-blue-900">No Assignments Yet</h3>
-                <p className="text-blue-500 max-w-sm mt-2">Contact the administrator to be assigned as a Homeroom Teacher or given Subject Allocations.</p>
+            <Card className="text-center py-16 flex flex-col items-center justify-center border-dashed border-2 border-slate-200 bg-slate-50/50">
+                <h3 className="text-xl font-bold text-slate-900">No Assignments Yet</h3>
+                <p className="text-slate-500 max-w-sm mt-2">
+                    Contact the administrator to be assigned as a Homeroom Teacher or given Subject Allocations.
+                </p>
             </Card>
         );
     }

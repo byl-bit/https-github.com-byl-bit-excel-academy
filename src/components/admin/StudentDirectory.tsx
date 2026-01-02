@@ -10,7 +10,7 @@ import { PaginationControls } from "@/components/PaginationControls";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { normalizeGender } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { printResults, exportToCSV, parseCSV } from '@/lib/utils/export';
+import { printResults, exportToCSV, parseCSV, parseExcel } from '@/lib/utils/export';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PromptDialog } from '@/components/ui/prompt-dialog';
 import { AlertModal } from '@/components/ui/alert-modal';
@@ -154,21 +154,27 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
         exportToCSV(rows, `students_export_${new Date().toISOString().split('T')[0]}`, headers);
     };
 
-    const handleImportCSVData = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImportData = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            const text = event.target?.result as string;
-            const rows = parseCSV(text);
+        try {
+            let rows: string[][] = [];
+            const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+
+            if (isExcel) {
+                rows = await parseExcel(file);
+            } else {
+                const text = await file.text();
+                rows = parseCSV(text);
+            }
 
             const headerRowIndex = rows.findIndex(r =>
                 r.some(cell => cell.toLowerCase().includes('student id') || cell.toLowerCase().includes('roll number') || cell.toLowerCase().includes('firstname'))
             );
 
             if (headerRowIndex === -1) {
-                setAlert({ open: true, title: 'Import Failed', description: "Invalid CSV format: Missing header row (Student ID, First Name, etc.)", variant: 'error' });
+                setAlert({ open: true, title: 'Import Failed', description: "Invalid format: Missing header row (Student ID, First Name, etc.)", variant: 'error' });
                 return;
             }
 
@@ -188,30 +194,33 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
                 const row: any = {};
                 headers.forEach((header, index) => {
                     const cleanHeader = header.toLowerCase().replace(/\s+/g, '');
-                    if (cleanHeader === 'firstname') row.firstName = values[index];
-                    else if (cleanHeader === 'middlename') row.middleName = values[index];
-                    else if (cleanHeader === 'lastname') row.lastName = values[index];
+                    const val = values[index];
+                    if (cleanHeader === 'firstname') row.firstName = val;
+                    else if (cleanHeader === 'middlename') row.middleName = val;
+                    else if (cleanHeader === 'lastname') row.lastName = val;
                     else if (cleanHeader === 'gender' || cleanHeader === 'sex') {
-                        const val = values[index].toLowerCase();
-                        if (val.startsWith('m')) row.gender = 'M';
-                        else if (val.startsWith('f')) row.gender = 'F';
-                        else row.gender = values[index];
+                        const v = val.toLowerCase();
+                        if (v.startsWith('m')) row.gender = 'M';
+                        else if (v.startsWith('f')) row.gender = 'F';
+                        else row.gender = val;
                     }
-                    else if (cleanHeader === 'grade' || cleanHeader === 'class') row.grade = values[index];
-                    else if (cleanHeader === 'section') row.section = values[index];
-                    else if (cleanHeader === 'rollnumber' || cleanHeader === 'roll' || cleanHeader === 'rollno') row.rollNumber = values[index];
-                    else if (cleanHeader === 'email') row.email = values[index];
-                    else if (cleanHeader === 'studentid' || cleanHeader === 'id') row.studentId = values[index];
+                    else if (cleanHeader === 'grade' || cleanHeader === 'class') row.grade = val;
+                    else if (cleanHeader === 'section') row.section = val;
+                    else if (cleanHeader === 'rollnumber' || cleanHeader === 'roll' || cleanHeader === 'rollno') row.rollNumber = val;
+                    else if (cleanHeader === 'email') row.email = val;
+                    else if (cleanHeader === 'studentid' || cleanHeader === 'id') row.studentId = val;
                 });
+
+                // Skip completely empty rows
+                if (!row.firstName && !row.lastName && !row.studentId) return null;
 
                 const fullName = [row.firstName, row.middleName, row.lastName].filter(Boolean).join(' ');
 
                 // 1. DEDUPLICATION: Check if this student already exists in the system
                 const isExisting = students.some(s =>
-                    (s.name || s.fullName || '').toLowerCase() === fullName.toLowerCase() &&
-                    String(s.rollNumber || '') === String(row.rollNumber || '') &&
-                    String(s.grade || '') === String(row.grade || '') &&
-                    String(s.section || '') === String(row.section || '')
+                    ((s.name || s.fullName || '').toLowerCase() === fullName.toLowerCase() &&
+                        String(s.grade || '') === String(row.grade || '')) ||
+                    s.studentId === row.studentId
                 );
 
                 if (isExisting) return null;
@@ -245,30 +254,28 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
                 return;
             }
 
-            try {
-                const res = await fetch('/api/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(studentsToImport)
-                });
-                const result = await res.json();
-                if (res.ok) {
-                    const credCsv = ['Student ID,Full Name,Temporary Password', ...credentialsList.map(c => `${c.studentId},"${c.fullName}",${c.tempPassword}`)].join('\n');
-                    try {
-                        await navigator.clipboard.writeText(credCsv);
-                        setAlert({ open: true, title: 'Import Successful', description: `Successfully imported ${result.count} students. Credentials copied to clipboard.`, variant: 'success' });
-                    } catch (copyErr) {
-                        setAlert({ open: true, title: 'Import Successful', description: `Successfully imported ${result.count} students. Please note credentials could not be copied automatically.`, variant: 'success' });
-                    }
-                    setTimeout(() => window.location.reload(), 2000);
-                } else {
-                    setAlert({ open: true, title: 'Import Failed', description: result.error || 'Import failed', variant: 'error' });
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(studentsToImport)
+            });
+            const result = await res.json();
+            if (res.ok) {
+                const credCsv = ['Student ID,Full Name,Temporary Password', ...credentialsList.map(c => `${c.studentId},"${c.fullName}",${c.tempPassword}`)].join('\n');
+                try {
+                    await navigator.clipboard.writeText(credCsv);
+                    setAlert({ open: true, title: 'Import Successful', description: `Successfully imported ${result.count} students. Credentials copied to clipboard.`, variant: 'success' });
+                } catch (copyErr) {
+                    setAlert({ open: true, title: 'Import Successful', description: `Successfully imported ${result.count} students. Note: Could not copy to clipboard.`, variant: 'success' });
                 }
-            } catch (err) {
-                setAlert({ open: true, title: 'Error', description: 'An unexpected error occurred during import.', variant: 'error' });
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                setAlert({ open: true, title: 'Import Failed', description: result.error || 'Import failed', variant: 'error' });
             }
-        };
-        reader.readAsText(file);
+        } catch (err) {
+            console.error(err);
+            setAlert({ open: true, title: 'Error', description: 'Failed to parse file. Ensure it is a valid CSV or Excel file.', variant: 'error' });
+        }
     };
 
     return (
@@ -324,8 +331,8 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
                                 type="file"
                                 id="student-csv-import"
                                 className="hidden"
-                                accept=".csv"
-                                onChange={handleImportCSVData}
+                                accept=".csv,.xlsx,.xls"
+                                onChange={handleImportData}
                             />
                             <Button
                                 variant="outline"
