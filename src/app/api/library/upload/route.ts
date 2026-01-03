@@ -48,21 +48,23 @@ export async function POST(request: Request) {
             });
 
         // 2. Handle Bucket Not Found -> Create it (only possible with Admin)
-        if (error && (error.message.includes('bucket not found') || error.message.includes('The resource was not found'))) {
+        const errMsg = error?.message?.toLowerCase() || '';
+        const errAny = error as any;
+        if (error && (errMsg.includes('bucket not found') || errMsg.includes('resource not found') || errAny.statusCode === '404' || errAny.status === 404)) {
             console.warn(`[Library Upload] Bucket ${bucketName} not found. Attempting to create...`);
 
             if (supabaseAdmin) {
                 const { error: createError } = await supabaseAdmin.storage.createBucket(bucketName, {
                     public: true,
                     fileSizeLimit: 10485760, // 10MB
-                    allowedMimeTypes: ['image/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv']
+                    allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv', 'text/plain']
                 });
 
                 if (createError) {
                     console.error('[Library Upload] Failed to create bucket:', createError);
-                    // Fallback to 'public' or 'images' if standard buckets exist?
-                    // Return error for now.
-                    return NextResponse.json({ error: 'Storage bucket missing and creation failed.' }, { status: 500 });
+                    return NextResponse.json({
+                        error: `System Error: Storage bucket '${bucketName}' is missing and auto-creation failed. Please create it manually in Supabase.`
+                    }, { status: 500 });
                 }
 
                 // Retry upload
@@ -75,7 +77,10 @@ export async function POST(request: Request) {
                 error = retry.error;
             } else {
                 console.error('[Library Upload] Bucket missing and no Admin key to create it.');
-                return NextResponse.json({ error: 'Storage bucket not found. Please contact admin to configure storage.' }, { status: 500 });
+                // Return a very specific error for the user
+                return NextResponse.json({
+                    error: `Setup Required: The storage bucket '${bucketName}' does not exist. Please go to your Supabase Dashboard -> Storage -> Create a new public bucket named '${bucketName}'.`
+                }, { status: 500 });
             }
         }
 
