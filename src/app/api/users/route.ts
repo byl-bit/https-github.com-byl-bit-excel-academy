@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
 import { normalizeGender } from '@/lib/utils';
 
@@ -257,7 +257,8 @@ export async function POST(request: Request) {
             }
         }
 
-        const { data: newUser, error } = await supabase
+        const client = supabaseAdmin || supabase;
+        const { data: newUser, error } = await client
             .from('users')
             .insert([dbPayload])
             .select()
