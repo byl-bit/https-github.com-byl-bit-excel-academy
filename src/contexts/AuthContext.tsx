@@ -168,13 +168,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const res = await fetch('/api/users');
             const users = res.ok ? await res.json() : [];
 
-            // Construct full name
-            const fullName = [firstName, middleName, lastName].filter(Boolean).join(' ');
+            // Construct full name (Trimmed and normalized)
+            const clean = (s: string) => (s || '').trim().replace(/\s+/g, ' ');
+            const fullName = [clean(firstName), clean(middleName), clean(lastName)].filter(Boolean).join(' ');
 
             // 1. SMART MATCHING & DEDUPLICATION: Check for collisions based on Full Name ONLY (Global Check)
             const collisionMatch = users.find((u: any) =>
                 u.role === 'student' &&
-                (u.name || u.fullName || '').toLowerCase() === fullName.toLowerCase()
+                clean(u.name || u.fullName || '').toLowerCase() === fullName.toLowerCase()
             );
 
             // If an active account already exists with this identity, block duplication
