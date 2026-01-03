@@ -229,18 +229,17 @@ export async function POST(request: Request) {
             const rollVal = getString(body, 'rollNumber') || getString(body, 'roll_number');
             const gradeVal = getString(body, 'grade');
             const nameVal = getString(body, 'name') || getString(body, 'fullName');
-            if (rollVal && gradeVal && nameVal) {
+            if (gradeVal && nameVal) {
                 const { data: dup } = await supabase
                     .from('users')
                     .select('id')
                     .eq('role', 'student')
                     .eq('grade', gradeVal)
                     .eq('section', getString(body, 'section'))
-                    .eq('roll_number', Number(rollVal))
                     .ilike('name', nameVal)
                     .limit(1);
                 if (dup && dup.length > 0) {
-                    return NextResponse.json({ error: 'A student with this name and roll number already exists in the specified class.' }, { status: 400 });
+                    return NextResponse.json({ error: 'A student with this name already exists in the specified class.' }, { status: 400 });
                 }
             }
         }

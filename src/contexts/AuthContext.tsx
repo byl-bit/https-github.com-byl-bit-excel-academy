@@ -265,6 +265,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     studentId: finalStudentId
                 };
             }
+            if (!postRes.ok) {
+                const errData = await postRes.json().catch(() => ({}));
+                return { success: false, message: errData.error || errData.message || 'Registration failed server-side.' };
+            }
             return { success: false, message: 'Registration failed server-side.' };
         } catch (e) {
             return { success: false, message: 'Registration error.' };
