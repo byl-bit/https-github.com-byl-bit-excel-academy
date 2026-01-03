@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 // Helper to map DB snake_case to Frontend camelCase
 const mapToFrontend = (book: any) => ({
@@ -20,7 +20,9 @@ export async function GET(request: Request) {
     const grade = searchParams.get('grade');
     const subject = searchParams.get('subject');
 
-    let query = supabase.from('books').select('*').order('created_at', { ascending: false });
+    // Use Admin client if available to bypass RLS policies
+    const client = supabaseAdmin || supabase;
+    let query = client.from('books').select('*').order('created_at', { ascending: false });
 
     if (grade && grade !== 'All') query = query.eq('grade', grade);
     if (subject && subject !== 'All') query = query.eq('subject', subject);
@@ -56,7 +58,8 @@ export async function POST(req: Request) {
             video_url: body.videoUrl
         };
 
-        const { data, error } = await supabase
+        const client = supabaseAdmin || supabase;
+        const { data, error } = await client
             .from('books')
             .insert([dbPayload])
             .select()
@@ -79,7 +82,8 @@ export async function DELETE(req: Request) {
 
     if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
-    const { error } = await supabase
+    const client = supabaseAdmin || supabase;
+    const { error } = await client
         .from('books')
         .delete()
         .eq('id', id);
