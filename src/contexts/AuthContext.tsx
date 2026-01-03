@@ -171,18 +171,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Construct full name
             const fullName = [firstName, middleName, lastName].filter(Boolean).join(' ');
 
-            // 1. SMART MATCHING & DEDUPLICATION: Check for collisions based on Name, Grade, Section, and Roll Number
+            // 1. SMART MATCHING & DEDUPLICATION: Check for collisions based on Name, Grade, Section
             const collisionMatch = users.find((u: any) =>
                 u.role === 'student' &&
                 (u.name || u.fullName || '').toLowerCase() === fullName.toLowerCase() &&
                 String(u.grade) === String(grade) &&
-                String(u.section) === String(section) &&
-                String(u.rollNumber || '') === String(rollNumber || '')
+                String(u.section).toLowerCase() === String(section).toLowerCase()
             );
 
             // If an active account already exists with this identity, block duplication
             if (collisionMatch && collisionMatch.password) {
-                return { success: false, message: 'A student with this name, class, and roll number is already exist.' };
+                return { success: false, message: 'You already have an account.' };
             }
 
             // If a placeholder exists, verify it matches the Roll Number and Gender provided
