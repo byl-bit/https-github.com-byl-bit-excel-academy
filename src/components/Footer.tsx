@@ -29,6 +29,7 @@ export function Footer() {
                         <h3 className="font-bold text-lg mb-4">Quick Links</h3>
                         <div className="flex flex-col gap-2 text-sm text-muted-foreground">
                             <Link href="/" className="hover:underline">Home</Link>
+                            <Link href="/about" className="hover:underline">About Us</Link>
                             <Link href="/announcements" className="hover:underline">Announcements</Link>
                             <Link href="/auth/login" className="hover:underline">Login</Link>
                         </div>
