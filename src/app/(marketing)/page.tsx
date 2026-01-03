@@ -11,6 +11,13 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Home() {
   const { user, isAuthenticated } = useAuth() as any;
 
+  const [academicYear, setAcademicYear] = useState('');
+
+  useEffect(() => {
+    const y = new Date().getFullYear();
+    setAcademicYear(`${y}-${y + 1}`);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -20,7 +27,7 @@ export default function Home() {
 
         <div className="container relative z-10 text-center space-y-4 sm:space-y-6">
           <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs sm:text-sm font-medium backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-            Admissions Open for 2025-2026
+            Admissions Open for {academicYear || '2026-2027'}
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-[1.1]">
             Welcome to <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-700 via-indigo-600 to-sky-500 hover:from-blue-600 hover:via-purple-600 hover:to-sky-400 transition-all duration-500 drop-shadow-sm filter">Excel Academy WDD PORTAL</span>

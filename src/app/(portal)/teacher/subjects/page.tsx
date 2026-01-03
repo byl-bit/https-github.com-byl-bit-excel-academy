@@ -159,7 +159,7 @@ export default function SubjectPortalPage() {
                             <div>
                                 <h2 className="text-xl font-black text-blue-950">{currentAllocation.subject}</h2>
                                 <p className="text-blue-500 font-medium mt-1">
-                                    Class {currentAllocation.grade}-{currentAllocation.section} • 2024-2025 Academic Year
+                                    Class {currentAllocation.grade}-{currentAllocation.section} • {new Date().getFullYear()}-{new Date().getFullYear() + 1} Academic Year
                                 </p>
                             </div>
                         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -12,6 +12,12 @@ import Link from 'next/link';
 
 export default function ForgotPassword() {
     const [formData, setFormData] = useState({ userId: '', email: '', fullName: '', newPassword: '', grade: '', section: '', rollNumber: '' });
+    const [placeholdText, setPlaceholdText] = useState('ST-YYYY-XXXX or TE-YYYY-XXXX');
+
+    useEffect(() => {
+        const y = new Date().getFullYear();
+        setPlaceholdText(`ST-${y}-XXXX or TE-${y}-XXXX`);
+    }, []);
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const { success, error: notifyError, info } = useToast();
@@ -95,7 +101,7 @@ export default function ForgotPassword() {
                                 id="userId"
                                 value={formData.userId}
                                 onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                                placeholder="ST-2025-XXXX or TE-2025-XXXX"
+                                placeholder={placeholdText}
                                 required
                                 className="h-11"
                             />

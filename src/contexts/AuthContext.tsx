@@ -58,8 +58,8 @@ const initializeDefaultUsers = () => {
     if (!users) {
         const defaultUsers = [
             {
-                id: 'AD-2025-001',
-                adminId: 'AD-2025-001',
+                id: `AD-${new Date().getFullYear()}-001`,
+                adminId: `AD-${new Date().getFullYear()}-001`,
                 fullName: 'Admin User',
                 email: 'administrator@excel.edu',
                 password: 'Admin123', // In production, this should be hashed
@@ -205,7 +205,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             // Always generate a FRESH Student ID during registration (as requested)
             const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-            const finalStudentId = `ST-2025-${randomPart}`;
+            const year = new Date().getFullYear();
+            const finalStudentId = `ST-${year}-${randomPart}`;
 
             let isUpdate = false;
             let placeholder: any = null;

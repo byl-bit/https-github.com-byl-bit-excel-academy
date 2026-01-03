@@ -230,7 +230,7 @@ export function PortalSidebarLayout({
                                 <div className="hidden sm:flex flex-col items-end text-right mr-2">
                                     <span className="text-[10px] font-black text-slate-900 leading-none">ADMINISTRATOR</span>
                                     <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest mt-1">
-                                        ID: {user?.adminId || 'AD-2025-001'}
+                                        ID: {user?.adminId || `AD-${new Date().getFullYear()}-001`}
                                     </span>
                                 </div>
 
