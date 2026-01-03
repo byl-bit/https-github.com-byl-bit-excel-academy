@@ -224,22 +224,18 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'User already exists' }, { status: 400 });
         }
 
-        // Prevent duplicate student (same full name and roll number in the same grade/section)
+        // Prevent duplicate student (same full name globally)
         if (getString(body, 'role') === 'student') {
-            const rollVal = getString(body, 'rollNumber') || getString(body, 'roll_number');
-            const gradeVal = getString(body, 'grade');
             const nameVal = getString(body, 'name') || getString(body, 'fullName');
-            if (gradeVal && nameVal) {
+            if (nameVal) {
                 const { data: dup } = await supabase
                     .from('users')
                     .select('id')
                     .eq('role', 'student')
-                    .eq('grade', gradeVal)
-                    .eq('section', getString(body, 'section'))
                     .ilike('name', nameVal)
                     .limit(1);
                 if (dup && dup.length > 0) {
-                    return NextResponse.json({ error: 'A student with this name already exists in the specified class.' }, { status: 400 });
+                    return NextResponse.json({ error: 'A student with this name already exists.' }, { status: 400 });
                 }
             }
         }
