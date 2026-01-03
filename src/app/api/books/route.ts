@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 // Helper to map DB snake_case to Frontend camelCase
 const mapToFrontend = (book: any) => ({
     id: book.id,

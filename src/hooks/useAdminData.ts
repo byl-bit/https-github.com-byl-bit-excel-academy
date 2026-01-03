@@ -85,22 +85,26 @@ export function useAdminData() {
         if (!silent) setIsLoading(true);
         setError(null);
         try {
+            // Disable hydration/browser caching for admin data
+            const noCache = { cache: 'no-store' } as RequestInit;
+
             const [userRes, appRes, subRes, resRes, bookRes, announceRes, settingsRes, allocRes, resetRes, notificationsRes] = await Promise.all([
-                fetch('/api/users'),
-                fetch('/api/admissions'),
-                fetch('/api/subjects'),
+                fetch('/api/users', noCache),
+                fetch('/api/admissions', noCache),
+                fetch('/api/subjects', noCache),
                 fetch('/api/results', {
                     headers: {
                         'x-actor-role': 'admin',
                         'x-actor-id': user?.id || ''
-                    }
+                    },
+                    ...noCache
                 }),
-                fetch('/api/books'),
-                fetch('/api/announcements'),
-                fetch('/api/settings'),
-                fetch('/api/allocations'),
-                fetch('/api/admin/reset-requests', { headers: { 'x-actor-role': 'admin' } }),
-                fetch('/api/notifications', { headers: { 'x-actor-role': 'admin' } })
+                fetch('/api/books', noCache),
+                fetch('/api/announcements', noCache),
+                fetch('/api/settings', noCache),
+                fetch('/api/allocations', noCache),
+                fetch('/api/admin/reset-requests', { headers: { 'x-actor-role': 'admin' }, ...noCache }),
+                fetch('/api/notifications', { headers: { 'x-actor-role': 'admin' }, ...noCache })
             ]);
 
             const fetchedUsers = userRes.ok ? await userRes.json() : [];
