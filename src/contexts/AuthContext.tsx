@@ -220,7 +220,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 firstName,
                 middleName,
                 lastName,
-                email: isUpdate ? placeholder.email : `student${users.length + 1}@excel.edu`,
+                email: isUpdate ? placeholder.email : `${finalStudentId.toLowerCase()}@excel.edu`,
                 studentId: finalStudentId,
                 password,
                 role: 'student',
