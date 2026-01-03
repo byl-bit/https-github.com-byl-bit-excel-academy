@@ -33,21 +33,33 @@ export function LibraryManager({ books, onAddBook, onDeleteBook }: LibraryManage
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Enforce 4.5MB limit to prevent serverless function timeout/payload errors
+        if (file.size > 4.5 * 1024 * 1024) {
+            setAlert({ open: true, title: 'File Too Large', description: "Max file size is 4.5MB. For larger files, please host externally (e.g. Google Drive) and paste the link.", variant: 'error' });
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', file);
         formData.append('fileName', file.name);
-        formData.append('bucket', 'letterheads');
 
         try {
-            const res = await fetch('/api/media/upload', {
+            // Use the specific library upload endpoint
+            const res = await fetch('/api/library/upload', {
                 method: 'POST',
                 body: formData
             });
 
             if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || 'Upload failed');
+                // Try to parse error
+                const errorData = await res.json().catch(() => ({}));
+                // If it's a 404, it means the API route isn't found (deployment issue)
+                if (res.status === 404) {
+                    throw new Error("Upload service unreachable (404). Please ensure the latest code is deployed.");
+                }
+                throw new Error(errorData.error || `Upload failed with status ${res.status}`);
             }
 
             const data = await res.json();
@@ -56,10 +68,15 @@ export function LibraryManager({ books, onAddBook, onDeleteBook }: LibraryManage
                 downloadUrl: data.url,
                 fileName: file.name
             }));
+
+            setAlert({ open: true, title: 'Upload Successful', description: 'File uploaded safely.', variant: 'success' });
+
         } catch (err: any) {
+            console.error('Upload Error:', err);
             setAlert({ open: true, title: 'Upload Failed', description: err.message || "Failed to upload file. Please try again.", variant: 'error' });
         } finally {
             setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 

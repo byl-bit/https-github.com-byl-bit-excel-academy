@@ -1,45 +1,55 @@
-# Deployment Guide (Vercel)
+# How to Update Your Website
 
-The easiest way to deploy your Next.js application is using **Vercel**. It is free for hobby projects and provides seamless integration with GitHub and Supabase.
+This guide explains how to make changes to your code and deploy them to your live website.
 
-### 1. Push your code to GitHub
-If you haven't already:
-1. Initialize a Git repository: `git init`
-2. Add your files: `git add .` (Make sure `.env.local` is **NOT** added. It should be in `.gitignore`)
-3. Commit: `git commit -m "Migration to Supabase complete"`
-4. Create a repository on GitHub and push your code.
+## Prerequisites
+- **VS Code**: Your code editor.
+- **Terminal**: The command line interface inside VS Code (Ctrl+`).
 
-### 2. Connect to Vercel
-1. Go to [vercel.com](https://vercel.com) and sign in with GitHub.
-2. Click **Add New** > **Project**.
-3. Import your `excel-academy` repository.
+## Step-by-Step Guide
 
-### 3. Configure Environment Variables
-During the import process, you will see a field for **Environment Variables**. You **MUST** add the keys from your `.env.local` here:
+### 1. Make Your Changes
+Open the files you want to edit in VS Code and make your changes. 
+*Example: Updating text on the home page, adding a new image, or fixing a bug.*
 
-- `NEXT_PUBLIC_SUPABASE_URL` = (Your Project URL)
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` = (Your Anon Key)
+**Important**: Always save your files (Ctrl+S) after editing.
 
-> [!IMPORTANT]
-> If you skip this step, the website will build but the database features will not work in production.
+### 2. Check Your Changes (Optional)
+Open the terminal in VS Code and type:
+```bash
+git status
+```
+This will show you which files you have modified (they will appear in red).
 
-### 4. Deploy!
-1. Click **Deploy**.
-2. Vercel will build your app and give you a public URL (e.g., `excel-academy.vercel.app`).
+### 3. Stage Your Changes
+To prepare all your modified files for uploading, type:
+```bash
+git add .
+```
+*(The dot `.` means "all files" in the current directory).*
 
-### 5. Final Pre-Flight Checks (Offline/Online Readiness)
-Before you go officially public, verify these high-security settings:
+### 4. Commit Your Changes
+Save a snapshot of your changes with a descriptive message explaining what you did:
+```bash
+git commit -m "Describe your changes here"
+```
+*Example: `git commit -m "Update homepage title"`*
 
-- **Master Admin ID**: Ensure you know your unique Admin ID (stored in `AD-2025-001` by default).
-- **Secret Recovery Gate**: If you lose your password, navigate to `/auth/admin-gate-reset`. This page is hidden from all navigation menus.
-- **Master Admin Creds**: The system currently enforces `admin@excel.edu` / `Admin123` as the master backup.
+### 5. Push to Deployment
+Send your changes to GitHub. This will **automatically trigger Vercel** to update your live website.
+```bash
+git push
+```
 
-### 6. Post-Deployment Check
-1. Visit your new URL.
-2. Try to log in with the default admin (`admin@excel.edu` / `Admin123`).
-3. If you see your dashboard, you are live!
+### 6. Wait for Deployment
+- Go to your Vercel Dashboard or just wait about 1-2 minutes.
+- Refresh your live website URL to see the changes!
 
-### Why Vercel?
-- **Global CDN**: Your site will be fast everywhere.
-- **Auto-Deploys**: Every time you push to GitHub, Vercel updates the site.
-- **Free Tier**: Perfect for school projects.
+---
+
+## Summary of Commands
+Run these 3 commands in order whenever you want to update the site:
+
+1. `git add .`
+2. `git commit -m "Your message"`
+3. `git push`
