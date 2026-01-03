@@ -23,9 +23,9 @@ export default function Home() {
             Admissions Open for 2025-2026
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-[1.1]">
-            Welcome to <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-blue-600">Excel Academy</span>
+            Welcome to <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-blue-600">Excel Academy WDD PORTAL</span>
             <br className="hidden sm:inline" />
-            <span className="text-foreground block sm:inline mt-2 sm:mt-0">
+            <span className="text-muted-foreground block mt-4 text-xl sm:text-2xl font-medium tracking-normal">
               Empowering Excellence
             </span>
           </h1>
