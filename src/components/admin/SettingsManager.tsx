@@ -313,6 +313,16 @@ export function SettingsManager({
                             onCheckedChange={(checked: boolean) => onUpdateSettings('certificateDownload', checked)}
                         />
                     </div>
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="space-y-0.5">
+                            <Label>Library Resource Download</Label>
+                            <p className="text-xs text-muted-foreground">Allow students to download PDFs from library</p>
+                        </div>
+                        <Switch
+                            checked={settings?.allowLibraryDownload === true}
+                            onCheckedChange={(checked: boolean) => onUpdateSettings('allowLibraryDownload', checked)}
+                        />
+                    </div>
                 </CardContent>
             </Card>
 

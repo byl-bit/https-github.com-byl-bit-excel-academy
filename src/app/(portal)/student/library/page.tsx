@@ -5,7 +5,7 @@ import { Card, CardHeader } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from '@/contexts/AuthContext';
-import { BookOpen, Search, Video } from "lucide-react";
+import { BookOpen, Download, Search, Video } from "lucide-react";
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 interface Book {
@@ -27,8 +27,19 @@ export default function StudentLibraryPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [subjectFilter, setSubjectFilter] = useState('');
 
+    const [settings, setSettings] = useState<any>({});
+    const [fetchingSettings, setFetchingSettings] = useState(true);
+
     const fetchBooks = async () => {
         try {
+            // Fetch settings first
+            const settingsRes = await fetch('/api/settings', { cache: 'no-store' });
+            if (settingsRes.ok) {
+                const sData = await settingsRes.json();
+                setSettings(sData);
+            }
+            setFetchingSettings(false);
+
             // Using new resources API
             const url = '/api/resources';
             const res = await fetch(url, { cache: 'no-store' });
@@ -52,6 +63,7 @@ export default function StudentLibraryPage() {
         } catch (err) {
             console.error(err);
             setLoading(false);
+            setFetchingSettings(false);
         }
     };
 
@@ -144,9 +156,14 @@ export default function StudentLibraryPage() {
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <Button className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md" variant={book.downloadUrl ? 'default' : 'secondary'} asChild disabled={!book.downloadUrl}>
-                                            <a href={book.downloadUrl} target="_blank" rel="noopener noreferrer">
-                                                <BookOpen className="h-4 w-4" />
-                                                {book.downloadUrl ? 'Read Resource' : 'No File Attachment'}
+                                            <a
+                                                href={book.downloadUrl}
+                                                target={settings?.allowLibraryDownload ? "_self" : "_blank"}
+                                                rel="noopener noreferrer"
+                                                download={settings?.allowLibraryDownload ? `${book.title}.pdf` : undefined}
+                                            >
+                                                {settings?.allowLibraryDownload ? <Download className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
+                                                {book.downloadUrl ? (settings?.allowLibraryDownload ? 'Download PDF' : 'Read Resource') : 'No File Attachment'}
                                             </a>
                                         </Button>
 

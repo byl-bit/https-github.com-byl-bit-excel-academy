@@ -54,6 +54,10 @@ export async function GET() {
             await supabase.from('settings').upsert({ key: 'letterheadUrl', value: '' });
             settings['letterheadUrl'] = '';
         }
+        if (settings['allowLibraryDownload'] === undefined || settings['allowLibraryDownload'] === null) {
+            await supabase.from('settings').upsert({ key: 'allowLibraryDownload', value: false });
+            settings['allowLibraryDownload'] = false;
+        }
     } catch (injectErr) {
         console.warn('Failed to inject default settings:', injectErr);
     }
