@@ -130,6 +130,13 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
     };
 
     const handleSave = () => {
+        if (editForm.rollNumber) {
+            const rollNum = parseInt(editForm.rollNumber);
+            if (isNaN(rollNum) || rollNum < 1 || rollNum > 100) {
+                setAlert({ open: true, title: 'Invalid Roll Number', description: 'Roll number must be between 1 and 100.', variant: 'error' });
+                return;
+            }
+        }
         const updates: any = { ...editForm };
         if (!updates.password) delete updates.password; // Don't overwrite if empty
         const identifier = editingStudent.studentId || editingStudent.id;
@@ -493,10 +500,13 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
                             <div className="space-y-2">
                                 <Label>Roll Number</Label>
                                 <Input
+                                    type="number"
+                                    min="1"
+                                    max="100"
                                     value={editForm.rollNumber}
                                     onChange={e => {
                                         const val = e.target.value;
-                                        if (val === '0') return; // Prevent 0
+                                        if (val !== '' && (parseInt(val) < 1 || parseInt(val) > 100)) return;
                                         setEditForm({ ...editForm, rollNumber: val })
                                     }}
                                 />

@@ -104,6 +104,13 @@ export default function RegisterPage() {
             return;
         }
 
+        const rollNum = parseInt(formData.rollNumber);
+        if (isNaN(rollNum) || rollNum < 1 || rollNum > 100) {
+            setError('Roll Number must be between 1 and 100');
+            setLoading(false);
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             setLoading(false);
@@ -387,10 +394,16 @@ export default function RegisterPage() {
                                         id="rollNumber"
                                         type="number"
                                         value={formData.rollNumber}
-                                        onChange={(e) => setFormData({ ...formData, rollNumber: e.target.value })}
-                                        placeholder="Enter your assigned roll number"
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val !== '' && (parseInt(val) > 100)) return;
+                                            setFormData({ ...formData, rollNumber: val });
+                                        }}
+                                        placeholder="Assigned roll number (1-100)"
                                         className="h-12 border-slate-200 rounded-xl font-bold"
                                         required
+                                        min="1"
+                                        max="100"
                                     />
                                     <div className="flex items-center gap-2 mt-2 ml-1">
                                         <AlertCircle className="h-3 w-3 text-slate-400" />

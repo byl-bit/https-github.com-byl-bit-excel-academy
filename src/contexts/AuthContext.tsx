@@ -163,6 +163,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         rollNumber?: string
     ): Promise<{ success: boolean; message?: string; studentId?: string }> => {
         try {
+            if (rollNumber) {
+                const roll = parseInt(rollNumber);
+                if (isNaN(roll) || roll < 1 || roll > 100) {
+                    return { success: false, message: 'Roll number must be between 1 and 100.' };
+                }
+            }
             // Count Check for random email/ID logic (simplified)
             // Fetch users first to check duplicates
             const res = await fetch('/api/users');

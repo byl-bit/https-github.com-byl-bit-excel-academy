@@ -92,6 +92,15 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
+        // Validate roll number range if provided
+        const rollVal = getString(body, 'rollNumber') || getString(body, 'roll_number');
+        if (typeof rollVal !== 'undefined' && rollVal !== '') {
+            const rNum = Number(rollVal);
+            if (isNaN(rNum) || rNum < 1 || rNum > 100) {
+                return NextResponse.json({ error: 'Roll number must be between 1 and 100' }, { status: 400 });
+            }
+        }
+
         // Helper to map keys (including student_id and roll_number)
         const mapUserToDb = (u: Record<string, unknown>) => {
             const dbUser: Record<string, unknown> = {
@@ -174,6 +183,16 @@ export async function POST(request: Request) {
                 if (existing && existing.length > 0) {
                     skippedUsers.push(item);
                     continue;
+                }
+
+                // VALIDATE: Roll Number (1-100)
+                const itemRoll = isRecord(item) ? (getString(item, 'rollNumber') || getString(item, 'roll_number')) : undefined;
+                if (typeof itemRoll !== 'undefined' && itemRoll !== '') {
+                    const rNum = Number(itemRoll);
+                    if (isNaN(rNum) || rNum < 1 || rNum > 100) {
+                        skippedUsers.push({ ...item, error: 'Roll number out of range (1-100)' });
+                        continue;
+                    }
                 }
 
                 const dbPayload = mapUserToDb(item);
@@ -279,6 +298,15 @@ export async function PUT(request: Request) {
 
         const body = await request.json();
         if (!isRecord(body)) return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+
+        // Validate roll number range if provided in update
+        const rollVal = getString(body, 'rollNumber') || getString(body, 'roll_number');
+        if (typeof rollVal !== 'undefined' && rollVal !== '') {
+            const rNum = Number(rollVal);
+            if (isNaN(rNum) || rNum < 1 || rNum > 100) {
+                return NextResponse.json({ error: 'Roll number must be between 1 and 100' }, { status: 400 });
+            }
+        }
         // Allow identification by studentId as well as internal id
         let { id, ...updates } = body as Record<string, unknown>;
 
