@@ -75,41 +75,64 @@ export function ResultsManager({
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Academic Records');
 
-        // Define Columns
+        // Dynamic Columns Definition
         const dynamicCols = subjects.map(s => ({ header: s, key: s, width: 12 }));
         const columns = [
             { header: 'Rank', key: 'rank', width: 8 },
-            { header: 'Student ID', key: 'studentId', width: 15 },
-            { header: 'Full Name', key: 'studentName', width: 25 },
+            { header: 'Student ID', key: 'studentId', width: 18 },
+            { header: 'Full Name', key: 'studentName', width: 30 },
             { header: 'Roll No', key: 'rollNumber', width: 10 },
-            { header: 'Gender', key: 'gender', width: 10 },
+            { header: 'Gender', key: 'gender', width: 12 },
             { header: 'Grade', key: 'grade', width: 8 },
-            { header: 'Section', key: 'section', width: 8 },
+            { header: 'Section', key: 'section', width: 10 },
             ...dynamicCols,
-            { header: 'Average (%)', key: 'average', width: 12 },
-            { header: 'Total Score', key: 'total', width: 12 },
+            { header: 'Average (%)', key: 'average', width: 14 },
+            { header: 'Total Score', key: 'total', width: 14 },
             { header: 'Conduct', key: 'conduct', width: 15 },
             { header: 'Decision', key: 'decision', width: 15 },
         ];
 
         worksheet.columns = columns;
 
-        // Header Styling
-        const headerRow = worksheet.getRow(1);
-        headerRow.height = 30;
+        // --- Row 1: Logo and Title Banner ---
+        worksheet.insertRow(1, []); // Insert a blank row at the top
+        worksheet.getRow(1).height = 60;
+
+        // Merge cells for the title
+        const titleRange = `D1:${ExcelJS.utils.getAlpha(columns.length - 2)}1`;
+        worksheet.mergeCells(titleRange);
+        const titleCell = worksheet.getCell('D1');
+        titleCell.value = 'Excel Academy Roster';
+        titleCell.font = { name: 'Arial Black', size: 28, color: { argb: 'FFFFFFFF' } };
+        titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        titleCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF6897E2' } // Medium Blue Banner
+        };
+        titleCell.border = {
+            top: { style: 'medium', color: { argb: 'FF3B82F6' } },
+            left: { style: 'medium', color: { argb: 'FF3B82F6' } },
+            bottom: { style: 'medium', color: { argb: 'FF3B82F6' } },
+            right: { style: 'medium', color: { argb: 'FF3B82F6' } }
+        };
+
+        // --- Row 2: Header Styling ---
+        const headerRow = worksheet.getRow(2);
+        headerRow.height = 35;
         headerRow.eachCell((cell) => {
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: 'FFD9E9FF' } // Light Blue
+                fgColor: { argb: 'FFD9E9FF' } // Light Blue Background
             };
-            cell.font = { bold: true, color: { argb: 'FF1E40AF' }, size: 11 }; // Blue text
+            cell.font = { bold: true, color: { argb: 'FF2563EB' }, size: 12 }; // Deep Blue Text
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
             cell.border = {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' }
+                top: { style: 'thin', color: { argb: 'FF94A3B8' } },
+                left: { style: 'thin', color: { argb: 'FF94A3B8' } },
+                bottom: { style: 'thin', color: { argb: 'FF94A3B8' } },
+                right: { style: 'thin', color: { argb: 'FF94A3B8' } }
             };
         });
 
@@ -190,15 +213,16 @@ export function ResultsManager({
             });
 
             worksheet.addImage(imageId, {
-                tl: { col: columns.length - 1.5, row: 0.1 },
-                ext: { width: 40, height: 40 }
+                tl: { col: 0.5, row: 0.1 },
+                ext: { width: 80, height: 80 }
             });
         } catch (e) {
             console.error("Could not add logo to Excel", e);
         }
 
         const buffer = await workbook.xlsx.writeBuffer();
-        saveAs(new Blob([buffer]), `Academic_Record_${filterGrade || 'All'}_${new Date().toISOString().split('T')[0]}.xlsx`);
+        const fileName = `Excel_Academy_Roster_${filterGrade || 'Global'}_Sec_${filterSection || 'All'}_${new Date().toISOString().split('T')[0]}`;
+        saveAs(new Blob([buffer]), `${fileName}.xlsx`);
     };
 
     const handleBatchExportPDF = async () => {
