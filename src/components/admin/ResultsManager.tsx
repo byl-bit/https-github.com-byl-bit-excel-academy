@@ -1046,8 +1046,10 @@ export function ResultsManager({
                                 const matchesGrade = filterGrade ? String(r.grade) === String(filterGrade) : true;
                                 const matchesSection = filterSection ? String(r.section) === String(filterSection) : true;
                                 const matchesGender = filterGender ? (normalizeGender(String(r.gender || '')) === filterGender) : true;
-                                const matchesRoll = filterRollNumber ? String(r.rollNumber || (r as any).roll_number || '').includes(filterRollNumber) : true;
-                                return matchesGrade && matchesSection && matchesGender && matchesRoll;
+                                const matchesSearch = !filterRollNumber ||
+                                    String(r.rollNumber || (r as any).roll_number || '').includes(filterRollNumber) ||
+                                    String(r.studentId || r.student_id || '').toLowerCase().includes(filterRollNumber.toLowerCase());
+                                return matchesGrade && matchesSection && matchesGender && matchesSearch;
                             }).sort((a, b) => {
                                 const nameA = (a.studentName || '').toLowerCase();
                                 const nameB = (b.studentName || '').toLowerCase();
@@ -1102,8 +1104,8 @@ export function ResultsManager({
                                     <option value="F">Female</option>
                                 </select>
                                 <Input
-                                    placeholder="Roll No..."
-                                    className="h-8 w-24 rounded-lg border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900"
+                                    placeholder="Search ID / Roll..."
+                                    className="h-8 w-32 rounded-lg border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900"
                                     value={filterRollNumber}
                                     onChange={(e) => setFilterRollNumber(e.target.value)}
                                 />
@@ -1115,8 +1117,10 @@ export function ResultsManager({
                                 const matchesGrade = String(s.grade) === filterGrade;
                                 const matchesSection = !filterSection || String(s.section) === filterSection;
                                 const matchesGender = !filterGender || normalizeGender(s.gender || s.sex) === filterGender;
-                                const matchesRoll = !filterRollNumber || String(s.rollNumber || (s as any).roll_number || '').includes(filterRollNumber);
-                                return matchesGrade && matchesSection && matchesGender && matchesRoll;
+                                const matchesSearch = !filterRollNumber ||
+                                    String(s.rollNumber || (s as any).roll_number || '').includes(filterRollNumber) ||
+                                    String(s.studentId || s.student_id || '').toLowerCase().includes(filterRollNumber.toLowerCase());
+                                return matchesGrade && matchesSection && matchesGender && matchesSearch;
                             })}
                             subjects={[filterSubject]}
                             settings={settings}
