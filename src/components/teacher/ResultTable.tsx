@@ -272,7 +272,24 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
     };
 
     const handleMarkChange = (studentId: string, key: string, value: string, max: number = 100) => {
-        const num = Math.min(max, Math.max(0, parseFloat(value) || 0));
+        // Allow empty string for clearing
+        if (value === '') {
+            setTableMarks(prev => {
+                const updated = { ...(prev[studentId] || {}) };
+                delete (updated as any)[key];
+                return { ...prev, [studentId]: updated as any };
+            });
+            return;
+        }
+
+        // Parse as float but don't clamp immediately if it ends with a dot or is just a minus sign
+        // though we have min=0, so minus sign isn't needed.
+        let num = parseFloat(value);
+        if (isNaN(num)) return;
+
+        // Clamp value
+        num = Math.min(max, Math.max(0, num));
+
         setTableMarks(prev => ({
             ...prev,
             [studentId]: {
@@ -280,6 +297,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                 [key]: num
             }
         }));
+
         if (submitStatus[studentId] === 'saved') {
             setSubmitStatus(prev => ({ ...prev, [studentId]: '' }));
         }
@@ -574,6 +592,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                                                 inputMode="decimal"
                                                                 min="0"
                                                                 max={Number(type.maxMarks) || 100}
+                                                                step="any"
                                                                 value={marks[`${subject}__${type.id}`] ?? ''}
                                                                 onChange={(e) => handleMarkChange(sid, `${subject}__${type.id}`, e.target.value, Number(type.maxMarks) || 100)}
                                                                 className={`w-full text-center h-9 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 rounded-lg font-bold text-slate-700 transition-all text-sm`}
@@ -592,6 +611,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                                                 inputMode="decimal"
                                                                 min="0"
                                                                 max="100"
+                                                                step="any"
                                                                 value={val ?? ''}
                                                                 onChange={(e) => handleMarkChange(sid, subject, e.target.value)}
                                                                 className={cn(

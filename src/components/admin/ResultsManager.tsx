@@ -384,7 +384,16 @@ export function ResultsManager({
     };
 
     const handleMarkChange = (sub: string, val: string) => {
-        const num = parseInt(val) || 0;
+        if (val === '') {
+            setSubjectMarks(prev => {
+                const updated = { ...prev };
+                delete updated[sub];
+                return updated;
+            });
+            return;
+        }
+        const num = parseFloat(val);
+        if (isNaN(num)) return;
         setSubjectMarks(prev => ({ ...prev, [sub]: Math.min(100, Math.max(0, num)) }));
     };
 
@@ -771,6 +780,7 @@ export function ResultsManager({
                                     <Label className="text-[10px] font-black text-slate-400 truncate block uppercase tracking-wide">{sub}</Label>
                                     <Input
                                         type="number"
+                                        step="any"
                                         value={subjectMarks[sub] ?? ''}
                                         onChange={(e) => handleMarkChange(sub, e.target.value)}
                                         className="h-10 text-center text-lg font-black border-slate-200 bg-white rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all"
