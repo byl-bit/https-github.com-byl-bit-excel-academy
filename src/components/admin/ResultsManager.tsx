@@ -72,6 +72,16 @@ export function ResultsManager({
         const ExcelJS = await import('exceljs');
         const { saveAs } = await import('file-saver');
 
+        const getColumnLetter = (n: number): string => {
+            let letter = '';
+            while (n > 0) {
+                let temp = (n - 1) % 26;
+                letter = String.fromCharCode(65 + temp) + letter;
+                n = (n - temp - 1) / 26;
+            }
+            return letter;
+        };
+
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Academic Records');
 
@@ -99,7 +109,8 @@ export function ResultsManager({
         worksheet.getRow(1).height = 60;
 
         // Merge cells for the title
-        const titleRange = `D1:${ExcelJS.utils.getAlpha(columns.length - 2)}1`;
+        const lastColLetter = getColumnLetter(columns.length);
+        const titleRange = `D1:${lastColLetter}1`;
         worksheet.mergeCells(titleRange);
         const titleCell = worksheet.getCell('D1');
         titleCell.value = 'Excel Academy Roster';
