@@ -362,8 +362,8 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
                             <tr className="bg-slate-50/50 border-b border-slate-100">
                                 <th className="py-4 px-6 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Student Identity</th>
                                 <th className="py-4 px-4 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">System ID</th>
-                                <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">Roll No</th>
-                                <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">Identity</th>
+                                <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">Roll Number</th>
+                                <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">Gender</th>
                                 <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">Academic Status</th>
                                 <th className="py-4 px-6 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Management</th>
                             </tr>

@@ -314,8 +314,10 @@ export function AppreciationLetters({ students, results }: AppreciationLettersPr
                             <table className="w-full text-sm text-left">
                                 <thead className="text-xs text-slate-500 bg-slate-50 uppercase sticky top-0">
                                     <tr>
+                                        <th className="px-4 py-3 font-bold">Roll No</th>
                                         <th className="px-4 py-3 font-bold">ID</th>
                                         <th className="px-4 py-3 font-bold">Name</th>
+                                        <th className="px-4 py-3 font-bold text-center">Gender</th>
                                         <th className="px-4 py-3 font-bold text-center">Grade</th>
                                         <th className="px-4 py-3 font-bold text-center">Avg %</th>
                                         <th className="px-4 py-3 font-bold text-right">Action</th>
@@ -324,8 +326,14 @@ export function AppreciationLetters({ students, results }: AppreciationLettersPr
                                 <tbody className="divide-y divide-slate-100">
                                     {eligibleResults.map((result, idx) => (
                                         <tr key={idx} className="hover:bg-blue-50/50 transition-colors">
+                                            <td className="px-4 py-3 font-bold text-slate-700">{result.rollNumber || result.roll_number || '--'}</td>
                                             <td className="px-4 py-3 font-medium text-slate-600">{result.studentId}</td>
                                             <td className="px-4 py-3 font-bold text-slate-800">{result.studentName}</td>
+                                            <td className="px-4 py-3 text-center">
+                                                <span className="text-[10px] font-black px-2 py-0.5 rounded-md border uppercase bg-slate-50 text-slate-500 border-slate-100">
+                                                    {normalizeGender(result.gender) || '-'}
+                                                </span>
+                                            </td>
                                             <td className="px-4 py-3 text-center text-slate-600">{result.grade}-{result.section}</td>
                                             <td className="px-4 py-3 text-center font-bold text-emerald-600">{(result.average || 0).toFixed(1)}%</td>
                                             <td className="px-4 py-3 text-right">

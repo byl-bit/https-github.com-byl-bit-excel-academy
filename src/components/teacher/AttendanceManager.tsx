@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, Check, X, Save, UserCheck, UserX, Loader2, CalendarCheck, Info, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, normalizeGender } from "@/lib/utils";
 import { CardContent } from "@/components/ui/card";
 
 interface AttendanceManagerProps {
@@ -166,9 +166,11 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                                 <div className="divide-y divide-blue-50">
                                     {/* Header Row */}
                                     <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] font-black uppercase text-blue-400 tracking-wider bg-blue-50/30">
+                                        <div className="col-span-1">Roll</div>
                                         <div className="col-span-2">ID</div>
-                                        <div className="col-span-6">Student Name</div>
-                                        <div className="col-span-4 text-right">Status</div>
+                                        <div className="col-span-4">Student Name</div>
+                                        <div className="col-span-2 text-center">Gender</div>
+                                        <div className="col-span-3 text-right">Status</div>
                                     </div>
 
                                     {students.length === 0 ? (
@@ -189,15 +191,21 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                                                         !isPresent && "bg-rose-50/30 hover:bg-rose-50/50"
                                                     )}
                                                 >
-                                                    <div className="col-span-2 font-mono text-xs text-blue-400 font-bold group-hover:text-blue-600 transition-colors">
-                                                        {student.studentId || student.rollNumber || 'ID'}
+                                                    <div className="col-span-1 font-bold text-xs text-blue-600">
+                                                        {student.rollNumber || '--'}
                                                     </div>
-                                                    <div className="col-span-6 font-bold text-sm text-blue-900">
+                                                    <div className="col-span-2 font-mono text-[10px] text-blue-400 font-bold group-hover:text-blue-600 transition-colors">
+                                                        {student.studentId || student.student_id || 'ID'}
+                                                    </div>
+                                                    <div className="col-span-4 font-bold text-sm text-blue-900 truncate">
                                                         {student.fullName || student.name}
                                                     </div>
-                                                    <div className="col-span-4 flex justify-end">
+                                                    <div className="col-span-2 text-center text-[10px] font-black text-slate-400">
+                                                        {normalizeGender(student.gender || student.sex) || '-'}
+                                                    </div>
+                                                    <div className="col-span-3 flex justify-end">
                                                         <div className={cn(
-                                                            "px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 transition-all w-28 justify-center shadow-xs border",
+                                                            "px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1.5 transition-all w-24 justify-center shadow-xs border",
                                                             isPresent
                                                                 ? "bg-emerald-100/50 text-emerald-700 border-emerald-200"
                                                                 : "bg-rose-100/50 text-rose-700 border-rose-200"

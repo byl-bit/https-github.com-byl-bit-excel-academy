@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { normalizeGender } from '@/lib/utils';
+import { normalizeGender, cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -506,9 +506,10 @@ export function ResultsManager({
                             <thead>
                                 <tr className="bg-slate-50/80 border-b border-slate-200">
                                     {!isPending && <th className="py-5 px-6 text-center whitespace-nowrap font-black text-slate-400 text-[10px] uppercase tracking-widest">Rank</th>}
+                                    <th className="py-5 px-6 text-center whitespace-nowrap font-black text-slate-400 text-[10px] uppercase tracking-widest">Roll Number</th>
                                     <th className="py-5 px-6 text-left whitespace-nowrap font-black text-slate-400 text-[10px] uppercase tracking-widest">Student Information</th>
                                     <th className="py-5 px-6 text-center whitespace-nowrap font-black text-slate-400 text-[10px] uppercase tracking-widest">Grade / Section</th>
-                                    <th className="py-5 px-6 text-center font-black text-slate-400 text-[10px] uppercase tracking-widest">Sex</th>
+                                    <th className="py-5 px-6 text-center font-black text-slate-400 text-[10px] uppercase tracking-widest">Gender</th>
                                     <th className="py-5 px-6 text-center font-black text-slate-400 text-[10px] uppercase tracking-widest">Total</th>
                                     <th className="py-5 px-6 text-center font-black text-slate-400 text-[10px] uppercase tracking-widest bg-slate-100/50">Average</th>
                                     <th className="py-5 px-6 text-center font-black text-slate-400 text-[10px] uppercase tracking-widest">Status</th>
@@ -533,11 +534,14 @@ export function ResultsManager({
                                                     <span className="text-xl font-black text-slate-400 group-hover:text-blue-600 transition-colors">#{r.rank || '-'}</span>
                                                 </td>
                                             )}
+                                            <td className="py-5 px-6 text-center">
+                                                <span className="font-black text-slate-700">{r.rollNumber || r.roll_number || '-'}</span>
+                                            </td>
                                             <td className="py-5 px-6">
                                                 <div className="font-black text-slate-800 text-base leading-tight group-hover:text-blue-700 transition-colors uppercase tracking-tight">{r.studentName}</div>
                                                 <div className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 flex items-center gap-2">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-                                                    ID: {r.studentId}
+                                                    ID: {r.studentId || r.student_id}
                                                 </div>
                                             </td>
                                             <td className="py-5 px-6 text-center">
@@ -545,8 +549,15 @@ export function ResultsManager({
                                                     {r.grade} - {r.section}
                                                 </span>
                                             </td>
-                                            <td className="py-5 px-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                                {r.gender || (r as any).sex || '-'}
+                                            <td className="py-5 px-6 text-center">
+                                                <span className={cn(
+                                                    "text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider",
+                                                    normalizeGender(r.gender || (r as any).sex) === 'M' ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                                        normalizeGender(r.gender || (r as any).sex) === 'F' ? "bg-pink-50 text-pink-600 border-pink-100" :
+                                                            "bg-slate-50 text-slate-500 border-slate-100"
+                                                )}>
+                                                    {normalizeGender(r.gender || (r as any).sex) || '-'}
+                                                </span>
                                             </td>
                                             <td className="py-5 px-6 text-center">
                                                 <span className="font-black text-slate-700 text-lg">{r.total || 0}</span>

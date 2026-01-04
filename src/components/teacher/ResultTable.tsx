@@ -508,9 +508,10 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                         <table className="w-full text-sm border-collapse min-w-[800px]">
                             <thead>
                                 <tr className="bg-slate-50/80 border-b border-slate-200">
-                                    <th className="p-4 text-left font-black text-slate-700 sticky left-0 bg-slate-50 z-20 min-w-[60px] text-xs uppercase tracking-wider">No.</th>
-                                    <th className="p-4 text-left font-black text-slate-700 sticky left-[60px] bg-slate-50 z-20 min-w-[120px] text-xs uppercase tracking-wider shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">Student ID</th>
-                                    <th className="p-4 text-left font-black text-slate-700 sticky left-[180px] bg-slate-50 z-20 min-w-[200px] text-xs uppercase tracking-wider shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">Full Name</th>
+                                    <th className="p-4 text-left font-black text-slate-700 sticky left-0 bg-slate-50 z-20 min-w-[100px] text-xs uppercase tracking-wider">Roll Number</th>
+                                    <th className="p-4 text-left font-black text-slate-700 sticky left-[100px] bg-slate-50 z-20 min-w-[120px] text-xs uppercase tracking-wider shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">Student ID</th>
+                                    <th className="p-4 text-left font-black text-slate-700 sticky left-[220px] bg-slate-50 z-20 min-w-[180px] text-xs uppercase tracking-wider shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">Full Name</th>
+                                    <th className="p-4 text-center font-black text-slate-700 text-xs uppercase tracking-wider min-w-[80px]">Gender</th>
                                     {subjects.map(subject => (
                                         isDynamic ? (
                                             assessmentTypes.map((type: AssessmentType) => (
@@ -550,9 +551,19 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
 
                                     return (
                                         <tr key={sid} className="bg-white hover:bg-blue-50/30 transition-colors group">
-                                            <td className="p-4 font-bold text-slate-400 sticky left-0 bg-white group-hover:bg-blue-50/30 z-10">{index + 1}</td>
-                                            <td className="p-4 font-bold text-slate-600 text-xs sticky left-[60px] bg-white group-hover:bg-blue-50/30 z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">{student.studentId || student.student_id || 'PENDING'}</td>
-                                            <td className="p-4 font-bold text-slate-800 text-sm sticky left-[180px] bg-white group-hover:bg-blue-50/30 z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)] truncate max-w-[200px]">{student.name || student.fullName}</td>
+                                            <td className="p-4 font-bold text-slate-400 sticky left-0 bg-white group-hover:bg-blue-50/30 z-10">{student.rollNumber || index + 1}</td>
+                                            <td className="p-4 font-bold text-slate-600 text-xs sticky left-[100px] bg-white group-hover:bg-blue-50/30 z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">{student.studentId || student.student_id || 'PENDING'}</td>
+                                            <td className="p-4 font-bold text-slate-800 text-sm sticky left-[220px] bg-white group-hover:bg-blue-50/30 z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)] truncate max-w-[180px]">{student.name || student.fullName}</td>
+                                            <td className="p-4 text-center">
+                                                <span className={cn(
+                                                    "text-[10px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider",
+                                                    normalizeGender(student.gender || (student as any).sex) === 'M' ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                                        normalizeGender(student.gender || (student as any).sex) === 'F' ? "bg-pink-50 text-pink-600 border-pink-100" :
+                                                            "bg-slate-50 text-slate-500 border-slate-100"
+                                                )}>
+                                                    {normalizeGender(student.gender || (student as any).sex) || '-'}
+                                                </span>
+                                            </td>
 
                                             {subjects.map(subject => {
                                                 if (isDynamic) {
