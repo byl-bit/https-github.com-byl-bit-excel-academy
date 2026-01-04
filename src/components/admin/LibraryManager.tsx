@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Library, Trash2, Plus, BookOpen, Download, Upload, FileCheck, Video } from "lucide-react";
+import { Library, Trash2, Plus, BookOpen, Upload, FileCheck, Video } from "lucide-react";
 import { PaginationControls } from "@/components/PaginationControls";
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { AlertModal } from '@/components/ui/alert-modal';
@@ -177,8 +177,8 @@ export function LibraryManager({ books, onAddBook, onDeleteBook }: LibraryManage
                                 <div className="mt-4 space-y-2">
                                     <div className="flex justify-between items-center">
                                         {book.downloadUrl ? (
-                                            <a href={book.downloadUrl} download={book.fileName || `${book.title}.pdf`} className="text-blue-600 font-bold hover:underline flex items-center gap-1">
-                                                <Download className="h-3 w-3" /> PDF
+                                            <a href={book.downloadUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline flex items-center gap-1">
+                                                <BookOpen className="h-3 w-3" /> View PDF
                                             </a>
                                         ) : <span className="text-slate-400 italic">No File</span>}
 

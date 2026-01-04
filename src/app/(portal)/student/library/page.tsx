@@ -5,7 +5,7 @@ import { Card, CardHeader } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from '@/contexts/AuthContext';
-import { BookOpen, Download, Search, Video } from "lucide-react";
+import { BookOpen, Search, Video } from "lucide-react";
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 interface Book {
@@ -144,9 +144,9 @@ export default function StudentLibraryPage() {
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <Button className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md" variant={book.downloadUrl ? 'default' : 'secondary'} asChild disabled={!book.downloadUrl}>
-                                            <a href={book.downloadUrl} download={`${book.title}.pdf`}>
-                                                <Download className="h-4 w-4" />
-                                                {book.downloadUrl ? 'Download PDF' : 'No File Attachment'}
+                                            <a href={book.downloadUrl} target="_blank" rel="noopener noreferrer">
+                                                <BookOpen className="h-4 w-4" />
+                                                {book.downloadUrl ? 'Read Resource' : 'No File Attachment'}
                                             </a>
                                         </Button>
 
