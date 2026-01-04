@@ -29,10 +29,25 @@ export default function StudentLibraryPage() {
 
     const fetchBooks = async () => {
         try {
-            const url = '/api/books';
-            const res = await fetch(url);
+            // Using new resources API
+            const url = '/api/resources';
+            const res = await fetch(url, { cache: 'no-store' });
             const data = await res.json();
-            setBooks(data);
+
+            // Map DB snake_case to UI camelCase
+            const mappedBooks = data.map((r: any) => ({
+                id: r.id,
+                title: r.title,
+                author: r.author || '',
+                grade: r.grade || '',
+                subject: r.subject || '',
+                downloadUrl: r.file_url,
+                videoUrl: r.video_url,
+                description: r.description || '',
+                uploadedAt: r.created_at
+            }));
+
+            setBooks(mappedBooks);
             setLoading(false);
         } catch (err) {
             console.error(err);
