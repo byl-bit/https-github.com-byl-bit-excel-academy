@@ -56,6 +56,7 @@ export function ResultsManager({
     const [filterSection, setFilterSection] = useState('');
     const [filterGender, setFilterGender] = useState('');
     const [filterSubject, setFilterSubject] = useState(''); // New Subject Filter
+    const [filterRollNumber, setFilterRollNumber] = useState('');
     const [_filterTeacher, _setFilterTeacher] = useState('');
     const [_currentPage, _setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 10;
@@ -66,46 +67,120 @@ export function ResultsManager({
     const grades = Array.from(new Set(students.map(s => String(s.grade || '')))).sort();
     const sections = Array.from(new Set(students.map(s => String(s.section || '')))).sort();
 
-    const handleExportResultsCSV = () => {
-        const headers = ["studentId", "studentName", "rollNumber", "Sex", "grade", "section", ...subjects, "conduct", "average", "total", "promotedOrDetained"];
+    const handleExportAcademicRecord = async () => {
+        const ExcelJS = await import('exceljs');
+        const { saveAs } = await import('file-saver');
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Academic Records');
+
+        // Define Columns
+        const dynamicCols = subjects.map(s => ({ header: s, key: s, width: 12 }));
+        const columns = [
+            { header: 'Rank', key: 'rank', width: 8 },
+            { header: 'Student ID', key: 'studentId', width: 15 },
+            { header: 'Full Name', key: 'studentName', width: 25 },
+            { header: 'Roll No', key: 'rollNumber', width: 10 },
+            { header: 'Gender', key: 'gender', width: 10 },
+            { header: 'Grade', key: 'grade', width: 8 },
+            { header: 'Section', key: 'section', width: 8 },
+            ...dynamicCols,
+            { header: 'Average (%)', key: 'average', width: 12 },
+            { header: 'Total Score', key: 'total', width: 12 },
+            { header: 'Conduct', key: 'conduct', width: 15 },
+            { header: 'Decision', key: 'decision', width: 15 },
+        ];
+
+        worksheet.columns = columns;
+
+        // Header Styling
+        const headerRow = worksheet.getRow(1);
+        headerRow.height = 30;
+        headerRow.eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFD9E9FF' } // Light Blue
+            };
+            cell.font = { bold: true, color: { argb: 'FF1E40AF' }, size: 11 }; // Blue text
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
 
         // Filter students based on current view settings
         const distinctStudents = students.filter(s => {
             const matchesGrade = !filterGrade || filterGrade === 'All' || String(s.grade) === filterGrade;
             const matchesSection = !filterSection || filterSection === 'All' || String(s.section) === filterSection;
+            const matchesGender = !filterGender || normalizeGender(s.gender || s.sex) === filterGender;
+            const matchesRoll = !filterRollNumber || String(s.rollNumber || (s as any).roll_number || '').includes(filterRollNumber);
             const matchesSearch = !search ||
                 ((s.name || '').toLowerCase().includes(search.toLowerCase())) ||
                 ((s.student_id || s.studentId || '').toLowerCase().includes(search.toLowerCase()));
-            return matchesGrade && matchesSection && matchesSearch;
+            return matchesGrade && matchesSection && matchesGender && matchesRoll && matchesSearch;
         }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-        const rows = distinctStudents.map(s => {
+        distinctStudents.forEach(s => {
             const r = publishedResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
                 pendingResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
                 ({} as PublishedResult | PendingResult);
 
             const marksMap = ((r.subjects || []) as Subject[]).reduce((acc: Record<string, number>, subj: Subject) => ({ ...acc, [subj.name]: subj.marks || 0 }), {});
 
-            const rawSex = s.gender || s.sex || r.gender || '';
-            const sexNorm = normalizeGender(rawSex) || '';
-            const sexVal = sexNorm === 'M' ? 'Male' : sexNorm === 'F' ? 'Female' : '';
+            const rawGender = s.gender || s.sex || r.gender || '';
+            const genderNorm = normalizeGender(rawGender);
+            const genderFull = genderNorm === 'M' ? 'Male' : genderNorm === 'F' ? 'Female' : genderNorm;
 
-            return [
-                s.studentId || s.student_id || '',
-                s.name || s.fullName || '',
-                s.rollNumber || '',
-                sexVal,
-                s.grade || '',
-                s.section || '',
-                ...subjects.map(sub => marksMap[sub] || 0),
-                r.conduct || 'Satisfactory',
-                ((r.average || 0)).toFixed(1),
-                r.total || 0,
-                (r.promotedOrDetained || r.promoted_or_detained) || ((r.average || 0) >= 50 ? 'PROMOTED' : 'DETAINED')
-            ];
+            const rowData: any = {
+                rank: r.rank || '-',
+                studentId: s.studentId || s.student_id || '',
+                studentName: s.name || s.fullName || '',
+                rollNumber: s.rollNumber || (s as any).roll_number || '',
+                gender: genderFull,
+                grade: s.grade || '',
+                section: s.section || '',
+                average: ((r.average || 0)).toFixed(1),
+                total: r.total || 0,
+                conduct: r.conduct || 'Satisfactory',
+                decision: (r.promotedOrDetained || (r as any).promoted_or_detained) || ((r.average || 0) >= 50 ? 'PROMOTED' : 'DETAINED')
+            };
+
+            subjects.forEach(sub => {
+                rowData[sub] = marksMap[sub] || 0;
+            });
+
+            const row = worksheet.addRow(rowData);
+            row.alignment = { vertical: 'middle', horizontal: 'center' };
         });
 
-        exportToCSV(rows, `excel_academy_results_${new Date().toISOString().split('T')[0]}`, headers);
+        // Add Logo if available
+        try {
+            const letterheadUrl = (settings && settings['letterheadUrl']) ? String(settings['letterheadUrl']) : '';
+            const logoSrc = letterheadUrl && letterheadUrl.length > 0 ? letterheadUrl : '/logo.png';
+
+            const response = await fetch(logoSrc);
+            const blob = await response.blob();
+            const arrayBuffer = await blob.arrayBuffer();
+
+            const imageId = workbook.addImage({
+                buffer: arrayBuffer,
+                extension: 'png',
+            });
+
+            worksheet.addImage(imageId, {
+                tl: { col: columns.length - 1.5, row: 0.1 },
+                ext: { width: 40, height: 40 }
+            });
+        } catch (e) {
+            console.error("Could not add logo to Excel", e);
+        }
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `Academic_Record_${filterGrade || 'All'}_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
     const handleBatchExportPDF = async () => {
@@ -460,8 +535,9 @@ export function ResultsManager({
         const matchesGrade = filterGrade ? String(r.grade) === String(filterGrade) : true;
         const matchesSection = filterSection ? String(r.section) === String(filterSection) : true;
         const matchesGender = filterGender ? (normalizeGender(String(r.gender || '')) === filterGender) : true;
+        const matchesRoll = filterRollNumber ? String(r.rollNumber || (r as any).roll_number || '').includes(filterRollNumber) : true;
         const matchesTeacher = _filterTeacher ? String(((r as any).submittedBy || (r as any).submitted_by || '')) === String(_filterTeacher) : true;
-        return matchesSearch && matchesGrade && matchesSection && matchesGender && matchesTeacher;
+        return matchesSearch && matchesGrade && matchesSection && matchesGender && matchesRoll && matchesTeacher;
     }).sort((a, b) => {
         const nameA = (a.studentName || '').toLowerCase();
         const nameB = (b.studentName || '').toLowerCase();
@@ -676,8 +752,8 @@ export function ResultsManager({
                     <p className="text-blue-500 font-medium">Coordinate and finalize student academic performance.</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2 h-11 px-6 rounded-xl font-bold border-blue-200" onClick={handleExportResultsCSV}>
-                        <Download className="h-4 w-4" /> Export All
+                    <Button variant="outline" className="gap-2 h-11 px-6 rounded-xl font-bold border-blue-200" onClick={handleExportAcademicRecord}>
+                        <Download className="h-4 w-4" /> Export XLSX
                     </Button>
                     <input type="file" id="admin-results-import" className="hidden" accept=".csv,.xlsx,.xls" onChange={handleImportResults} />
                     <Button className="bg-blue-600 hover:bg-blue-700 gap-2 h-11 px-6 rounded-xl font-bold shadow-lg shadow-blue-200" onClick={() => document.getElementById('admin-results-import')?.click()}>
@@ -837,7 +913,8 @@ export function ResultsManager({
                                 const matchesGrade = filterGrade ? String(r.grade) === String(filterGrade) : true;
                                 const matchesSection = filterSection ? String(r.section) === String(filterSection) : true;
                                 const matchesGender = filterGender ? (normalizeGender(String(r.gender || '')) === filterGender) : true;
-                                return matchesGrade && matchesSection && matchesGender;
+                                const matchesRoll = filterRollNumber ? String(r.rollNumber || (r as any).roll_number || '').includes(filterRollNumber) : true;
+                                return matchesGrade && matchesSection && matchesGender && matchesRoll;
                             }).sort((a, b) => {
                                 const nameA = (a.studentName || '').toLowerCase();
                                 const nameB = (b.studentName || '').toLowerCase();
@@ -858,10 +935,18 @@ export function ResultsManager({
                     <div className="relative w-full md:w-60 group">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                         <Input
-                            placeholder="Search by ID or Name..."
+                            placeholder="Search ID/Name..."
                             className="pl-10 h-10 rounded-xl border-slate-200 bg-white/50 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all font-medium text-sm"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <div className="relative w-full md:w-32 group">
+                        <Input
+                            placeholder="Roll No..."
+                            className="h-10 rounded-xl border-slate-200 bg-white/50 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all font-medium text-sm"
+                            value={filterRollNumber}
+                            onChange={(e) => setFilterRollNumber(e.target.value)}
                         />
                     </div>
                     <div className="flex gap-2 flex-wrap">
@@ -906,11 +991,47 @@ export function ResultsManager({
             {
                 filterSubject && filterGrade ? (
                     <div className="animate-fade-in-up space-y-4">
-                        <div className="flex items-center gap-2 p-4 bg-amber-50 rounded-xl border border-amber-200">
-                            <Award className="h-6 w-6 text-amber-600" />
-                            <div>
-                                <h3 className="text-lg font-black text-amber-900">Detailed Assessment View: {filterSubject}</h3>
-                                <p className="text-xs text-amber-700 font-bold">Viewing breakdown (Test, Mid, etc) for Grade {filterGrade} {filterSection || '(All Sections)'}</p>
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-amber-50 rounded-xl border border-amber-200">
+                            <div className="flex items-center gap-3">
+                                <Award className="h-6 w-6 text-amber-600" />
+                                <div>
+                                    <h3 className="text-lg font-black text-amber-900">Detailed Assessment View: {filterSubject}</h3>
+                                    <p className="text-xs text-amber-700 font-bold">Viewing breakdown (Test, Mid, etc) for Grade {filterGrade} {filterSection || '(All Sections)'}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2 flex-wrap items-center">
+                                <Label className="text-[10px] font-black text-amber-800 uppercase tracking-widest mr-2">Filters:</Label>
+                                <select
+                                    className="h-8 rounded-lg border border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900 outline-none"
+                                    value={filterGrade}
+                                    onChange={e => setFilterGrade(e.target.value)}
+                                >
+                                    <option value="">Grade</option>
+                                    {grades.map(g => <option key={g} value={g}>G-{g}</option>)}
+                                </select>
+                                <select
+                                    className="h-8 rounded-lg border border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900 outline-none"
+                                    value={filterSection}
+                                    onChange={e => setFilterSection(e.target.value)}
+                                >
+                                    <option value="">Section</option>
+                                    {sections.map(s => <option key={s} value={s}>S-{s}</option>)}
+                                </select>
+                                <select
+                                    className="h-8 rounded-lg border border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900 outline-none"
+                                    value={filterGender}
+                                    onChange={e => setFilterGender(e.target.value)}
+                                >
+                                    <option value="">Gender</option>
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                </select>
+                                <Input
+                                    placeholder="Roll No..."
+                                    className="h-8 w-24 rounded-lg border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900"
+                                    value={filterRollNumber}
+                                    onChange={(e) => setFilterRollNumber(e.target.value)}
+                                />
                             </div>
                         </div>
                         <ResultTable
@@ -919,7 +1040,8 @@ export function ResultsManager({
                                 const matchesGrade = String(s.grade) === filterGrade;
                                 const matchesSection = !filterSection || String(s.section) === filterSection;
                                 const matchesGender = !filterGender || normalizeGender(s.gender || s.sex) === filterGender;
-                                return matchesGrade && matchesSection && matchesGender;
+                                const matchesRoll = !filterRollNumber || String(s.rollNumber || (s as any).roll_number || '').includes(filterRollNumber);
+                                return matchesGrade && matchesSection && matchesGender && matchesRoll;
                             })}
                             subjects={[filterSubject]}
                             settings={settings}
