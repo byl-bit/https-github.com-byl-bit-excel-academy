@@ -112,6 +112,7 @@ export function useAdminData() {
             const fetchedSubjects = subRes.ok ? await subRes.json() : [];
             const fetchedResultsRaw = resRes.ok ? await resRes.json() : { published: {}, pending: {} };
             const fetchedBooks = bookRes.ok ? await bookRes.json() : [];
+            console.log('UseAdminData: Fetched Books:', fetchedBooks);
             const fetchedAnnouncements = announceRes.ok ? await announceRes.json() : [];
             const fetchedSettings = settingsRes.ok ? await settingsRes.json() : {};
             const fetchedAllocations = allocRes.ok ? await allocRes.json() : [];

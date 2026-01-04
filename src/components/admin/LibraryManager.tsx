@@ -96,7 +96,7 @@ export function LibraryManager({ books, onAddBook, onDeleteBook }: LibraryManage
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Plus className="h-5 w-5" />
-                        Add New Resource
+                        Add New Resource (Debug: {books.length} items)
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="grid md:grid-cols-3 gap-4">
