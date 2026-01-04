@@ -55,6 +55,7 @@ export function ResultsManager({
     const [filterGrade, setFilterGrade] = useState('');
     const [filterSection, setFilterSection] = useState('');
     const [filterGender, setFilterGender] = useState('');
+    const [filterStatus, setFilterStatus] = useState('');
     const [filterSubject, setFilterSubject] = useState(''); // New Subject Filter
     const [filterRollNumber, setFilterRollNumber] = useState('');
     const [_filterTeacher, _setFilterTeacher] = useState('');
@@ -114,21 +115,38 @@ export function ResultsManager({
 
         // Filter students based on current view settings
         const distinctStudents = students.filter(s => {
+            const r = publishedResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
+                pendingResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
+                ({} as PublishedResult | PendingResult);
+
             const matchesGrade = !filterGrade || filterGrade === 'All' || String(s.grade) === filterGrade;
             const matchesSection = !filterSection || filterSection === 'All' || String(s.section) === filterSection;
             const matchesGender = !filterGender || normalizeGender(s.gender || s.sex) === filterGender;
             const matchesRoll = !filterRollNumber || String(s.rollNumber || (s as any).roll_number || '').includes(filterRollNumber);
+            const matchesStatus = !filterStatus || (r.promotedOrDetained || (r as any).promoted_or_detained || '').includes(filterStatus);
             const matchesSearch = !search ||
                 ((s.name || '').toLowerCase().includes(search.toLowerCase())) ||
                 ((s.student_id || s.studentId || '').toLowerCase().includes(search.toLowerCase()));
-            return matchesGrade && matchesSection && matchesGender && matchesRoll && matchesSearch;
+            return matchesGrade && matchesSection && matchesGender && matchesRoll && matchesStatus && matchesSearch;
         }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+        // Calculate Ranks for the exported set
+        const exportSetResults = distinctStudents.map(s => {
+            const r = publishedResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
+                pendingResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
+                ({} as PublishedResult | PendingResult);
+            return { studentId: s.studentId || s.student_id || '', average: r.average || 0 };
+        });
+
+        const { calculateRanks } = await import('@/lib/utils/excelCalculations');
+        const calculatedRanks = calculateRanks(exportSetResults);
 
         distinctStudents.forEach(s => {
             const r = publishedResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
                 pendingResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
                 ({} as PublishedResult | PendingResult);
 
+            const sid = s.studentId || s.student_id || '';
             const marksMap = ((r.subjects || []) as Subject[]).reduce((acc: Record<string, number>, subj: Subject) => ({ ...acc, [subj.name]: subj.marks || 0 }), {});
 
             const rawGender = s.gender || s.sex || r.gender || '';
@@ -136,8 +154,8 @@ export function ResultsManager({
             const genderFull = genderNorm === 'M' ? 'Male' : genderNorm === 'F' ? 'Female' : genderNorm;
 
             const rowData: any = {
-                rank: r.rank || '-',
-                studentId: s.studentId || s.student_id || '',
+                rank: calculatedRanks[sid] || r.rank || '-',
+                studentId: sid,
                 studentName: s.name || s.fullName || '',
                 rollNumber: s.rollNumber || (s as any).roll_number || '',
                 gender: genderFull,
@@ -536,8 +554,9 @@ export function ResultsManager({
         const matchesSection = filterSection ? String(r.section) === String(filterSection) : true;
         const matchesGender = filterGender ? (normalizeGender(String(r.gender || '')) === filterGender) : true;
         const matchesRoll = filterRollNumber ? String(r.rollNumber || (r as any).roll_number || '').includes(filterRollNumber) : true;
+        const matchesStatusLine = filterStatus ? (r.promotedOrDetained || (r as any).promoted_or_detained || '').includes(filterStatus) : true;
         const matchesTeacher = _filterTeacher ? String(((r as any).submittedBy || (r as any).submitted_by || '')) === String(_filterTeacher) : true;
-        return matchesSearch && matchesGrade && matchesSection && matchesGender && matchesRoll && matchesTeacher;
+        return matchesSearch && matchesGrade && matchesSection && matchesGender && matchesRoll && matchesStatusLine && matchesTeacher;
     }).sort((a, b) => {
         const nameA = (a.studentName || '').toLowerCase();
         const nameB = (b.studentName || '').toLowerCase();
@@ -745,33 +764,112 @@ export function ResultsManager({
 
     return (
         <div className="space-y-8 pb-32">
-            {/* Header with quick actions */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-3xl font-black text-blue-900 tracking-tighter">Academic Records</h2>
-                    <p className="text-blue-500 font-medium">Coordinate and finalize student academic performance.</p>
+            {/* Academic Record Export & Management Center */}
+            <div className="glass-panel p-8 rounded-3xl bg-linear-to-br from-white to-blue-50/20 border-blue-100/50 shadow-xl shadow-blue-900/5">
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-blue-600 rounded-2xl shadow-lg shadow-blue-200">
+                                <Award className="h-6 w-6 text-white" />
+                            </div>
+                            <h2 className="text-3xl font-black text-blue-950 tracking-tight">Academic Results Center</h2>
+                        </div>
+                        <p className="text-blue-600/70 font-bold text-sm ml-12">Finalize outcomes and export class-wise performance records.</p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                        <input type="file" id="admin-results-import-top" className="hidden" accept=".csv,.xlsx,.xls" onChange={handleImportResults} />
+                        <Button
+                            variant="outline"
+                            className="bg-white border-blue-200 text-blue-600 h-12 px-6 rounded-2xl font-black hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
+                            onClick={() => document.getElementById('admin-results-import-top')?.click()}
+                        >
+                            <Upload className="h-4 w-4 mr-2" /> IMPORT DATA
+                        </Button>
+                        <Button
+                            className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-8 rounded-2xl font-black shadow-xl shadow-blue-200 transition-all transform hover:scale-105 active:scale-95"
+                            onClick={handleExportAcademicRecord}
+                        >
+                            <Download className="h-4 w-4 mr-2" /> EXPORT PERFORMANCE XLSX
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2 h-11 px-6 rounded-xl font-bold border-blue-200" onClick={handleExportAcademicRecord}>
-                        <Download className="h-4 w-4" /> Export XLSX
-                    </Button>
-                    <input type="file" id="admin-results-import" className="hidden" accept=".csv,.xlsx,.xls" onChange={handleImportResults} />
-                    <Button className="bg-blue-600 hover:bg-blue-700 gap-2 h-11 px-6 rounded-xl font-bold shadow-lg shadow-blue-200" onClick={() => document.getElementById('admin-results-import')?.click()}>
-                        <Upload className="h-4 w-4" /> Import Data
-                    </Button>
+
+                <div className="mt-8 pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Grade</Label>
+                        <select
+                            className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all"
+                            value={filterGrade}
+                            onChange={e => setFilterGrade(e.target.value)}
+                        >
+                            <option value="">All Grades</option>
+                            {grades.map(g => <option key={g} value={g}>Grade {g}</option>)}
+                        </select>
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Section</Label>
+                        <select
+                            className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all"
+                            value={filterSection}
+                            onChange={e => setFilterSection(e.target.value)}
+                        >
+                            <option value="">All Sections</option>
+                            {sections.map(s => <option key={s} value={s}>Section {s}</option>)}
+                        </select>
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Gender</Label>
+                        <select
+                            className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all"
+                            value={filterGender}
+                            onChange={e => setFilterGender(e.target.value)}
+                        >
+                            <option value="">All Genders</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Promoted Status</Label>
+                        <select
+                            className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all"
+                            value={filterStatus}
+                            onChange={e => setFilterStatus(e.target.value)}
+                        >
+                            <option value="">All Outcomes</option>
+                            <option value="PROMOTED">PROMOTED</option>
+                            <option value="DETAINED">DETAINED</option>
+                        </select>
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Roll / ID Search</Label>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                            <Input
+                                placeholder="Search here..."
+                                className="pl-10 h-11 rounded-xl border-slate-200 bg-white focus:ring-2 focus:ring-blue-100 font-bold text-sm"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Subject Filter for Detailed View */}
-            <div className="flex justify-end px-1">
-                <select
-                    className="rounded-xl border-amber-200 h-9 px-3 text-xs font-bold bg-amber-50 text-amber-900 border"
-                    value={filterSubject}
-                    onChange={e => setFilterSubject(e.target.value)}
-                >
-                    <option value="">Detailed View (Select Subject)</option>
-                    {subjects.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+            {/* Subject Filter Card */}
+            <div className="flex justify-start">
+                <div className="glass-panel p-2 rounded-2xl flex items-center gap-2 bg-amber-50/50 border-amber-100">
+                    <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest px-3">Subject Analytics:</span>
+                    <select
+                        className="rounded-xl border-amber-200 h-9 px-4 text-xs font-black bg-white text-amber-900 border outline-none cursor-pointer hover:border-amber-400 transition-all"
+                        value={filterSubject}
+                        onChange={e => setFilterSubject(e.target.value)}
+                    >
+                        <option value="">Global Overview (All Subjects)</option>
+                        {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                </div>
             </div>
             {/* Quick Result Editor Section */}
             <div className="grid md:grid-cols-12 gap-6 mb-8">
@@ -928,64 +1026,6 @@ export function ResultsManager({
                     </div>
                 )
             }
-
-            {/* Search & Filters for Management Table */}
-            <div className="glass-panel p-4 rounded-2xl mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md">
-                <div className="flex flex-wrap items-center gap-3 flex-1">
-                    <div className="relative w-full md:w-60 group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                        <Input
-                            placeholder="Search ID/Name..."
-                            className="pl-10 h-10 rounded-xl border-slate-200 bg-white/50 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all font-medium text-sm"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                    <div className="relative w-full md:w-32 group">
-                        <Input
-                            placeholder="Roll No..."
-                            className="h-10 rounded-xl border-slate-200 bg-white/50 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all font-medium text-sm"
-                            value={filterRollNumber}
-                            onChange={(e) => setFilterRollNumber(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
-                        <select
-                            className="h-10 rounded-xl border border-slate-200 bg-white/50 px-3 text-xs font-bold text-slate-600 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer hover:bg-white"
-                            value={filterGrade}
-                            onChange={e => setFilterGrade(e.target.value)}
-                        >
-                            <option value="">All Grades</option>
-                            {grades.map(g => <option key={g} value={g}>Grade {g}</option>)}
-                        </select>
-                        <select
-                            className="h-10 rounded-xl border border-slate-200 bg-white/50 px-3 text-xs font-bold text-slate-600 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer hover:bg-white"
-                            value={filterSection}
-                            onChange={e => setFilterSection(e.target.value)}
-                        >
-                            <option value="">All Sections</option>
-                            {sections.map(s => <option key={s} value={s}>Sec {s}</option>)}
-                        </select>
-                        <select
-                            className="h-10 rounded-xl border border-slate-200 bg-white/50 px-3 text-xs font-bold text-slate-600 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer hover:bg-white"
-                            value={filterGender}
-                            onChange={e => setFilterGender(e.target.value)}
-                        >
-                            <option value="">All Genders</option>
-                            <option value="M">Male</option>
-                            <option value="F">Female</option>
-                        </select>
-                        <select
-                            className="h-10 rounded-xl border border-slate-200 bg-white/50 px-3 text-xs font-bold text-slate-600 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer hover:bg-white min-w-[150px]"
-                            value={filterSubject}
-                            onChange={e => setFilterSubject(e.target.value)}
-                        >
-                            <option value="">Detailed View (Select Subject)</option>
-                            {subjects.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                    </div>
-                </div>
-            </div>
 
             {/* Final Management Table or Detailed Result Table */}
             {
