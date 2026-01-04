@@ -12,7 +12,7 @@ import type { User, PendingResult, PublishedResult, Subject } from '@/lib/types'
 
 type AssessmentType = { id: string; label: string; maxMarks?: number; weight?: number };
 
-interface TeacherDashboardProps {
+interface TeacherOverviewProps {
     user: User;
     students: User[];
     classResults: Array<PublishedResult | PendingResult>;
@@ -21,7 +21,7 @@ interface TeacherDashboardProps {
     settings?: { assessmentTypes?: AssessmentType[] };
 }
 
-export function TeacherDashboard({ user, students, classResults, onExport, onImportClick, settings }: TeacherDashboardProps) {
+export function TeacherOverview({ user, students, classResults, onExport, onImportClick, settings }: TeacherOverviewProps) {
     const { success, error: notifyError } = useToast();
     const publishedCount = classResults.filter(r => r.status === 'published').length;
     const pendingCount = classResults.filter(r => r.status === 'pending').length;
@@ -146,7 +146,7 @@ export function TeacherDashboard({ user, students, classResults, onExport, onImp
                         </div>
                         <div className="flex flex-wrap justify-center md:justify-start gap-3">
                             <div className="glass-panel bg-white/40 px-5 py-2 rounded-2xl text-[11px] font-black uppercase tracking-widest border-white/50 flex items-center gap-3 text-slate-600 shadow-xs">
-                                <LayoutDashboard className="h-4 w-4 text-indigo-500" /> Faculty Portal Active
+                                <LayoutDashboard className="h-4 w-4 text-indigo-500" /> Administrative Overview
                             </div>
                         </div>
                     </div>

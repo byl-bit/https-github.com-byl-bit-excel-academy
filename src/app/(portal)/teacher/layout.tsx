@@ -48,7 +48,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
                         const tName = String(a.teacherName || a.teacher_name || '').toLowerCase();
 
                         return (tId && (tId === uId || tId === uTId)) ||
-                            (!tId && tName && uName && tName === uName);
+                            (!tId && tName && uName && (tName.includes(uName) || uName.includes(tName)));
                     });
                     setHasAllocations(myAllocations.length > 0);
                 }
@@ -82,7 +82,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
     const isHomeroomTeacher = !!currentUser?.grade && !!currentUser?.section;
 
     const navItems = [
-        { id: 'dashboard', href: '/teacher', label: 'Dashboard', icon: LayoutDashboard, show: true },
+        { id: 'dashboard', href: '/teacher', label: 'Overview', icon: LayoutDashboard, show: true },
         { id: 'subjects', href: '/teacher/subjects', label: 'Subject Portal', icon: BookOpen, show: hasAllocations },
         { id: 'homeroom', href: '/teacher/homeroom', label: 'Homeroom', icon: Users, show: isHomeroomTeacher },
         { id: 'attendance', href: '/teacher/attendance', label: 'Attendance', icon: CalendarCheck, show: true },

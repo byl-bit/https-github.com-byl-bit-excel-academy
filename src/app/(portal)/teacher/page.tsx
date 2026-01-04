@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { TeacherDashboard } from '@/components/teacher/TeacherDashboard';
+import { TeacherOverview } from '@/components/teacher/TeacherDashboard';
 import { Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
@@ -42,7 +42,7 @@ export default function TeacherPage() {
                     const tName = String(a.teacherName || a.teacher_name || '').toLowerCase();
 
                     return (tId && (tId === uId || tId === uTId)) ||
-                        (!tId && tName && uName && tName === uName);
+                        (!tId && tName && uName && (tName.includes(uName) || uName.includes(tName)));
                 });
                 setAllocations(myAllocations);
 
@@ -123,7 +123,7 @@ export default function TeacherPage() {
     }
 
     return (
-        <TeacherDashboard
+        <TeacherOverview
             user={user}
             students={students}
             classResults={classResults}

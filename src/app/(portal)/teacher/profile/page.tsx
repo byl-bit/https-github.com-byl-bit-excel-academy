@@ -302,7 +302,7 @@ export default function TeacherProfilePage() {
 
                     <div className="ml-auto flex flex-col gap-2">
                         <Button variant="ghost" onClick={() => router.push('/teacher')} className="rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 hover:bg-indigo-50">
-                            Back to Dashboard
+                            Back to Overview
                         </Button>
                     </div>
                 </div>

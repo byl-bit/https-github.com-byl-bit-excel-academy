@@ -262,7 +262,7 @@ export default function StudentResultsPage() {
                                     <Download className="mr-2 h-4 w-4" /> Download Report
                                 </Button>
                             ) : null}
-                            {certificateEnabled && (
+                            {certificateEnabled && result.average >= 90 && (
                                 <Button onClick={async () => {
                                     if (!result || !user) return;
                                     const jsPDF = (await import('jspdf')).default;
