@@ -25,6 +25,7 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
     const [search, setSearch] = useState('');
     const [filterGrade, setFilterGrade] = useState('ALL');
     const [filterSection, setFilterSection] = useState('ALL');
+    const [filterGender, setFilterGender] = useState('ALL');
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 8;
 
@@ -103,7 +104,8 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
             (s.rollNumber || '').toLowerCase().includes(q);
         const matchesGrade = filterGrade === 'ALL' || s.grade === filterGrade;
         const matchesSection = filterSection === 'ALL' || s.section === filterSection;
-        return matchesSearch && matchesGrade && matchesSection;
+        const matchesGender = filterGender === 'ALL' || normalizeGender(s.gender || s.sex) === filterGender;
+        return matchesSearch && matchesGrade && matchesSection && matchesGender;
     }).sort((a, b) => {
         const nameA = (a.fullName || a.name || '').toLowerCase();
         const nameB = (b.fullName || b.name || '').toLowerCase();
@@ -325,6 +327,15 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
                         >
                             <option value="ALL">All Sections</option>
                             {sections.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <select
+                            className="flex-1 md:flex-none h-10 rounded-xl border border-slate-200 bg-white/50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                            value={filterGender}
+                            onChange={(e) => setFilterGender(e.target.value)}
+                        >
+                            <option value="ALL">All Genders</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
                         </select>
                     </div>
 

@@ -908,7 +908,8 @@ export function ResultsManager({
                             students={students.filter(s => {
                                 const matchesGrade = String(s.grade) === filterGrade;
                                 const matchesSection = !filterSection || String(s.section) === filterSection;
-                                return matchesGrade && matchesSection;
+                                const matchesGender = !filterGender || normalizeGender(s.gender || s.sex) === filterGender;
+                                return matchesGrade && matchesSection && matchesGender;
                             })}
                             subjects={[filterSubject]}
                             settings={settings}

@@ -23,6 +23,7 @@ export function AppreciationLetters({ students, results }: AppreciationLettersPr
     const [minAverage, setMinAverage] = useState<number>(90);
     const [selectedGrade, setSelectedGrade] = useState<string>('all');
     const [selectedSection, setSelectedSection] = useState<string>('all');
+    const [selectedGender, setSelectedGender] = useState<string>('all');
     const [selectedStudentId, setSelectedStudentId] = useState<string>('');
     const [previewStudent, setPreviewStudent] = useState<PublishedResult | null>(null);
 
@@ -35,11 +36,12 @@ export function AppreciationLetters({ students, results }: AppreciationLettersPr
         const avg = r.average || 0;
         const matchesGrade = selectedGrade === 'all' || r.grade === selectedGrade;
         const matchesSection = selectedSection === 'all' || r.section === selectedSection;
+        const matchesGender = selectedGender === 'all' || normalizeGender(r.gender || (r as any).sex) === selectedGender;
         const matchesStudent = !selectedStudentId ||
             r.studentName?.toLowerCase().includes(selectedStudentId.toLowerCase()) ||
             String(r.studentId).includes(selectedStudentId);
 
-        return avg >= minAverage && matchesGrade && matchesSection && matchesStudent;
+        return avg >= minAverage && matchesGrade && matchesSection && matchesGender && matchesStudent;
     });
 
     const generatePDF = async (result: PublishedResult, isBulk: boolean = false) => {
@@ -240,7 +242,7 @@ export function AppreciationLetters({ students, results }: AppreciationLettersPr
             <div className="p-6 space-y-6">
 
                 {/* Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div className="space-y-2">
                         <Label className="text-xs font-bold uppercase text-slate-500">Min. Average (%)</Label>
                         <Input
@@ -271,6 +273,19 @@ export function AppreciationLetters({ students, results }: AppreciationLettersPr
                             <SelectContent>
                                 <SelectItem value="all">All Sections</SelectItem>
                                 {sections.map(s => <SelectItem key={s} value={String(s)}>Section {s}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-bold uppercase text-slate-500">Gender</Label>
+                        <Select value={selectedGender} onValueChange={setSelectedGender}>
+                            <SelectTrigger className="bg-white">
+                                <SelectValue placeholder="All Genders" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Genders</SelectItem>
+                                <SelectItem value="M">Male</SelectItem>
+                                <SelectItem value="F">Female</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

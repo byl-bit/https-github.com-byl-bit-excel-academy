@@ -59,7 +59,7 @@ export async function GET(request: Request) {
 
         // Fetch allocations and users
         const { data: allocations } = await supabase.from('allocations').select('id, teacher_id, grade, section') as { data: Allocation[] };
-        const { data: users } = await supabase.from('users').select('id, student_id, teacher_id, name, grade, section') as { data: User[] };
+        const { data: users } = await supabase.from('users').select('id, student_id, teacher_id, name, grade, section, gender, roll_number') as { data: User[] };
 
         const resolveGradeSection = (entry: PendingResult | PublishedResult | undefined) => {
             if (!entry) return { grade: '', section: '' };
@@ -213,7 +213,7 @@ export async function POST(request: Request) {
         const { data: currentResultsArr } = await supabase.from('results').select('student_id, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained');
         const { data: pendingResultsArr } = await supabase.from('results_pending').select('student_id, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained, status');
         const { data: allocations } = await supabase.from('allocations').select('id, teacher_id, grade, section');
-        const { data: users } = await supabase.from('users').select('id, student_id, teacher_id, name, grade, section');
+        const { data: users } = await supabase.from('users').select('id, student_id, teacher_id, name, grade, section, gender, roll_number');
         const { data: settingsArr } = await supabase.from('settings').select('key, value');
 
         const currentResults: Record<string, PublishedResult> = {};
