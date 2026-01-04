@@ -82,20 +82,89 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
     const isHomeroomTeacher = !!currentUser?.grade && !!currentUser?.section;
 
     const navItems = [
-        { href: '/teacher', label: 'Dashboard', icon: LayoutDashboard, show: true },
-        { href: '/teacher/subjects', label: 'Subject Portal', icon: BookOpen, show: hasAllocations },
-        { href: '/teacher/homeroom', label: 'Homeroom', icon: Users, show: isHomeroomTeacher },
-        { href: '/teacher/attendance', label: 'Attendance', icon: CalendarCheck, show: true },
-        { href: '/teacher/profile', label: 'My Profile', icon: UserIcon, show: true },
+        { id: 'dashboard', href: '/teacher', label: 'Dashboard', icon: LayoutDashboard, show: true },
+        { id: 'subjects', href: '/teacher/subjects', label: 'Subject Portal', icon: BookOpen, show: hasAllocations },
+        { id: 'homeroom', href: '/teacher/homeroom', label: 'Homeroom', icon: Users, show: isHomeroomTeacher },
+        { id: 'attendance', href: '/teacher/attendance', label: 'Attendance', icon: CalendarCheck, show: true },
+        { id: 'profile', href: '/teacher/profile', label: 'My Profile', icon: UserIcon, show: true },
     ];
+
+    const menuGroups = [
+        {
+            label: 'Home',
+            icon: LayoutDashboard,
+            items: ['dashboard']
+        },
+        {
+            label: 'Academic',
+            icon: BookOpen,
+            items: ['subjects', 'attendance']
+        },
+        {
+            label: 'Management',
+            icon: Users,
+            items: ['homeroom', 'profile']
+        }
+    ].filter(group => group.items.some(id => navItems.find(n => n.id === id)?.show));
+
+    const TeacherHeaderMenus = (
+        <div className="flex items-center gap-4">
+            {menuGroups.map((group) => (
+                <div key={group.label} className="relative group">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50/50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 font-bold text-sm transition-all shadow-sm ring-1 ring-blue-100/50 group-hover:bg-blue-100 group-hover:text-blue-800">
+                        <group.icon className="h-4 w-4" />
+                        <span>{group.label}</span>
+                        <Menu className="h-3 w-3 opacity-30 group-hover:rotate-180 transition-transform" />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50 overflow-hidden">
+                        <div className="absolute inset-0 bg-linear-to-br from-blue-50/20 to-indigo-50/20 pointer-events-none" />
+                        <div className="relative grid gap-1">
+                            {group.items.map(itemId => {
+                                const item = navItems.find(n => n.id === itemId);
+                                if (!item || !item.show) return null;
+                                const isActive = item.href === '/teacher'
+                                    ? pathname === '/teacher'
+                                    : pathname.startsWith(item.href!);
+                                return (
+                                    <Link
+                                        key={itemId}
+                                        href={item.href!}
+                                        className={cn(
+                                            "flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-black transition-all group/item",
+                                            isActive
+                                                ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+                                                : "text-slate-600 hover:bg-blue-50/50 hover:text-blue-700"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={cn(
+                                                "h-8 w-8 rounded-lg flex items-center justify-center transition-colors",
+                                                isActive ? "bg-white/20" : "bg-slate-50 group-hover/item:bg-blue-100"
+                                            )}>
+                                                <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "text-slate-500 group-hover/item:text-blue-600")} />
+                                            </div>
+                                            <span className="uppercase tracking-tight underline-offset-4 decoration-2 group-hover/item:underline decoration-blue-200/50">{item.label}</span>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 
     return (
         <PortalSidebarLayout
             role="teacher"
             title="Faculty Portal"
             user={user}
-            navItems={navItems}
-            hideSidebar={false}
+            navItems={navItems as any}
+            headerContent={TeacherHeaderMenus}
+            hideSidebar={true}
             logout={logout}
             notificationCount={unreadCount}
         >

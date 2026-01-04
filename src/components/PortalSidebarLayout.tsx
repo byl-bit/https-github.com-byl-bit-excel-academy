@@ -197,7 +197,7 @@ export function PortalSidebarLayout({
                             <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
                         </Button>
 
-                        {hideSidebar && role === 'student' && (
+                        {hideSidebar && (
                             <div className="flex items-center gap-1.5 sm:gap-3 mr-2 sm:mr-4 shrink-0">
                                 <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white transform transition-transform hover:scale-105 duration-300">
                                     <Shield className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
