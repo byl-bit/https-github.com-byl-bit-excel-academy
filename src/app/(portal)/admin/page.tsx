@@ -298,27 +298,35 @@ export default function AdminPage() {
 
     const handleAddBook = async (book: any) => {
         try {
-            const res = await fetch('/api/books', {
+            const res = await fetch('/api/resources', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...book, id: `book-${Date.now()}`, uploadedAt: new Date().toISOString() })
+                body: JSON.stringify({
+                    title: book.title,
+                    author: book.author,
+                    description: book.description,
+                    grade: book.grade,
+                    subject: book.subject,
+                    file_url: book.downloadUrl,
+                    video_url: book.videoUrl
+                })
             });
             if (res.ok) {
-                logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Added Book', category: 'library', details: `Added book: ${book.title}` });
+                logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Added Resource', category: 'library', details: `Added resource: ${book.title}` });
                 refresh(true);
             }
-        } catch (e) { notifyError('Failed to add book'); }
+        } catch (e) { notifyError('Failed to add resource'); }
     };
 
     const handleDeleteBook = async (id: string) => {
-        if (!confirm('Delete this book?')) return;
+        if (!confirm('Delete this resource?')) return;
         try {
-            const res = await fetch(`/api/books?id=${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/resources?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
-                logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Deleted Book', category: 'library', details: `Deleted book ID ${id}` });
+                logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Deleted Resource', category: 'library', details: `Deleted resource ID ${id}` });
                 refresh(true);
             }
-        } catch (e) { notifyError('Failed to delete book'); }
+        } catch (e) { notifyError('Failed to delete resource'); }
     };
 
     const handleToggleMaintenance = () => {

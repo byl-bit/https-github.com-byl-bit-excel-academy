@@ -45,9 +45,10 @@ export interface Book {
     author: string;
     grade: string;
     subject: string;
-    downloadUrl?: string;
+    downloadUrl?: string; // Mapped from file_url
     description: string;
-    uploadedAt: string;
+    uploadedAt: string; // Mapped from created_at
+    videoUrl?: string; // Added field
 }
 
 export interface Announcement {
@@ -99,7 +100,7 @@ export function useAdminData() {
                     },
                     ...noCache
                 }),
-                fetch('/api/books', noCache),
+                fetch('/api/resources', noCache), // Use new resources API
                 fetch('/api/announcements', noCache),
                 fetch('/api/settings', noCache),
                 fetch('/api/allocations', noCache),
@@ -112,7 +113,7 @@ export function useAdminData() {
             const fetchedSubjects = subRes.ok ? await subRes.json() : [];
             const fetchedResultsRaw = resRes.ok ? await resRes.json() : { published: {}, pending: {} };
             const fetchedBooks = bookRes.ok ? await bookRes.json() : [];
-            console.log('UseAdminData: Fetched Books:', fetchedBooks);
+            console.log('UseAdminData: Fetched Resources:', fetchedBooks);
             const fetchedAnnouncements = announceRes.ok ? await announceRes.json() : [];
             const fetchedSettings = settingsRes.ok ? await settingsRes.json() : {};
             const fetchedAllocations = allocRes.ok ? await allocRes.json() : [];
@@ -185,10 +186,23 @@ export function useAdminData() {
                     submitted_at: r['submitted_at'] ?? r['submittedAt'] ?? null
                 } as unknown as PendingResult);
             }));
-            setBooks(fetchedBooks);
+
+            // Map resources to Book interface
+            setBooks(fetchedBooks.map((r: any) => ({
+                id: r.id,
+                title: r.title,
+                author: r.author || '',
+                grade: r.grade || '',
+                subject: r.subject || '',
+                downloadUrl: r.file_url,
+                videoUrl: r.video_url,
+                description: r.description || '',
+                uploadedAt: r.created_at
+            })));
+
             setAnnouncements(fetchedAnnouncements);
 
-            setSystemStats(calculateStats(fetchedUsers, published, pending, fetchedAnnouncements, fetchedBooks));
+            setSystemStats(calculateStats(fetchedUsers, published, pending, fetchedAnnouncements, fetchedBooks)); // fetchedBooks is now resources list, stats might need adjustment if it expects Book type, but stats logic usually counts length, which is array so it works.
             setActivityLogs(getActivityLogs());
 
             // Notifications fetched from server
@@ -212,7 +226,7 @@ export function useAdminData() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [user?.id]); // Added dependency
 
     useEffect(() => {
         if (isAuthenticated && user?.role === 'admin') {
