@@ -272,4 +272,4 @@ This is a demo application for educational purposes.
 
 ---
 
-**Built with ❤️ for Excel Academy**
+**Built with Beimnetyalmzewd@gmail.com for Excel Academy**
