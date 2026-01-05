@@ -60,7 +60,7 @@ The admin can generate comprehensive student results with:
 ### Default Credentials
 **Admin Account:**
 - Email: `admin@excel.edu`
-- Password: `admin123`
+- Password: `***`
 
 ### Student Login
 Students use their generated Student ID and chosen password:
