@@ -192,7 +192,7 @@ export function PortalSidebarLayout({
             )}>
                 {/* Top Header (Mobile Toggle + Page Title) */}
                 <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-3 sm:px-8 flex items-center justify-between shadow-sm">
-                    <div className="flex items-center min-w-0">
+                    <div className="flex items-center min-w-0 shrink-0">
                         <Button variant="ghost" size="icon" className="lg:hidden text-slate-500 hover:bg-slate-50 mr-1 sm:mr-2 shrink-0" onClick={() => setMobileOpen(true)}>
                             <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
                         </Button>
@@ -218,8 +218,8 @@ export function PortalSidebarLayout({
                         )}
                     </div>
 
-                    <div className="hidden lg:block flex-1 max-w-2xl px-8">
-                        <div className="flex items-center gap-3">
+                    <div className="hidden lg:flex flex-1 justify-center px-4 overflow-hidden">
+                        <div className="flex items-center gap-2 max-w-full">
                             {headerContent}
                         </div>
                     </div>

@@ -57,21 +57,21 @@ export default function StudentLayout({
     ];
 
     const StudentHeaderMenus = (
-        <div className="flex items-center gap-1">
-            {navItems.map((item) => {
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            {navItems.filter(i => i.label !== 'My Profile').map((item) => {
                 const isActive = pathname === item.href;
                 return (
                     <Link
                         key={item.href}
                         href={item.href}
                         className={cn(
-                            "flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-sm ring-1 ring-blue-100/50",
+                            "flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold text-xs transition-all shadow-sm ring-1 ring-blue-100/50 whitespace-nowrap shrink-0",
                             isActive
                                 ? "bg-blue-600 text-white shadow-lg shadow-blue-200 ring-blue-600"
                                 : "bg-blue-50/50 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
                         )}
                     >
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className="h-3.5 w-3.5" />
                         <span>{item.label}</span>
                     </Link>
                 );
