@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { logActivity } from '@/lib/utils/activityLog';
 import bcrypt from 'bcryptjs';
 
@@ -131,15 +131,16 @@ export async function POST(request: Request) {
         } else {
             // Create a pending reset request for Students/Teachers
 
+            const client = supabaseAdmin || supabase;
             // Remove any existing pending requests for this user
-            await supabase
+            await client
                 .from('password_reset_requests')
                 .delete()
                 .eq('user_id', user.id)
                 .eq('used', false);
 
             // Create new request
-            const { error: insertError } = await supabase
+            const { error: insertError } = await client
                 .from('password_reset_requests')
                 .insert({
                     user_id: user.id,
