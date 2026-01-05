@@ -225,6 +225,10 @@ export function useAdminData() {
                     userId: r.user_id,
                     userName: userData?.name || 'User',
                     userRole: userData?.role || 'student',
+                    email: userData?.email || '',
+                    grade: userData?.grade || '',
+                    section: userData?.section || '',
+                    rollNumber: userData?.roll_number || '',
                     timestamp: r.created_at,
                     token: r.token,
                     expires_at: r.expires_at

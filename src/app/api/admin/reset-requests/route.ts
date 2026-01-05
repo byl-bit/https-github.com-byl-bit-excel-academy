@@ -12,7 +12,7 @@ export async function GET(request: Request) {
         // Try with join first
         let { data, error } = await client
             .from('password_reset_requests')
-            .select('id, user_id, token, expires_at, used, created_at, users(name, role)')
+            .select('id, user_id, token, expires_at, used, created_at, users(name, role, email, grade, section, roll_number)')
             .eq('used', false)
             .order('created_at', { ascending: false });
 
