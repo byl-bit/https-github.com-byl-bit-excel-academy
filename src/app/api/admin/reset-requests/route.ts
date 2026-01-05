@@ -54,21 +54,34 @@ export async function POST(request: Request) {
         const { requestId, action } = await request.json();
         console.log(`[API] Processing reset request: ${requestId}, action: ${action}`);
 
-        // Fetch the reset request
-        const { data: resetReq, error: fetchError } = await client
+        // Fetch the reset request with fallback for join
+        let { data: resetReq, error: fetchError } = await client
             .from('password_reset_requests')
             .select('id, user_id, token, expires_at, used, created_at, users(name)')
             .eq('id', requestId)
             .single();
 
         if (fetchError || !resetReq) {
-            console.error('[API] Request fetch error:', fetchError);
-            return NextResponse.json({ error: 'Reset request not found in system' }, { status: 404 });
+            console.error('[API] Initial fetch failed, trying fallback:', fetchError);
+            const { data: fallbackReq, error: fbError } = await client
+                .from('password_reset_requests')
+                .select('id, user_id, token, expires_at, used, created_at') // No join
+                .eq('id', requestId)
+                .single();
+
+            if (fbError || !fallbackReq) {
+                console.error('[API] Fallback fetch error:', fbError);
+                return NextResponse.json({ error: 'Reset request not found in system' }, { status: 404 });
+            }
+            resetReq = fallbackReq as any;
         }
+
+        const currentReq = resetReq;
+        if (!currentReq) return NextResponse.json({ error: 'Reset request not found' }, { status: 404 });
 
         if (action === 'approve') {
             // Hash the new password before saving it to the users table
-            const hashedPassword = await bcrypt.hash(String(resetReq.token), 10);
+            const hashedPassword = await bcrypt.hash(String(currentReq.token), 10);
 
             // Update user password
             const { error: updateError } = await client
@@ -77,7 +90,7 @@ export async function POST(request: Request) {
                     password: hashedPassword,
                     updated_at: new Date().toISOString()
                 })
-                .eq('id', resetReq.user_id);
+                .eq('id', currentReq.user_id);
 
             if (updateError) {
                 console.error('Error approving password reset:', updateError);
@@ -89,21 +102,22 @@ export async function POST(request: Request) {
                 userName: 'Admin',
                 action: 'APPROVED PASSWORD RESET',
                 category: 'user',
-                details: `Approved reset for user ${resetReq.user_id}`
+                details: `Approved reset for user ${currentReq.user_id}`
             });
 
             // Create notification for admin action
             try {
-                const userData = Array.isArray(resetReq.users) ? resetReq.users[0] : resetReq.users;
+                const reqAny = currentReq as any;
+                const userData = Array.isArray(reqAny.users) ? reqAny.users[0] : reqAny.users;
                 const uName = userData?.name || 'User';
                 await supabase.from('notifications').insert({
                     type: 'account',
                     category: 'user',
-                    user_id: resetReq.user_id,
+                    user_id: currentReq.user_id,
                     user_name: uName,
                     action: 'Password Reset Approved',
-                    details: `Admin approved password reset for user ${resetReq.user_id}`,
-                    target_id: resetReq.user_id,
+                    details: `Admin approved password reset for user ${currentReq.user_id}`,
+                    target_id: currentReq.user_id,
                     target_name: uName
                 });
             } catch (nErr) { console.error('Failed to insert notification for approve', nErr); }
@@ -113,20 +127,21 @@ export async function POST(request: Request) {
                 userName: 'Admin',
                 action: 'REJECTED PASSWORD RESET',
                 category: 'user',
-                details: `Rejected reset for user ${resetReq.user_id}`
+                details: `Rejected reset for user ${currentReq.user_id}`
             });
 
             try {
-                const userData = Array.isArray(resetReq.users) ? resetReq.users[0] : resetReq.users;
+                const reqAny = currentReq as any;
+                const userData = Array.isArray(reqAny.users) ? reqAny.users[0] : reqAny.users;
                 const uName = userData?.name || 'User';
                 await client.from('notifications').insert({
                     type: 'account',
                     category: 'user',
-                    user_id: resetReq.user_id,
+                    user_id: currentReq.user_id,
                     user_name: uName,
                     action: 'Password Reset Rejected',
-                    details: `Admin rejected password reset for user ${resetReq.user_id}`,
-                    target_id: resetReq.user_id,
+                    details: `Admin rejected password reset for user ${currentReq.user_id}`,
+                    target_id: currentReq.user_id,
                     target_name: uName
                 });
             } catch (nErr) { console.error('Failed to insert notification for reject', nErr); }
