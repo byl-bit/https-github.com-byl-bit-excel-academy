@@ -72,6 +72,20 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Failed to save book to database' }, { status: 500 });
         }
 
+        // Create notification for all students
+        try {
+            await client.from('notifications').insert({
+                type: 'broadcast',
+                category: 'library',
+                action: 'New Resource Uploaded',
+                details: `New book added: ${body.title} for Grade ${body.grade}`,
+                target_id: data.id,
+                target_name: body.title
+            });
+        } catch (nErr) {
+            console.error('Failed to create notification for book:', nErr);
+        }
+
         return NextResponse.json(mapToFrontend(data));
     } catch (e) {
         return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });

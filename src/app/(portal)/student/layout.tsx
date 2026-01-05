@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { User, LogOut, LayoutDashboard, FileText, Calendar, BookOpen, Menu, X, GraduationCap } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, FileText, Calendar, BookOpen, Menu, X, GraduationCap, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { PortalSidebarLayout } from '@/components/PortalSidebarLayout';
@@ -52,6 +52,7 @@ export default function StudentLayout({
         { href: '/student/results', label: 'Results', icon: FileText },
         { href: '/student/announcements', label: 'News', icon: Calendar },
         { href: '/student/library', label: 'Library', icon: BookOpen },
+        { href: '/student/notifications', label: 'Notifications', icon: Bell },
         { href: '/student/profile', label: 'My Profile', icon: User },
     ];
 

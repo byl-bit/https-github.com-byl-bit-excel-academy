@@ -115,6 +115,19 @@ export async function POST(request: Request) {
             console.error('Supabase error saving announcements:', insertError);
             return NextResponse.json({ error: 'Failed to save: ' + insertError.message }, { status: 500 });
         }
+
+        // Create notification for all students
+        try {
+            await client.from('notifications').insert({
+                type: 'broadcast',
+                category: 'announcement',
+                action: 'New Announcements Posted',
+                details: `${mappedAnnouncements.length} new announcements have been published.`,
+                user_name: 'Admin'
+            });
+        } catch (nErr) {
+            console.error('Failed to create notification for announcements:', nErr);
+        }
     }
 
     return NextResponse.json({ success: true });

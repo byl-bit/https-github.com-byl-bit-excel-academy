@@ -463,6 +463,23 @@ export async function POST(request: Request) {
         if (toInsert.length > 0) {
             await supabase.from('results').delete().in('student_id', toInsert.map(r => r.student_id));
             await supabase.from('results').insert(toInsert);
+
+            // Notify students
+            try {
+                const notifications = toInsert.map(r => ({
+                    type: 'result',
+                    category: 'result',
+                    user_id: r.student_id,
+                    user_name: r.student_name,
+                    action: 'Results Published',
+                    details: `Your results for Grade ${r.grade} have been published.`,
+                    target_id: r.student_id,
+                    target_name: r.student_name
+                }));
+                await supabase.from('notifications').insert(notifications);
+            } catch (nErr) {
+                console.error('Failed to create result notifications in POST:', nErr);
+            }
         }
 
         return NextResponse.json({ success: true });
@@ -558,6 +575,23 @@ export async function PUT(request: Request) {
                 await supabase.from('results').insert(toPublish);
                 // Remove from pending after successful publish
                 await supabase.from('results_pending').delete().in('student_id', body.approve);
+
+                // Notify students
+                try {
+                    const notifications = toPublish.map(r => ({
+                        type: 'result',
+                        category: 'result',
+                        user_id: r.student_id,
+                        user_name: r.student_name,
+                        action: 'Results Published',
+                        details: `Your results for Grade ${r.grade} have been officially approved and published.`,
+                        target_id: r.student_id,
+                        target_name: r.student_name
+                    }));
+                    await supabase.from('notifications').insert(notifications);
+                } catch (nErr) {
+                    console.error('Failed to create result notifications in PUT:', nErr);
+                }
             }
         }
 

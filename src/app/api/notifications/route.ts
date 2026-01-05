@@ -12,10 +12,10 @@ export async function GET(request: Request) {
 
         let query = supabase.from('notifications').select('id, user_id, user_name, action, category, details, target_id, target_name, type, is_read, created_at');
 
-        // If not admin, only show notifications targeting or created by the user
+        // If not admin, show notifications targeting or created by the user OR broadcast notifications
         if (actorRole !== 'admin') {
             if (!actorId) return NextResponse.json({ error: 'Actor ID required' }, { status: 400 });
-            query = query.or(`user_id.eq.${actorId},target_id.eq.${actorId}`);
+            query = query.or(`user_id.eq.${actorId},target_id.eq.${actorId},type.eq.broadcast`);
         }
 
         const { data, error } = await query
@@ -33,6 +33,21 @@ export async function GET(request: Request) {
     } catch (e) {
         console.error('GET /api/notifications error', e);
         return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
+        const { error } = await supabase.from('notifications').delete().eq('id', id);
+        if (error) throw error;
+
+        return NextResponse.json({ success: true });
+    } catch (e) {
+        return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
     }
 }
 
