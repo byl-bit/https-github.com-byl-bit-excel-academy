@@ -820,6 +820,7 @@ export default function AdminPage() {
                         onRejectPending={handleRejectPendingResult}
                         onDeletePublished={handleDeletePublishedResult}
                         onUnlock={handleUnlockResult}
+                        onRefresh={refresh}
                         onTabChange={setActiveTab}
                     />
                 )}

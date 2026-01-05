@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { logActivity } from '@/lib/utils/activityLog';
+import bcrypt from 'bcryptjs';
 
 export async function GET(request: Request) {
     try {
@@ -9,7 +10,7 @@ export async function GET(request: Request) {
 
         const { data, error } = await supabase
             .from('password_reset_requests')
-            .select('id, user_id, user_name, token, expires_at, used, created_at')
+            .select('id, user_id, user_name, token, expires_at, used, created_at, users(role)')
             .eq('used', false)
             .order('created_at', { ascending: false });
 
@@ -46,11 +47,14 @@ export async function POST(request: Request) {
         const resetReq = requests;
 
         if (action === 'approve') {
+            // Hash the new password before saving it to the users table
+            const hashedPassword = await bcrypt.hash(String(resetReq.token), 10);
+
             // Update user password
             const { error: updateError } = await supabase
                 .from('users')
                 .update({
-                    password: resetReq.token,  // token field stores the new password
+                    password: hashedPassword,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', resetReq.user_id);

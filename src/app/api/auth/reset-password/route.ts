@@ -143,6 +143,7 @@ export async function POST(request: Request) {
                 .from('password_reset_requests')
                 .insert({
                     user_id: user.id,
+                    user_name: user.name, // Added for admin visibility
                     token: newPassword, // Using token field to store new password temporarily
                     expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
                     used: false

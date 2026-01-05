@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Award, FileText, CheckCircle, Trash2, Printer, Search, Download, Upload, Clock, Lock } from "lucide-react";
+import { Award, FileText, CheckCircle, Trash2, Printer, Search, Download, Upload, Clock, Lock, XCircle } from "lucide-react";
 import { PaginationControls } from "@/components/PaginationControls";
 import { exportToCSV, parseCSV, generateAppreciationLetter } from '@/lib/utils/export';
 import { ResultTable } from '@/components/teacher/ResultTable'; // Detailed view integration
@@ -26,6 +26,7 @@ export interface ResultsManagerProps {
     onApproveMany: (keys: string[], teacherName: string) => void;
     onRejectPending: (key: string, name: string) => void;
     onDeletePublished: (id: string) => void;
+    onRefresh?: () => void;
     onUnlock?: (id: string) => void;
     onTabChange?: (tab: string) => void;
 }
@@ -43,6 +44,7 @@ export function ResultsManager({
     onApproveMany,
     onRejectPending,
     onDeletePublished,
+    onRefresh,
     onUnlock,
     onTabChange: _onTabChange
 }: ResultsManagerProps) {
@@ -741,7 +743,7 @@ export function ResultsManager({
                                                                     <CheckCircle className="h-5 w-5" />
                                                                 </Button>
                                                                 <Button size="icon" variant="ghost" className="h-9 w-9 text-red-600 hover:bg-red-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onRejectPending((r as any).key, r.studentName || (r as any).studentName)} title="Reject Student">
-                                                                    <Trash2 className="h-5 w-5" />
+                                                                    <XCircle className="h-5 w-5" />
                                                                 </Button>
                                                             </>
                                                         ) : (
@@ -1043,13 +1045,15 @@ export function ResultsManager({
                         </div>
                         <ResultTableHarmonized
                             data={[...pendingResults].filter(r => {
+                                // Only show results with status 'pending' (hide rejected/draft)
+                                const isPendingStatus = r.status === 'pending';
                                 const matchesGrade = filterGrade ? String(r.grade) === String(filterGrade) : true;
                                 const matchesSection = filterSection ? String(r.section) === String(filterSection) : true;
                                 const matchesGender = filterGender ? (normalizeGender(String(r.gender || '')) === filterGender) : true;
                                 const matchesSearch = !filterRollNumber ||
                                     String(r.rollNumber || (r as any).roll_number || '').includes(filterRollNumber) ||
                                     String(r.studentId || r.student_id || '').toLowerCase().includes(filterRollNumber.toLowerCase());
-                                return matchesGrade && matchesSection && matchesGender && matchesSearch;
+                                return isPendingStatus && matchesGrade && matchesSection && matchesGender && matchesSearch;
                             }).sort((a, b) => {
                                 const nameA = (a.studentName || '').toLowerCase();
                                 const nameB = (b.studentName || '').toLowerCase();
@@ -1126,9 +1130,8 @@ export function ResultsManager({
                             settings={settings}
                             classResults={[...publishedResults, ...pendingResults]}
                             onRefresh={() => {
-                                // Trigger refresh if needed - for now just log
+                                if (onRefresh) onRefresh();
                                 console.log("Refresh requested from detailed view");
-                                // Ideally re-fetch results exposed via props?
                             }}
                             isHomeroomView={false} // Subject view
                         />

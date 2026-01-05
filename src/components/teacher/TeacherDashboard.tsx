@@ -1,13 +1,15 @@
-'use client';
-
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { CardHeader } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Users, FileCheck, Clock, TrendingUp, CheckCircle, AlertCircle, Loader2, ArrowRight, School } from 'lucide-react';
+import { LayoutDashboard, Users, FileCheck, Clock, TrendingUp, CheckCircle, AlertCircle, Loader2, ArrowRight, School, Search } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 import { calculateGrade, calculateConduct } from '@/lib/utils/gradingLogic';
+import { normalizeGender, cn } from '@/lib/utils';
 import type { User, PendingResult, PublishedResult, Subject } from '@/lib/types';
 
 type AssessmentType = { id: string; label: string; maxMarks?: number; weight?: number };
@@ -23,6 +25,7 @@ interface TeacherOverviewProps {
 
 export function TeacherOverview({ user, students, classResults, onExport, onImportClick, settings }: TeacherOverviewProps) {
     const { success, error: notifyError } = useToast();
+    const [search, setSearch] = useState('');
     const publishedCount = classResults.filter(r => r.status === 'published').length;
     const pendingCount = classResults.filter(r => r.status === 'pending').length;
     const draftCount = classResults.filter(r => r.status === 'draft').length;
@@ -59,9 +62,11 @@ export function TeacherOverview({ user, students, classResults, onExport, onImpo
 
             doc.setFont("helvetica", "normal");
             doc.text(`Name: ${result.studentName || 'Student'}`, 20, 70);
-            doc.text(`ID: ${result.studentId}`, 20, 78);
+            doc.text(`ID: ${result.studentId || (result as any).student_id}`, 20, 78);
+            doc.text(`Gender: ${normalizeGender(result.gender || (result as any).sex) || '-'}`, 20, 86);
             doc.text(`Grade: ${result.grade}-${result.section}`, 120, 70);
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, 78);
+            doc.text(`Roll No: ${result.rollNumber || (result as any).roll_number || '-'}`, 120, 78);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, 86);
 
             y = 100;
 
@@ -296,17 +301,29 @@ export function TeacherOverview({ user, students, classResults, onExport, onImpo
 
             {/* Recent Table */}
             <div className="space-y-4">
-                <div className="flex items-center gap-3 px-2">
-                    <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center shadow-inner">
-                        <FileCheck className="h-5 w-5 text-slate-600" />
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-2">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center shadow-inner">
+                            <FileCheck className="h-5 w-5 text-slate-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-black text-slate-800 tracking-tight">Recent Activity</h3>
+                            <p className="text-xs text-slate-500 font-medium">Latest result processing snapshots.</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="text-xl font-black text-slate-800 tracking-tight">Recent Activity</h3>
-                        <p className="text-xs text-slate-500 font-medium">Latest result processing snapshots.</p>
+
+                    <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                            placeholder="Search student or ID..."
+                            className="pl-10 h-10 rounded-xl bg-white/50 border-slate-200 focus:ring-indigo-500 font-bold text-sm"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                     </div>
                 </div>
 
-                <div className="glass-panel overflow-hidden rounded-4xl shadow-sm">
+                <div className="glass-panel overflow-hidden rounded-4xl shadow-sm border border-slate-100">
                     {classResults.length === 0 ? (
                         <div className="text-center py-20">
                             <div className="h-20 w-20 bg-slate-50 rounded-4xl flex items-center justify-center mx-auto mb-6">
@@ -315,35 +332,87 @@ export function TeacherOverview({ user, students, classResults, onExport, onImpo
                             <p className="text-slate-400 font-bold uppercase tracking-widest text-xs italic">No activity logs recorded yet.</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-slate-50">
-                            {classResults.slice(0, 5).map((result, idx) => (
-                                <div key={result.id ?? idx} className="flex items-center justify-between p-6 hover:bg-white transition-all duration-300 group">
-                                    <div className="flex items-center gap-6">
-                                        <div className="h-14 w-14 bg-slate-50 rounded-2xl flex items-center justify-center font-black text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all text-xl">
-                                            {(result.studentName ?? '').charAt(0)}
-                                        </div>
-                                        <div>
-                                            <p className="font-black text-slate-800 group-hover:text-indigo-700 transition-colors text-lg leading-tight">{result.studentName ?? 'Student'}</p>
-                                            <div className="flex items-center gap-3 mt-1">
-                                                <span className="text-[10px] font-black text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100/50 uppercase tracking-tighter">
-                                                    Roll: {result.rollNumber || 'N/A'}
-                                                </span>
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {result.studentId}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-2xl font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{(result.average ?? 0).toFixed(1)}%</p>
-                                        <div className="flex items-center justify-end gap-2 mt-1">
-                                            <div className={`h-2 w-2 rounded-full ${result.status === 'published' ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`} />
-                                            <span className={`text-[10px] font-black uppercase tracking-widest ${result.status === 'published' ? 'text-emerald-600' : 'text-amber-600'
-                                                }`}>
-                                                {result.status || 'Draft'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                        <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest">Student Information</th>
+                                        <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Class / Roll</th>
+                                        <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Gender</th>
+                                        <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Assessments</th>
+                                        <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Outcome</th>
+                                        <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {classResults
+                                        .filter(r =>
+                                            (r.studentName || '').toLowerCase().includes(search.toLowerCase()) ||
+                                            (r.studentId || '').toLowerCase().includes(search.toLowerCase())
+                                        )
+                                        .slice(0, 10)
+                                        .map((result, idx) => (
+                                            <tr key={result.id ?? idx} className="hover:bg-indigo-50/30 transition-all duration-300 group">
+                                                <td className="p-5">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="h-12 w-12 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-all">
+                                                            {(result.studentName ?? '').charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-black text-slate-800 group-hover:text-indigo-700 transition-colors leading-tight uppercase tracking-tight">{result.studentName ?? 'Student'}</p>
+                                                            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">ID: {result.studentId}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="p-5 text-center">
+                                                    <div className="inline-flex flex-col items-center">
+                                                        <span className="text-xs font-black text-slate-700">{result.grade}-{result.section}</span>
+                                                        <span className="text-[9px] font-bold text-slate-400 uppercase">Roll: {result.rollNumber || (result as any).roll_number || 'N/A'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-5 text-center">
+                                                    <span className={cn(
+                                                        "text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider",
+                                                        normalizeGender(result.gender || (result as any).sex) === 'M' ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                                            normalizeGender(result.gender || (result as any).sex) === 'F' ? "bg-pink-50 text-pink-600 border-pink-100" :
+                                                                "bg-slate-50 text-slate-500 border-slate-100"
+                                                    )}>
+                                                        {normalizeGender(result.gender || (result as any).sex) || '-'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-5 text-center">
+                                                    <div className="flex flex-wrap justify-center gap-1 max-w-[200px] mx-auto">
+                                                        {(result.subjects || []).map((sub: any) => (
+                                                            <div key={sub.name} className="flex flex-col items-center p-1.5 rounded-lg bg-white border border-slate-100 shadow-xs min-w-[50px]">
+                                                                <span className="text-[8px] font-black text-slate-400 uppercase truncate w-10 text-center">{sub.name}</span>
+                                                                <span className="text-[11px] font-black text-indigo-600">{sub.marks}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                                <td className="p-5 text-center">
+                                                    <div className="inline-block relative">
+                                                        <span className={`text-xl font-black ${(result.average ?? 0) >= 50 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                                            {(result.average ?? 0).toFixed(1)}
+                                                        </span>
+                                                        <span className="text-[9px] text-slate-400 ml-0.5 font-bold">%</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-5 text-right">
+                                                    <div className="flex flex-col items-end gap-1.5">
+                                                        <span className={`text-[9px] px-2.5 py-1 rounded-lg font-black tracking-widest uppercase shadow-sm border ${result.status === 'published'
+                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                            : 'bg-amber-50 text-amber-700 border-amber-100'
+                                                            }`}>
+                                                            {result.status || 'Draft'}
+                                                        </span>
+                                                        <span className="text-[8px] font-bold text-slate-400 uppercase">{new Date().toLocaleDateString()}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>

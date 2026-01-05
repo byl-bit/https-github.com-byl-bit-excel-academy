@@ -582,9 +582,16 @@ export async function PUT(request: Request) {
 
         // Reject - Now sets status to draft instead of deleting, so teacher can see it's rejected/editable
         if (Array.isArray(body.reject)) {
+            // Move back to draft status in pending table
             await supabase
                 .from('results_pending')
                 .update({ status: 'draft', updated_at: new Date().toISOString() })
+                .in('student_id', body.reject);
+
+            // ALSO delete from the public results table so it disappears from the student portal
+            await supabase
+                .from('results')
+                .delete()
                 .in('student_id', body.reject);
         }
 
@@ -607,13 +614,18 @@ export async function PUT(request: Request) {
 
         // Delete published
         if (Array.isArray(body.deletePublished)) {
+            // Delete from published results
             await supabase.from('results').delete().in('student_id', body.deletePublished);
+
+            // ALSO delete from pending results to ensure it disappears everywhere
+            await supabase.from('results_pending').delete().in('student_id', body.deletePublished);
+
             logActivity({
                 userId: actorId,
                 userName: 'Admin',
                 action: 'DELETED PUBLISHED RESULTS',
                 category: 'result',
-                details: `Deleted ${body.deletePublished.length} published results`
+                details: `Deleted ${body.deletePublished.length} results from all portals`
             });
         }
 
