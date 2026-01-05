@@ -229,6 +229,10 @@ export function useAdminData() {
                     grade: userData?.grade || '',
                     section: userData?.section || '',
                     rollNumber: userData?.roll_number || '',
+                    gender: userData?.gender || '',
+                    photo: userData?.photo || '',
+                    studentId: userData?.student_id || '',
+                    teacherId: userData?.teacher_id || '',
                     timestamp: r.created_at,
                     token: r.token,
                     expires_at: r.expires_at

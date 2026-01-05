@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Clock, User, ShieldAlert, Mail, GraduationCap, Hash, Fingerprint, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Clock, User, ShieldAlert, Mail, GraduationCap, Hash, Fingerprint, Loader2, Contact } from "lucide-react";
 
 interface ResetApprovalsProps {
     requests: any[];
@@ -25,73 +25,97 @@ export function ResetApprovals({ requests, onApprove, onReject, processingId }: 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {requests.map((req) => {
                 const isProcessing = processingId === req.id;
+                const specificId = req.userRole === 'student' ? req.studentId : (req.userRole === 'teacher' ? req.teacherId : null);
 
                 return (
                     <Card key={req.id} className={`relative overflow-hidden border-none shadow-xl bg-white group hover:scale-[1.02] transition-all duration-300 ${isProcessing ? 'opacity-70' : ''}`}>
                         <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />
 
                         <CardHeader className="pb-3 border-b border-slate-50">
-                            <div className="flex justify-between items-center mb-1">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-2 bg-amber-50 rounded-xl">
-                                        <ShieldAlert className="h-5 w-5 text-amber-600" />
+                            <div className="flex justify-between items-start mb-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="relative">
+                                        <div className="w-12 h-12 rounded-xl border-2 border-white shadow-md overflow-hidden bg-slate-100">
+                                            {req.photo ? (
+                                                <img src={req.photo} alt={req.userName} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-amber-50">
+                                                    <User className="h-6 w-6 text-amber-300" />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-2 py-1 rounded-full">
-                                        {isProcessing ? 'Processing...' : 'Pending Approval'}
+                                    <div className="space-y-0.5">
+                                        <CardTitle className="text-lg font-black text-slate-800 tracking-tight leading-none">{req.userName}</CardTitle>
+                                        <CardDescription className="flex items-center gap-1.5 capitalize font-bold text-indigo-600 text-xs">
+                                            <User className="h-3 w-3" />
+                                            {req.userRole}
+                                        </CardDescription>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-1">
+                                    <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                                        {isProcessing ? 'Processing' : 'Pending'}
+                                    </span>
+                                    <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1">
+                                        <Clock className="h-2.5 w-2.5" />
+                                        {new Date(req.timestamp).toLocaleDateString()}
                                     </span>
                                 </div>
-                                <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {new Date(req.timestamp).toLocaleDateString()}
-                                </span>
                             </div>
-                            <CardTitle className="text-xl font-black text-slate-800 tracking-tight">{req.userName}</CardTitle>
-                            <CardDescription className="flex items-center gap-1.5 capitalize font-bold text-indigo-600">
-                                <User className="h-3.5 w-3.5" />
-                                {req.userRole}
-                            </CardDescription>
                         </CardHeader>
 
                         <CardContent className="pt-5 space-y-4">
-                            {/* Core Details Grid */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                        <Fingerprint className="h-3 w-3" /> User ID
+                            {/* Detailed Information Grid */}
+                            <div className="grid grid-cols-2 gap-y-4 gap-x-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+                                <div className="space-y-0.5">
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                        <Mail className="h-2.5 w-2.5" /> Email
                                     </p>
-                                    <p className="text-xs font-bold text-slate-700 truncate">{req.userId}</p>
+                                    <p className="text-[11px] font-bold text-slate-700 truncate">{req.email || 'N/A'}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                        <Mail className="h-3 w-3" /> Email Address
+
+                                <div className="space-y-0.5 text-right">
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 justify-end">
+                                        <Contact className="h-2.5 w-2.5" /> Gender
                                     </p>
-                                    <p className="text-xs font-bold text-slate-700 truncate">{req.email || 'N/A'}</p>
+                                    <p className="text-[11px] font-bold text-slate-700 capitalize">{req.gender || 'N/A'}</p>
                                 </div>
+
+                                {specificId && (
+                                    <div className="space-y-0.5">
+                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                            <Fingerprint className="h-2.5 w-2.5" /> {req.userRole === 'student' ? 'Student ID' : 'Teacher ID'}
+                                        </p>
+                                        <p className="text-[11px] font-bold text-indigo-600 font-mono tracking-tighter">{specificId}</p>
+                                    </div>
+                                )}
+
+                                <div className="space-y-0.5 text-right">
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 justify-end">
+                                        <Fingerprint className="h-2.5 w-2.5" /> DB ID
+                                    </p>
+                                    <p className="text-[10px] font-medium text-slate-400 font-mono truncate max-w-[80px] ml-auto" title={req.userId}>
+                                        {req.userId.split('-')[0]}...
+                                    </p>
+                                </div>
+
                                 {req.userRole === 'student' && (
                                     <>
-                                        <div className="space-y-1">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                                <GraduationCap className="h-3 w-3" /> Class
+                                        <div className="space-y-0.5 pt-1 border-t border-slate-200/50">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                                <GraduationCap className="h-2.5 w-2.5" /> Class
                                             </p>
-                                            <p className="text-xs font-bold text-slate-700">{req.grade}-{req.section}</p>
+                                            <p className="text-[11px] font-bold text-slate-700">{req.grade}-{req.section}</p>
                                         </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                                <Hash className="h-3 w-3" /> Roll Number
+                                        <div className="space-y-0.5 pt-1 border-t border-slate-200/50 text-right">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 justify-end">
+                                                <Hash className="h-2.5 w-2.5" /> Roll
                                             </p>
-                                            <p className="text-xs font-bold text-slate-700">{req.rollNumber || 'N/A'}</p>
+                                            <p className="text-[11px] font-bold text-slate-700">#{req.rollNumber || 'N/A'}</p>
                                         </div>
                                     </>
                                 )}
-                            </div>
-
-                            {/* Request Preview */}
-                            <div className="bg-slate-50/80 border border-slate-100 p-4 rounded-2xl">
-                                <p className="text-[9px] font-black text-slate-400 mb-2 uppercase tracking-[0.2em]">New Password Requested</p>
-                                <div className="flex items-center justify-between">
-                                    <p className="font-mono text-lg text-slate-400 tracking-tighter">••••••••</p>
-                                    <div className={`h-2 w-2 rounded-full ${isProcessing ? 'bg-indigo-400 animate-pulse' : 'bg-amber-400 animate-pulse'}`} />
-                                </div>
                             </div>
 
                             {/* Action Buttons */}
