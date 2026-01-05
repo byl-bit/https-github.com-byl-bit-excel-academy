@@ -20,9 +20,19 @@ export default function StudentLayout({
     const [loading, setLoading] = useState(true);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+    const [unreadCount, setUnreadCount] = useState(0);
+
     useEffect(() => {
         setLoading(false);
-    }, []);
+        if (user?.id) {
+            fetch('/api/notifications', {
+                headers: { 'x-actor-role': 'student', 'x-actor-id': user.id }
+            })
+                .then(res => res.json())
+                .then(data => setUnreadCount(data.unreadCount || 0))
+                .catch(err => console.error('Failed to fetch unread count', err));
+        }
+    }, [user]);
 
     useEffect(() => {
         if (!loading && !isAuthenticated) {
@@ -60,6 +70,7 @@ export default function StudentLayout({
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {navItems.filter(i => i.label !== 'My Profile').map((item) => {
                 const isActive = pathname === item.href;
+                const isNotifications = item.label === 'Notifications';
                 return (
                     <Link
                         key={item.href}
@@ -73,6 +84,11 @@ export default function StudentLayout({
                     >
                         <item.icon className="h-3.5 w-3.5" />
                         <span>{item.label}</span>
+                        {isNotifications && unreadCount > 0 && (
+                            <span className="ml-1 text-xs font-bold text-white bg-red-600 rounded-full px-1.5 animate-pulse">
+                                {unreadCount}
+                            </span>
+                        )}
                     </Link>
                 );
             })}
@@ -87,6 +103,7 @@ export default function StudentLayout({
             navItems={navItems}
             headerContent={StudentHeaderMenus}
             hideSidebar={true}
+            notificationCount={unreadCount}
             logout={logout}
         >
             {children}
