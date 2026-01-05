@@ -218,15 +218,18 @@ export function useAdminData() {
 
             setSettings(fetchedSettings as Record<string, unknown>);
             setAllocations(fetchedAllocations);
-            setResetRequests((fetchedResetRequests as any[]).map(r => ({
-                id: r.id,
-                userId: r.user_id,
-                userName: r.user_name || 'User',
-                userRole: r.users?.role || 'student', // Map from joined users table
-                timestamp: r.created_at,
-                token: r.token,
-                expires_at: r.expires_at
-            })));
+            setResetRequests((fetchedResetRequests as any[]).map(r => {
+                const userData = Array.isArray(r.users) ? r.users[0] : r.users;
+                return {
+                    id: r.id,
+                    userId: r.user_id,
+                    userName: userData?.name || 'User',
+                    userRole: userData?.role || 'student',
+                    timestamp: r.created_at,
+                    token: r.token,
+                    expires_at: r.expires_at
+                };
+            }));
 
         } catch (e) {
             console.error("Failed to load admin data", e);

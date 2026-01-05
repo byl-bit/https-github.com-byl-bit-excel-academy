@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 
         const { data, error } = await supabase
             .from('password_reset_requests')
-            .select('id, user_id, user_name, token, expires_at, used, created_at, users(role)')
+            .select('id, user_id, token, expires_at, used, created_at, users(name, role)')
             .eq('used', false)
             .order('created_at', { ascending: false });
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         // Fetch the reset request
         const { data: requests, error: fetchError } = await supabase
             .from('password_reset_requests')
-            .select('id, user_id, user_name, token, expires_at, used, created_at')
+            .select('id, user_id, token, expires_at, used, created_at, users(name)')
             .eq('id', requestId)
             .single();
 
@@ -74,15 +74,17 @@ export async function POST(request: Request) {
 
             // Create notification for admin action
             try {
+                const userData = Array.isArray(resetReq.users) ? resetReq.users[0] : resetReq.users;
+                const uName = userData?.name || 'User';
                 await supabase.from('notifications').insert({
                     type: 'account',
                     category: 'user',
                     user_id: resetReq.user_id,
-                    user_name: resetReq.user_name || null,
+                    user_name: uName,
                     action: 'Password Reset Approved',
                     details: `Admin approved password reset for user ${resetReq.user_id}`,
                     target_id: resetReq.user_id,
-                    target_name: resetReq.user_name || null
+                    target_name: uName
                 });
             } catch (nErr) { console.error('Failed to insert notification for approve', nErr); }
         } else {
@@ -95,15 +97,17 @@ export async function POST(request: Request) {
             });
 
             try {
+                const userData = Array.isArray(resetReq.users) ? resetReq.users[0] : resetReq.users;
+                const uName = userData?.name || 'User';
                 await supabase.from('notifications').insert({
                     type: 'account',
                     category: 'user',
                     user_id: resetReq.user_id,
-                    user_name: resetReq.user_name || null,
+                    user_name: uName,
                     action: 'Password Reset Rejected',
                     details: `Admin rejected password reset for user ${resetReq.user_id}`,
                     target_id: resetReq.user_id,
-                    target_name: resetReq.user_name || null
+                    target_name: uName
                 });
             } catch (nErr) { console.error('Failed to insert notification for reject', nErr); }
         }
