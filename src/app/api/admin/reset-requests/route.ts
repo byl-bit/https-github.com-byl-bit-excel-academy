@@ -9,7 +9,8 @@ export async function GET(request: Request) {
         if (role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
         const client = supabaseAdmin || supabase;
-        // Try with join first
+
+        // Fetch reset requests with join attempt
         let { data, error } = await client
             .from('password_reset_requests')
             .select('id, user_id, token, expires_at, used, created_at, users(name, role, email, grade, section, roll_number, gender, photo, student_id, teacher_id)')
@@ -18,29 +19,56 @@ export async function GET(request: Request) {
 
         if (error) {
             console.error('Error fetching reset requests with join:', error);
-            // Fallback: Try without join if relationship is missing
-            const { data: fallbackData, error: fallbackError } = await client
+            // Fallback: Fetch requests without join
+            const { data: fallbackData, error: fbError } = await client
                 .from('password_reset_requests')
                 .select('id, user_id, token, expires_at, used, created_at')
                 .eq('used', false)
                 .order('created_at', { ascending: false });
 
-            if (fallbackError) {
-                console.error('Error fetching reset requests fallback:', fallbackError);
+            if (fbError) {
+                console.error('Fatal error fetching reset requests:', fbError);
                 return NextResponse.json([]);
             }
             data = fallbackData as any;
         }
 
-        console.info(`[reset-requests] Found ${(data || []).length} pending requests`);
+        // ENHANCEMENT: If users data is missing for some records (join failure/missing relationship)
+        // manually fetch user information and stitch it together
         if (data && data.length > 0) {
-            console.info('[reset-requests] First request preview:', JSON.stringify(data[0]).slice(0, 100));
+            const requestsWithMissingUser = data.filter((r: any) => !r.users);
+
+            if (requestsWithMissingUser.length > 0) {
+                console.info(`[reset-requests] ${requestsWithMissingUser.length} records missing user data. Stitching manually...`);
+                const userIds = requestsWithMissingUser.map((r: any) => r.user_id);
+
+                const { data: users, error: userError } = await client
+                    .from('users')
+                    .select('*') // Get everything to ensure we don't miss anything due to naming discrepancies
+                    .in('id', userIds);
+
+                if (!userError && users) {
+                    console.info(`[reset-requests] Manually fetched ${users.length} users for stitching.`);
+                    const userMap = users.reduce((acc: any, u: any) => {
+                        acc[u.id] = u;
+                        return acc;
+                    }, {});
+
+                    data = data.map((r: any) => ({
+                        ...r,
+                        users: r.users || userMap[r.user_id] || null
+                    }));
+                } else if (userError) {
+                    console.error('[reset-requests] Manual user fetch failed:', userError);
+                }
+            }
         }
 
+        console.info(`[reset-requests] Returning ${(data || []).length} requests (synchronized)`);
         return NextResponse.json(data || []);
     } catch (e) {
         console.error('Reset requests GET error:', e);
-        return NextResponse.json({ error: 'Error' }, { status: 500 });
+        return NextResponse.json({ error: 'Error processing requests' }, { status: 500 });
     }
 }
 

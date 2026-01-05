@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
         const { data: users, error: userError } = await supabase
             .from('users')
-            .select('id, name, role, grade, section, roll_number, email')
+            .select('id, name, role, grade, section, roll_number, email, student_id, teacher_id')
             .or(orClauses.join(','))
             .ilike('email', email);
 
@@ -130,8 +130,26 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: true, message: 'Admin password updated.' });
         } else {
             // Create a pending reset request for Students/Teachers
-
             const client = supabaseAdmin || supabase;
+
+            // Sync user information from the reset form to ensure admin sees full details
+            const userUpdates: any = {};
+            // If the name is generic 'User' or empty, update it
+            if ((!user.name || user.name === 'User') && fullName) userUpdates.name = fullName;
+            if (grade && user.grade !== grade) userUpdates.grade = grade;
+            if (section && user.section !== section) userUpdates.section = section;
+            if (rollNumber && String(user.roll_number) !== String(rollNumber)) userUpdates.roll_number = Number(rollNumber);
+            if (email && user.email !== email) userUpdates.email = email;
+
+            // Sync specific IDs if they look valid and are missing
+            if (userId && String(userId).toUpperCase().startsWith('ST-') && !user.student_id) userUpdates.student_id = userId;
+            if (userId && String(userId).toUpperCase().startsWith('TE-') && !user.teacher_id) userUpdates.teacher_id = userId;
+
+            if (Object.keys(userUpdates).length > 0) {
+                console.info(`[reset-password] Syncing user ${user.id} details:`, userUpdates);
+                await client.from('users').update(userUpdates).eq('id', user.id);
+            }
+
             // Remove any existing pending requests for this user
             await client
                 .from('password_reset_requests')
