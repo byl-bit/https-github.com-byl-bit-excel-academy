@@ -47,6 +47,7 @@ export default function AdminPage() {
 
     const [activeTab, setActiveTab] = useState('overview');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [processingResetId, setProcessingResetId] = useState<string | null>(null);
     const [maintenanceMode, setMaintenanceMode] = useState(() => {
         if (typeof window !== 'undefined') return localStorage.getItem('excel_academy_maintenance') === 'true';
         return false;
@@ -414,6 +415,8 @@ export default function AdminPage() {
     };
 
     const handleApproveReset = async (requestId: string) => {
+        setProcessingResetId(requestId);
+        console.log('[Admin] Approving reset request:', requestId);
         try {
             const res = await fetch('/api/admin/reset-requests', {
                 method: 'POST',
@@ -424,14 +427,25 @@ export default function AdminPage() {
                 },
                 body: JSON.stringify({ requestId, action: 'approve' })
             });
+            const data = await res.json();
             if (res.ok) {
                 success('Password reset approved');
-                refresh(true);
+                await refresh(true);
+            } else {
+                console.error('[Admin] Approval failed:', data);
+                notifyError(data.error || 'Approval failed');
             }
-        } catch (e) { notifyError('Approval failed'); }
+        } catch (e) {
+            console.error('[Admin] Approval catch:', e);
+            notifyError('Network error during approval');
+        } finally {
+            setProcessingResetId(null);
+        }
     };
 
     const handleRejectReset = async (requestId: string) => {
+        setProcessingResetId(requestId);
+        console.log('[Admin] Rejecting reset request:', requestId);
         try {
             const res = await fetch('/api/admin/reset-requests', {
                 method: 'POST',
@@ -442,11 +456,20 @@ export default function AdminPage() {
                 },
                 body: JSON.stringify({ requestId, action: 'reject' })
             });
+            const data = await res.json();
             if (res.ok) {
                 info('Reset request rejected');
-                refresh(true);
+                await refresh(true);
+            } else {
+                console.error('[Admin] Rejection failed:', data);
+                notifyError(data.error || 'Rejection failed');
             }
-        } catch (e) { notifyError('Rejection failed'); }
+        } catch (e) {
+            console.error('[Admin] Rejection catch:', e);
+            notifyError('Network error during rejection');
+        } finally {
+            setProcessingResetId(null);
+        }
     };
 
     const handleResetSystem = async () => {
@@ -792,6 +815,7 @@ export default function AdminPage() {
                         requests={resetRequests}
                         onApprove={handleApproveReset}
                         onReject={handleRejectReset}
+                        processingId={processingResetId}
                     />
                 )}
 

@@ -52,19 +52,19 @@ export async function POST(request: Request) {
 
         const client = supabaseAdmin || supabase;
         const { requestId, action } = await request.json();
+        console.log(`[API] Processing reset request: ${requestId}, action: ${action}`);
 
         // Fetch the reset request
-        const { data: requests, error: fetchError } = await client
+        const { data: resetReq, error: fetchError } = await client
             .from('password_reset_requests')
             .select('id, user_id, token, expires_at, used, created_at, users(name)')
             .eq('id', requestId)
             .single();
 
-        if (fetchError || !requests) {
-            return NextResponse.json({ error: 'Request not found' }, { status: 404 });
+        if (fetchError || !resetReq) {
+            console.error('[API] Request fetch error:', fetchError);
+            return NextResponse.json({ error: 'Reset request not found in system' }, { status: 404 });
         }
-
-        const resetReq = requests;
 
         if (action === 'approve') {
             // Hash the new password before saving it to the users table
