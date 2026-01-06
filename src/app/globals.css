@@ -203,6 +203,25 @@
   .delay-500 {
     animation-delay: 500ms;
   }
+
+  /* Santa Animation */
+  @keyframes santa-bounce {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-3px) rotate(-10deg);
+    }
+    75% {
+      transform: translateY(-3px) rotate(10deg);
+    }
+  }
+
+  .animate-santa {
+    display: inline-block;
+    animation: santa-bounce 2s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
 }
 
 /* Custom Scrollbar - Blue Theme */
