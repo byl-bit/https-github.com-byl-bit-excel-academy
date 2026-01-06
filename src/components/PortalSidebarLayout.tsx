@@ -58,8 +58,8 @@ export function PortalSidebarLayout({
             <div className="p-6 shrink-0 flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
                     <div className="flex items-center gap-3">
-                        <div className="h-16 w-16 relative hover:scale-105 transition-transform duration-300">
-                            <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-contain drop-shadow-sm" />
+                        <div className="h-16 w-16 relative hover:scale-105 transition-transform duration-300 rounded-full overflow-hidden border-2 border-slate-100 shadow-md bg-white p-0.5">
+                            <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-cover" />
                         </div>
                         <div>
                             <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">EXCEL <span className="animate-santa">🎅</span></h1>
@@ -201,8 +201,8 @@ export function PortalSidebarLayout({
 
                         {hideSidebar && (
                             <div className="flex items-center gap-1.5 sm:gap-3 mr-2 sm:mr-4 shrink-0">
-                                <div className="h-10 w-10 sm:h-12 sm:w-12 relative hover:scale-105 transition-transform duration-300">
-                                    <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-contain drop-shadow-sm" />
+                                <div className="h-10 w-10 sm:h-12 sm:w-12 relative hover:scale-105 transition-transform duration-300 rounded-full overflow-hidden border border-slate-200 shadow-sm bg-white p-0.5">
+                                    <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-cover" />
                                 </div>
                                 <div className="flex flex-col leading-none">
                                     <h1 className="font-black text-[10px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase">Excel <span className="animate-santa">🎅</span></h1>

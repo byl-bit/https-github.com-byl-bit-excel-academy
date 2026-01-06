@@ -44,8 +44,8 @@ export function Navbar() {
             <div className="container flex h-16 sm:h-20 items-center justify-between">
                 <div className="flex items-center gap-4 sm:gap-8">
                     <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group" onClick={() => setMobileMenuOpen(false)}>
-                        <div className="h-10 w-10 sm:h-12 sm:w-12 relative hover:scale-105 transition-transform duration-300">
-                            <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-contain" />
+                        <div className="h-10 w-10 sm:h-12 sm:w-12 relative hover:scale-105 transition-transform duration-300 rounded-full overflow-hidden border border-white/50 shadow-md bg-white p-0.5">
+                            <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-cover" />
                         </div>
                         <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-blue-900">Excel Academy <span className="animate-santa">🎅</span></span>
                     </Link>
