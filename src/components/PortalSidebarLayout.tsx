@@ -218,7 +218,7 @@ export function PortalSidebarLayout({
                         )}
                     </div>
 
-                    <div className="hidden lg:flex flex-1 justify-center px-4 overflow-hidden">
+                    <div className="hidden lg:flex flex-1 justify-center px-4">
                         <div className="flex items-center gap-2 max-w-full">
                             {headerContent}
                         </div>
