@@ -57,12 +57,14 @@ export function PortalSidebarLayout({
             {/* Logo */}
             <div className="p-6 shrink-0 flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                    <div className="h-10 w-10 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white transform transition-transform hover:scale-110 duration-300">
-                        <Shield className="h-5 w-5 fill-current" />
-                    </div>
-                    <div>
-                        <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">EXCEL <span className="animate-santa">🎅</span></h1>
-                        <p className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.2em] leading-none mt-1.5 opacity-90">ACADEMY</p>
+                    <div className="flex items-center gap-3">
+                        <div className="h-16 w-16 relative hover:scale-105 transition-transform duration-300">
+                            <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-contain drop-shadow-sm" />
+                        </div>
+                        <div>
+                            <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">EXCEL <span className="animate-santa">🎅</span></h1>
+                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.2em] leading-none mt-1.5 opacity-90">ACADEMY</p>
+                        </div>
                     </div>
                 </div>
                 <Button variant="ghost" size="icon" className="lg:hidden text-slate-400" onClick={() => setMobileOpen(false)}>
@@ -199,8 +201,8 @@ export function PortalSidebarLayout({
 
                         {hideSidebar && (
                             <div className="flex items-center gap-1.5 sm:gap-3 mr-2 sm:mr-4 shrink-0">
-                                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white transform transition-transform hover:scale-105 duration-300">
-                                    <Shield className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
+                                <div className="h-10 w-10 sm:h-12 sm:w-12 relative hover:scale-105 transition-transform duration-300">
+                                    <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-contain drop-shadow-sm" />
                                 </div>
                                 <div className="flex flex-col leading-none">
                                     <h1 className="font-black text-[10px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase">Excel <span className="animate-santa">🎅</span></h1>
