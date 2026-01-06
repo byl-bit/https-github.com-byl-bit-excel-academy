@@ -107,7 +107,7 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
                                                     // eslint-disable-next-line @next/next/no-img-element
                                                     <img src={m.url} alt={`${ann.title} ${idx}`} className="object-cover w-full h-full" />
                                                 ) : (
-                                                    <video src={m.url} className="object-cover w-full h-full" />
+                                                    <video src={m.url} className="object-cover w-full h-full" autoPlay muted loop playsInline />
                                                 )}
                                             </div>
                                         ))}

@@ -274,7 +274,7 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
                                                         // eslint-disable-next-line @next/next/no-img-element
                                                         <img src={m.url} alt={m.name || 'media'} className="object-cover w-full h-full" />
                                                     ) : (
-                                                        <video src={m.url} className="object-cover w-full h-full" />
+                                                        <video src={m.url} className="object-cover w-full h-full" autoPlay muted loop playsInline />
                                                     )}
                                                     <button
                                                         type="button"
@@ -320,7 +320,7 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
                                                     // eslint-disable-next-line @next/next/no-img-element
                                                     <img src={m.url} alt={`${item.title} media ${idx}`} className="object-cover w-full h-full hover:scale-105 transition-transform duration-500" />
                                                 ) : (
-                                                    <video src={m.url} className="object-cover w-full h-full" controls={false} />
+                                                    <video src={m.url} className="object-cover w-full h-full" autoPlay muted loop playsInline controls={false} />
                                                 )}
                                             </div>
                                         ))}
