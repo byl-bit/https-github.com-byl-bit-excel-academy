@@ -61,7 +61,7 @@ export function PortalSidebarLayout({
                         <Shield className="h-5 w-5 fill-current" />
                     </div>
                     <div>
-                        <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">EXCEL</h1>
+                        <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">EXCEL 🎅</h1>
                         <p className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.2em] leading-none mt-1.5 opacity-90">ACADEMY</p>
                     </div>
                 </div>
@@ -203,7 +203,7 @@ export function PortalSidebarLayout({
                                     <Shield className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
                                 </div>
                                 <div className="flex flex-col leading-none">
-                                    <h1 className="font-black text-[10px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase">Excel</h1>
+                                    <h1 className="font-black text-[10px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase">Excel 🎅</h1>
                                     <p className="text-[7px] sm:text-[9px] font-extrabold text-blue-500 uppercase tracking-widest mt-0.5 opacity-90">Academy</p>
                                 </div>
                             </div>

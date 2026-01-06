@@ -47,7 +47,7 @@ export function Navbar() {
                         <div className="bg-blue-600 p-1.5 sm:p-2 rounded-lg group-hover:bg-blue-700 transition-colors">
                             <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                         </div>
-                        <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-blue-900">Excel Academy</span>
+                        <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-blue-900">Excel Academy 🎅</span>
                     </Link>
                     <div className="hidden md:flex gap-8 text-sm font-semibold text-slate-600">
                         <Link href="/" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">
