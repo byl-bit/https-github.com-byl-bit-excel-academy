@@ -12,6 +12,7 @@ import { exportToCSV, parseCSV } from '@/lib/utils/export';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { AlertModal } from '@/components/ui/alert-modal';
 import { Card } from '@/components/ui/card';
+import { calculatePassStatus, calculatePromotionStatus, calculateConduct } from '@/lib/utils/gradingLogic';
 
 interface ResultTableProps {
     students: User[];
@@ -114,9 +115,9 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             setSubmitStatus(prev => ({ ...prev, [studentId]: 'saving' }));
 
             const { total, average } = calculateRowStats(studentId);
-            const totalRounded = total; // Removed aggressive rounding here
-            const avgRounded = average; // Removed aggressive rounding here
-            const isPass = avgRounded >= 50;
+            const totalRounded = total;
+            const avgRounded = average;
+            const isPass = avgRounded >= 35;
 
             const subjectsArr = subjects.map(s => {
                 if (isDynamic) {
@@ -207,7 +208,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                 const sid = String(student.id || student.student_id || student.studentId);
                 const { total, average } = calculateRowStats(sid);
                 const marks = tableMarks[sid] || {};
-                const isPass = average >= 50;
+                const isPass = average >= 35;
 
                 const subjectsArr = subjects.map(s => {
                     if (isDynamic) {
@@ -228,6 +229,12 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
 
                 const totalRounded = total;
                 const avgRounded = average;
+
+                // Use grading logic from lib for consistency
+                const resultStatus = calculatePassStatus(avgRounded);
+                const promoStatus = calculatePromotionStatus(resultStatus === 'PASS');
+                const conductRemark = calculateConduct(avgRounded);
+
                 batch[sid] = {
                     studentId: student.studentId || student.student_id || sid,
                     studentName: student.name || student.fullName || '',
@@ -239,9 +246,9 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     total: totalRounded,
                     average: avgRounded,
                     rank: 0,
-                    conduct: 'Satisfactory',
-                    result: isPass ? 'PASS' : 'FAIL',
-                    promotedOrDetained: isPass ? 'PROMOTED' : 'DETAINED',
+                    conduct: conductRemark,
+                    result: resultStatus,
+                    promotedOrDetained: promoStatus,
                     submissionLevel: level
                 };
             });
@@ -299,7 +306,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
 
                     const { total, average } = calculateRowStats(sid);
                     const marks = tableMarks[sid] || {};
-                    const isPass = average >= 50;
+                    const isPass = average >= 35;
 
                     const subjectsArr = subjects.map(s => {
                         if (isDynamic) {
@@ -657,22 +664,29 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
 
                                             {subjects.map(subject => {
                                                 if (isDynamic) {
-                                                    return assessmentTypes.map((type: AssessmentType) => (
-                                                        <td key={`${subject}-${type.id}`} className="p-2 border-r border-slate-50 last:border-0 text-center">
-                                                            <Input
-                                                                type="number"
-                                                                inputMode="decimal"
-                                                                min="0"
-                                                                max={Number(type.maxMarks) || 100}
-                                                                step="any"
-                                                                value={marks[`${subject}__${type.id}`] ?? ''}
-                                                                onChange={(e) => handleMarkChange(sid, `${subject}__${type.id}`, e.target.value, Number(type.maxMarks) || 100)}
-                                                                className={`w-full text-center h-9 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 rounded-lg font-bold text-slate-700 transition-all text-sm`}
-                                                                placeholder="-"
-                                                                disabled={isLocked || isHomeroomView}
-                                                            />
-                                                        </td>
-                                                    ));
+                                                    return assessmentTypes.map((type: AssessmentType) => {
+                                                        const val = marks[`${subject}__${type.id}`];
+                                                        const isFail = val !== undefined && val < (35 * (Number(type.maxMarks) || 100) / 100);
+                                                        return (
+                                                            <td key={`${subject}-${type.id}`} className="p-2 border-r border-slate-50 last:border-0 text-center">
+                                                                <Input
+                                                                    type="number"
+                                                                    inputMode="decimal"
+                                                                    min="0"
+                                                                    max={Number(type.maxMarks) || 100}
+                                                                    step="any"
+                                                                    value={val ?? ''}
+                                                                    onChange={(e) => handleMarkChange(sid, `${subject}__${type.id}`, e.target.value, Number(type.maxMarks) || 100)}
+                                                                    className={cn(
+                                                                        "w-full text-center h-9 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 rounded-lg font-bold transition-all text-sm",
+                                                                        isFail ? 'text-red-500 bg-red-50 hover:bg-red-50 focus:bg-red-50' : 'text-slate-700'
+                                                                    )}
+                                                                    placeholder="-"
+                                                                    disabled={isLocked || isHomeroomView}
+                                                                />
+                                                            </td>
+                                                        );
+                                                    });
                                                 } else {
                                                     const val = marks[subject];
                                                     const isFail = val !== undefined && val < 35;

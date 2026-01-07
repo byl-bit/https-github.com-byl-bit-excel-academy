@@ -4,12 +4,12 @@ export const calculateGrade = (marks: number): string => {
     if (marks >= 70) return 'B+';
     if (marks >= 60) return 'B';
     if (marks >= 50) return 'C';
-    if (marks >= 40) return 'D';
+    if (marks >= 35) return 'D';
     return 'F';
 };
 
 export const calculatePassStatus = (average: number): 'PASS' | 'FAIL' => {
-    return average >= 50 ? 'PASS' : 'FAIL';
+    return average >= 35 ? 'PASS' : 'FAIL';
 };
 
 export const calculatePromotionStatus = (isPass: boolean): 'PROMOTED' | 'DETAINED' => {

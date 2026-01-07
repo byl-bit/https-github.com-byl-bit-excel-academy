@@ -392,7 +392,7 @@ export function TeacherOverview({ user, students, classResults, onExport, onImpo
                                                 </td>
                                                 <td className="p-5 text-center">
                                                     <div className="inline-block relative">
-                                                        <span className={`text-xl font-black ${(result.average ?? 0) >= 50 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                                        <span className={`text-xl font-black ${(result.average ?? 0) >= 35 ? 'text-emerald-600' : 'text-red-500'}`}>
                                                             {(result.average ?? 0).toFixed(1)}
                                                         </span>
                                                         <span className="text-[9px] text-slate-400 ml-0.5 font-bold">%</span>

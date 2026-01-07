@@ -376,7 +376,7 @@ export default function StudentResultsPage() {
                                     <tbody className="divide-y divide-blue-100 bg-white/50">
                                         {result.subjects.map((sub: any, idx) => {
                                             const grade = calculateGrade(sub.marks);
-                                            const passed = sub.marks >= 40;
+                                            const passed = sub.marks >= 35;
                                             return (
                                                 <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
                                                     <td className="px-6 py-4 font-medium text-blue-900">{sub.name}</td>

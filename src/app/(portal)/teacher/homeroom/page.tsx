@@ -246,7 +246,7 @@ export default function HomeroomPage() {
                                     <>
                                         <div className="text-right hidden sm:block">
                                             <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Average</p>
-                                            <p className={`font-black text-lg ${average >= 50 ? 'text-green-600' : 'text-red-500'}`}>
+                                            <p className={`font-black text-lg ${average >= 35 ? 'text-green-600' : 'text-red-500'}`}>
                                                 {average.toFixed(1)}<span className="text-xs text-slate-300 ml-0.5">%</span>
                                             </p>
                                         </div>
