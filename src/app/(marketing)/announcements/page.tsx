@@ -2,11 +2,47 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MOCK_ANNOUNCEMENTS, Announcement } from "@/lib/mockData";
-import { Calendar, Bell } from "lucide-react";
+import { Calendar, Bell, ThumbsUp, ThumbsDown, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FormattedText } from "@/components/FormattedText";
+import { SlideshowMedia } from "@/components/SlideshowMedia";
+import { Button } from "@/components/ui/button";
 
 export default function AnnouncementsPage() {
     const [announcements, setAnnouncements] = useState<Announcement[]>(MOCK_ANNOUNCEMENTS);
+    const [votes, setVotes] = useState<Record<string, { likes: number, dislikes: number, myVote?: 'like' | 'dislike' }>>({});
+
+    useEffect(() => {
+        const saved = localStorage.getItem('announcement_votes');
+        if (saved) {
+            try { setVotes(JSON.parse(saved)); } catch (e) { }
+        }
+    }, []);
+
+    const handleVote = (id: string | number, vote: 'like' | 'dislike') => {
+        const key = String(id);
+        const current = votes[key] || { likes: Math.floor(Math.random() * 20) + 5, dislikes: Math.floor(Math.random() * 5) };
+
+        let newVote: 'like' | 'dislike' | undefined = vote;
+        let newLikes = current.likes;
+        let newDislikes = current.dislikes;
+
+        if (current.myVote === vote) {
+            newVote = undefined;
+            if (vote === 'like') newLikes--;
+            else newDislikes--;
+        } else {
+            if (current.myVote === 'like') newLikes--;
+            if (current.myVote === 'dislike') newDislikes--;
+
+            if (vote === 'like') newLikes++;
+            else newDislikes++;
+        }
+
+        const updated = { ...votes, [key]: { likes: newLikes, dislikes: newDislikes, myVote: newVote } };
+        setVotes(updated);
+        localStorage.setItem('announcement_votes', JSON.stringify(updated));
+    };
 
     useEffect(() => {
         // Fetch live announcements from the API; fall back to mock data
@@ -77,35 +113,32 @@ export default function AnnouncementsPage() {
                                 <CardTitle className="text-2xl pt-2">{announcement.title}</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <CardDescription className="text-base text-foreground/90 leading-relaxed">
-                                    {announcement.body}
-                                </CardDescription>
-                                {(announcement.media && announcement.media.length > 0) ? (() => {
-                                    const media = announcement.media;
-                                    const count = media.length;
-                                    return (
-                                        <div className={`mt-6 grid gap-4 ${count === 1 ? 'grid-cols-1' :
-                                            count === 2 ? 'grid-cols-2' :
-                                                'grid-cols-2 md:grid-cols-3'
-                                            }`}>
-                                            {media.map((m, idx) => (
-                                                <div key={idx} className={`rounded-xl overflow-hidden border shadow-sm bg-blue-50 ${count === 1 ? 'max-h-[500px]' : 'aspect-square'
-                                                    }`}>
-                                                    {m.type === 'image' ? (
-                                                        // eslint-disable-next-line @next/next/no-img-element
-                                                        <img
-                                                            src={m.url}
-                                                            alt={`${announcement.title} ${idx}`}
-                                                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                                                        />
-                                                    ) : (
-                                                        <video src={m.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    );
-                                })() : announcement.imageUrl ? (
+                                <div className="text-base text-foreground/90 leading-relaxed font-medium">
+                                    <FormattedText text={announcement.body} />
+                                </div>
+                                {announcement.type === 'event' && (
+                                    <div className="flex items-center gap-6 mt-4 py-3 border-y border-slate-100">
+                                        <button
+                                            onClick={() => handleVote(announcement.id, 'like')}
+                                            className={`flex items-center gap-2 text-sm font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'like' ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500'}`}
+                                        >
+                                            <ThumbsUp className={`h-5 w-5 ${votes[String(announcement.id)]?.myVote === 'like' ? 'fill-blue-600' : ''}`} />
+                                            <span>{votes[String(announcement.id)]?.likes ?? 0}</span>
+                                        </button>
+                                        <button
+                                            onClick={() => handleVote(announcement.id, 'dislike')}
+                                            className={`flex items-center gap-2 text-sm font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'dislike' ? 'text-red-500' : 'text-slate-400 hover:text-red-500'}`}
+                                        >
+                                            <ThumbsDown className={`h-5 w-5 ${votes[String(announcement.id)]?.myVote === 'dislike' ? 'fill-red-600' : ''}`} />
+                                            <span>{votes[String(announcement.id)]?.dislikes ?? 0}</span>
+                                        </button>
+                                    </div>
+                                )}
+                                {(announcement.media && announcement.media.length > 0) ? (
+                                    <div className="mt-6">
+                                        <SlideshowMedia media={announcement.media as any} title={announcement.title} />
+                                    </div>
+                                ) : announcement.imageUrl ? (
                                     <div className="mt-6 rounded-xl overflow-hidden border shadow-sm bg-blue-50">
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img

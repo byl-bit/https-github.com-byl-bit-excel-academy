@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, Bell } from 'lucide-react';
+import { Calendar, Bell, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { FormattedText } from './FormattedText';
+import { SlideshowMedia } from './SlideshowMedia';
+import { Button } from './ui/button';
 
 interface Announcement {
     id: string | number;
@@ -22,6 +25,42 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
     const { user } = useAuth() as any;
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(true);
+    const [likes, setLikes] = useState<Record<string, { likes: number, dislikes: number, myVote?: 'like' | 'dislike' }>>({});
+
+    // Initialize likes from localStorage on mount
+    useEffect(() => {
+        const saved = localStorage.getItem('announcement_votes');
+        if (saved) {
+            try { setLikes(JSON.parse(saved)); } catch (e) { }
+        }
+    }, []);
+
+    const handleVote = (id: string | number, vote: 'like' | 'dislike') => {
+        const key = String(id);
+        const current = likes[key] || { likes: Math.floor(Math.random() * 10), dislikes: Math.floor(Math.random() * 3) };
+
+        let newVote: 'like' | 'dislike' | undefined = vote;
+        let newLikes = current.likes;
+        let newDislikes = current.dislikes;
+
+        if (current.myVote === vote) {
+            // Undo vote
+            newVote = undefined;
+            if (vote === 'like') newLikes--;
+            else newDislikes--;
+        } else {
+            // New vote or change vote
+            if (current.myVote === 'like') newLikes--;
+            if (current.myVote === 'dislike') newDislikes--;
+
+            if (vote === 'like') newLikes++;
+            else newDislikes++;
+        }
+
+        const updated = { ...likes, [key]: { likes: newLikes, dislikes: newDislikes, myVote: newVote } };
+        setLikes(updated);
+        localStorage.setItem('announcement_votes', JSON.stringify(updated));
+    };
 
     useEffect(() => {
         const fetchAnnouncements = async () => {
@@ -100,32 +139,34 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
                             <h4 className="font-bold text-blue-900 group-hover:text-blue-600 transition-colors mb-1 line-clamp-1">
                                 {ann.title}
                             </h4>
-                            <p className="text-sm text-blue-500 line-clamp-2 leading-relaxed mb-3">
-                                {ann.body}
-                            </p>
+                            <div className="text-sm text-blue-500 leading-relaxed mb-3">
+                                <FormattedText text={ann.body} />
+                            </div>
 
-                            {(ann.media && ann.media.length > 0) && (() => {
-                                const media = ann.media;
-                                const count = media.length;
-                                return (
-                                    <div className={`grid gap-2 mb-2 ${count === 1 ? 'grid-cols-1' :
-                                        count === 2 ? 'grid-cols-2' :
-                                            'grid-cols-3'
-                                        }`}>
-                                        {media.map((m, idx) => (
-                                            <div key={idx} className={`relative rounded-md overflow-hidden bg-blue-50/50 border border-blue-100 ${count === 1 ? 'aspect-video w-full max-w-sm' : 'aspect-square'
-                                                }`}>
-                                                {m.type === 'image' ? (
-                                                    // eslint-disable-next-line @next/next/no-img-element
-                                                    <img src={m.url} alt={`${ann.title} ${idx}`} className="object-cover w-full h-full" />
-                                                ) : (
-                                                    <video src={m.url} className="object-cover w-full h-full" autoPlay muted loop playsInline />
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                );
-                            })()}
+                            {(ann.media && ann.media.length > 0) && (
+                                <div className="mb-3 max-w-xl">
+                                    <SlideshowMedia media={ann.media as any} title={ann.title} />
+                                </div>
+                            )}
+
+                            {ann.type === 'event' && (
+                                <div className="flex items-center gap-4 mt-2 pt-2 border-t border-blue-50">
+                                    <button
+                                        onClick={() => handleVote(ann.id, 'like')}
+                                        className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${likes[String(ann.id)]?.myVote === 'like' ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500'}`}
+                                    >
+                                        <ThumbsUp className={`h-4 w-4 ${likes[String(ann.id)]?.myVote === 'like' ? 'fill-blue-600' : ''}`} />
+                                        <span>{likes[String(ann.id)]?.likes ?? 0}</span>
+                                    </button>
+                                    <button
+                                        onClick={() => handleVote(ann.id, 'dislike')}
+                                        className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${likes[String(ann.id)]?.myVote === 'dislike' ? 'text-red-600' : 'text-slate-400 hover:text-red-500'}`}
+                                    >
+                                        <ThumbsDown className={`h-4 w-4 ${likes[String(ann.id)]?.myVote === 'dislike' ? 'fill-red-600' : ''}`} />
+                                        <span>{likes[String(ann.id)]?.dislikes ?? 0}</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -59,6 +59,25 @@ export default function TeacherNotificationsPage() {
         }
     };
 
+    const handleDeleteRead = async (id: string) => {
+        try {
+            const res = await fetch(`/api/notifications?id=${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'x-actor-role': 'teacher',
+                    'x-actor-id': user?.id || ''
+                }
+            });
+            if (res.ok) {
+                success('Notification deleted');
+                fetchNotifications();
+            }
+        } catch (e) {
+            console.error('Failed to delete notification', e);
+            notifyError('Failed to delete notification');
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center p-12">
@@ -84,6 +103,7 @@ export default function TeacherNotificationsPage() {
                 <Notifications
                     notifications={notifications}
                     onMarkRead={handleMarkRead}
+                    onDelete={handleDeleteRead}
                 />
             )}
         </div>

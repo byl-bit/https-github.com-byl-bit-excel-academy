@@ -21,9 +21,10 @@ interface Notification {
 interface NotificationsProps {
     notifications: Notification[];
     onMarkRead?: (id: string) => Promise<void>;
+    onDelete?: (id: string) => Promise<void>;
 }
 
-export function Notifications({ notifications, onMarkRead }: NotificationsProps) {
+export function Notifications({ notifications, onMarkRead, onDelete }: NotificationsProps) {
     return (
         <Card>
             <CardHeader>
@@ -38,7 +39,7 @@ export function Notifications({ notifications, onMarkRead }: NotificationsProps)
                 ) : (
                     <div className="space-y-4">
                         {notifications.map(notif => (
-                            <div key={notif.id} className={`p-3 rounded-lg border ${notif.is_read ? 'bg-slate-50' : 'bg-white'} flex items-start justify-between gap-4`}> 
+                            <div key={notif.id} className={`p-3 rounded-lg border ${notif.is_read ? 'bg-slate-50' : 'bg-white'} flex items-start justify-between gap-4`}>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between">
                                         <div className="text-sm font-semibold">{notif.action}</div>
@@ -49,10 +50,13 @@ export function Notifications({ notifications, onMarkRead }: NotificationsProps)
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     {!notif.is_read && (
-                                        <Button size="sm" onClick={() => onMarkRead && onMarkRead(notif.id)}>
-                                            <Check className="h-4 w-4 mr-1" /> Mark read
+                                        <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => onMarkRead && onMarkRead(notif.id)}>
+                                            <Check className="h-3 w-3 mr-1" /> Read
                                         </Button>
                                     )}
+                                    <Button size="sm" variant="ghost" className="h-8 px-2 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => onDelete && onDelete(notif.id)}>
+                                        <X className="h-3 w-3 mr-1" /> Delete
+                                    </Button>
                                 </div>
                             </div>
                         ))}

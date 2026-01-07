@@ -975,6 +975,24 @@ export default function AdminPage() {
                                 console.error('Failed to mark notification read', e);
                             }
                         }}
+                        onDelete={async (id: string) => {
+                            try {
+                                const res = await fetch(`/api/notifications?id=${id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'x-actor-role': 'admin',
+                                        'x-actor-id': user?.id || ''
+                                    }
+                                });
+                                if (res.ok) {
+                                    success('Notification deleted');
+                                    refresh();
+                                }
+                            } catch (e) {
+                                console.error('Failed to delete notification', e);
+                                notifyError('Failed to delete notification');
+                            }
+                        }}
                     />
                 )}
 

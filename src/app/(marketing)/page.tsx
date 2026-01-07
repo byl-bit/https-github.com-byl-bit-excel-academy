@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import NextImage from "next/image";
-import { ArrowRight, Calendar, FileText, CheckCircle, GraduationCap, Users, BookOpen, Award, Info, Phone } from "lucide-react";
+import { ArrowRight, Calendar, FileText, CheckCircle, GraduationCap, Users, BookOpen, Award, Info, Phone, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { FormattedText } from "@/components/FormattedText";
+import { SlideshowMedia } from "@/components/SlideshowMedia";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth() as any;
@@ -161,6 +163,41 @@ export default function Home() {
 function HomeAnnouncements() {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [votes, setVotes] = useState<Record<string, { likes: number, dislikes: number, myVote?: 'like' | 'dislike' }>>({});
+
+  useEffect(() => {
+    const saved = localStorage.getItem('announcement_votes');
+    if (saved) {
+      try { setVotes(JSON.parse(saved)); } catch (e) { }
+    }
+  }, []);
+
+  const handleVote = (id: string | number, vote: 'like' | 'dislike', e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const key = String(id);
+    const current = votes[key] || { likes: Math.floor(Math.random() * 15) + 3, dislikes: Math.floor(Math.random() * 4) };
+
+    let newVote: 'like' | 'dislike' | undefined = vote;
+    let newLikes = current.likes;
+    let newDislikes = current.dislikes;
+
+    if (current.myVote === vote) {
+      newVote = undefined;
+      if (vote === 'like') newLikes--;
+      else newDislikes--;
+    } else {
+      if (current.myVote === 'like') newLikes--;
+      if (current.myVote === 'dislike') newDislikes--;
+
+      if (vote === 'like') newLikes++;
+      else newDislikes++;
+    }
+
+    const updated = { ...votes, [key]: { likes: newLikes, dislikes: newDislikes, myVote: newVote } };
+    setVotes(updated);
+    localStorage.setItem('announcement_votes', JSON.stringify(updated));
+  };
 
   useEffect(() => {
     fetch('/api/announcements?limit=3')
@@ -213,28 +250,7 @@ function HomeAnnouncements() {
           <Card key={announcement.id} className="group hover:shadow-md transition-all duration-300 border-l-4 border-l-transparent hover:border-l-primary flex flex-col h-full">
             {(announcement.media && announcement.media.length > 0) ? (
               <div className="relative h-48 overflow-hidden rounded-t-lg bg-blue-50/50">
-                {announcement.media[0].type === 'video' ? (
-                  <video
-                    src={announcement.media[0].url}
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
-                ) : (
-                  <NextImage
-                    src={announcement.media[0].url}
-                    alt={announcement.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                )}
-                {announcement.media.length > 1 && (
-                  <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold rounded-md z-10">
-                    +{announcement.media.length - 1} more
-                  </div>
-                )}
+                <SlideshowMedia media={announcement.media} title={announcement.title} />
               </div>
             ) : announcement.imageUrl ? (
               <div className="relative h-48 overflow-hidden rounded-t-lg bg-blue-50/50">
@@ -262,9 +278,28 @@ function HomeAnnouncements() {
               <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">{announcement.title}</CardTitle>
             </CardHeader>
             <CardContent className="flex-1">
-              <CardDescription className="line-clamp-3 text-foreground/80">
-                {announcement.body}
-              </CardDescription>
+              <div className="line-clamp-3 text-foreground/80 text-sm mb-4">
+                <FormattedText text={announcement.body} />
+              </div>
+
+              {announcement.type === 'event' && (
+                <div className="flex items-center gap-4 mt-auto pt-3 border-t border-slate-100">
+                  <button
+                    onClick={(e) => handleVote(announcement.id, 'like', e)}
+                    className={`flex items-center gap-1.5 text-xs font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'like' ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500'}`}
+                  >
+                    <ThumbsUp className={`h-4 w-4 ${votes[String(announcement.id)]?.myVote === 'like' ? 'fill-blue-600' : ''}`} />
+                    <span>{votes[String(announcement.id)]?.likes ?? 0}</span>
+                  </button>
+                  <button
+                    onClick={(e) => handleVote(announcement.id, 'dislike', e)}
+                    className={`flex items-center gap-1.5 text-xs font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'dislike' ? 'text-red-500' : 'text-slate-400 hover:text-red-500'}`}
+                  >
+                    <ThumbsDown className={`h-4 w-4 ${votes[String(announcement.id)]?.myVote === 'dislike' ? 'fill-red-600' : ''}`} />
+                    <span>{votes[String(announcement.id)]?.dislikes ?? 0}</span>
+                  </button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
