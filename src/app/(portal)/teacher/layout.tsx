@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useRouter, usePathname } from 'next/navigation';
-import { GraduationCap, Bell, LogOut, LayoutDashboard, BookOpen, Users, CalendarCheck, Loader2, Menu, User as UserIcon } from 'lucide-react';
+import { GraduationCap, Bell, LogOut, LayoutDashboard, BookOpen, Users, CalendarCheck, Loader2, Menu, User as UserIcon, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -83,6 +83,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
 
     const navItems = [
         { id: 'dashboard', href: '/teacher', label: 'Overview', icon: LayoutDashboard, show: true },
+        { id: 'announcements', href: '/teacher/announcements', label: 'News', icon: Calendar, show: true },
         { id: 'subjects', href: '/teacher/subjects', label: 'Subject Portal', icon: BookOpen, show: hasAllocations },
         { id: 'homeroom', href: '/teacher/homeroom', label: 'Homeroom', icon: Users, show: isHomeroomTeacher },
         { id: 'notifications', href: '/teacher/notifications', label: 'Notifications', icon: Bell, show: true },
@@ -94,7 +95,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
         {
             label: 'Home',
             icon: LayoutDashboard,
-            items: ['dashboard', 'notifications']
+            items: ['dashboard', 'announcements', 'notifications']
         },
         {
             label: 'Academic',

@@ -23,10 +23,15 @@ export async function GET(request: Request) {
         if (!isNaN(parsedLimit)) query = query.limit(parsedLimit);
     }
 
-    if (role && role !== 'admin') {
+    if (role === 'admin') {
+        // Admins see everything
+    } else if (role === 'student' || role === 'teacher') {
         const targetAudienceValue = role === 'student' ? 'students' : 'teachers';
-        // Match 'all', the specific role, OR null (array containment syntax for Supabase)
+        // Match 'all', the specific role, OR null
         query = query.or(`target_audience.cs.{all},target_audience.cs.{${targetAudienceValue}},target_audience.is.null`);
+    } else {
+        // Public/Home page: only show 'all'
+        query = query.or('target_audience.cs.{all},target_audience.is.null');
     }
 
     const { data, error } = await query;

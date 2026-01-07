@@ -42,7 +42,11 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
             setAnnouncements(initialData);
             return;
         }
-        fetch('/api/announcements')
+        const role = user?.role || 'admin';
+        const actorId = user?.id || '';
+        fetch('/api/announcements', {
+            headers: { 'x-actor-role': role, 'x-actor-id': actorId }
+        })
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -53,7 +57,7 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
                 console.error(err);
                 notifyError('Failed to load announcements');
             });
-    }, [notifyError, initialData]);
+    }, [notifyError, initialData, user]);
 
     const updateAnnouncements = async (newAnnouncements: Announcement[]) => {
         const oldAnnouncements = [...announcements];
@@ -120,7 +124,11 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
 
         // Refresh to get server-generated IDs
         setTimeout(() => {
-            fetch('/api/announcements')
+            const role = user?.role || 'admin';
+            const actorId = user?.id || '';
+            fetch('/api/announcements', {
+                headers: { 'x-actor-role': role, 'x-actor-id': actorId }
+            })
                 .then(res => res.json())
                 .then(data => {
                     if (Array.isArray(data)) setAnnouncements(data);

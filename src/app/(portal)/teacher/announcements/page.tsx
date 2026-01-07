@@ -3,14 +3,15 @@
 import { Card, CardHeader } from '@/components/ui/glass-card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
-import { Bell, Calendar, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Bell, Calendar, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FormattedText } from '@/components/FormattedText';
 import { SlideshowMedia } from '@/components/SlideshowMedia';
 
-export default function StudentAnnouncementsPage() {
-    const { user } = useAuth();
+export default function TeacherAnnouncementsPage() {
+    const { user } = useAuth() as any;
     const [announcements, setAnnouncements] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [votes, setVotes] = useState<Record<string, { likes: number, dislikes: number, myVote?: 'like' | 'dislike' }>>({});
 
     useEffect(() => {
@@ -50,7 +51,7 @@ export default function StudentAnnouncementsPage() {
         try {
             const res = await fetch('/api/announcements', {
                 headers: {
-                    'x-actor-role': 'student',
+                    'x-actor-role': 'teacher',
                     'x-actor-id': user.id
                 }
             });
@@ -60,6 +61,8 @@ export default function StudentAnnouncementsPage() {
             }
         } catch (e) {
             console.error("Failed to fetch announcements");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -74,16 +77,24 @@ export default function StudentAnnouncementsPage() {
         refreshOnMount: false
     });
 
+    if (loading) {
+        return (
+            <div className="flex justify-center p-12">
+                <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-6 max-w-4xl mx-auto animate-fade-in-up">
+        <div className="space-y-6 max-w-4xl mx-auto animate-fade-in-up pb-20">
             <Card className="bg-white border-slate-100 shadow-sm">
                 <div className="flex items-center gap-4 p-2">
-                    <div className="bg-blue-50 p-3 rounded-xl hidden sm:block">
-                        <Bell className="h-6 w-6 text-blue-600" />
+                    <div className="bg-indigo-50 p-3 rounded-xl hidden sm:block">
+                        <Bell className="h-6 w-6 text-indigo-600" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-blue-900">School Announcements</h2>
-                        <p className="text-sm text-blue-500">Stay updated with the latest news, events, and circulars.</p>
+                        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Faculty Announcements</h2>
+                        <p className="text-sm text-slate-500">Official updates, circulars and notices for teachers.</p>
                     </div>
                 </div>
             </Card>
@@ -91,23 +102,23 @@ export default function StudentAnnouncementsPage() {
             <div className="space-y-6">
                 {announcements.length > 0 ? (
                     announcements.map((announcement) => (
-                        <Card key={announcement.id} className="overflow-hidden border-t-4 border-t-blue-500 hover:shadow-lg transition-all bg-white border-slate-100">
-                            <CardHeader className="pb-3 border-b border-blue-50/50 flex justify-between items-start">
+                        <Card key={announcement.id} className="overflow-hidden border-t-4 border-t-indigo-500 hover:shadow-lg transition-all bg-white border-slate-100">
+                            <CardHeader className="pb-3 border-b border-indigo-50/50 flex justify-between items-start">
                                 <div className="flex items-start gap-3">
-                                    <div className="bg-blue-50 p-2 rounded-lg mt-1">
-                                        <Bell className="h-5 w-5 text-blue-600" />
+                                    <div className="bg-indigo-50 p-2 rounded-lg mt-1">
+                                        <Bell className="h-5 w-5 text-indigo-600" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-black text-blue-900 leading-tight">{announcement.title}</h3>
+                                        <h3 className="text-lg font-black text-slate-900 leading-tight tracking-tight uppercase">{announcement.title}</h3>
                                         <div className="flex items-center gap-2 mt-2">
-                                            <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100`}>
+                                            <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-indigo-50 text-indigo-700 border border-indigo-100`}>
                                                 {announcement.type}
                                             </span>
-                                            <div className="flex items-center text-blue-500 text-xs font-medium bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                                            <div className="flex items-center text-slate-500 text-[10px] font-black bg-slate-50 px-3 py-1 rounded-full border border-slate-100 uppercase tracking-widest">
                                                 <Calendar className="mr-2 h-3.5 w-3.5" />
                                                 {new Date(announcement.date).toLocaleDateString('en-US', {
                                                     year: 'numeric',
-                                                    month: 'long',
+                                                    month: 'short',
                                                     day: 'numeric'
                                                 })}
                                             </div>
@@ -116,16 +127,16 @@ export default function StudentAnnouncementsPage() {
                                 </div>
                             </CardHeader>
                             <div className="p-6 pt-4">
-                                <div className="text-base text-blue-900/80 leading-relaxed">
+                                <div className="text-base text-slate-700 leading-relaxed">
                                     <FormattedText text={announcement.body} />
                                 </div>
                                 {announcement.type === 'event' && (
                                     <div className="flex items-center gap-4 mt-4 pt-3 border-t border-slate-100">
                                         <button
                                             onClick={() => handleVote(announcement.id, 'like')}
-                                            className={`flex items-center gap-1.5 text-xs font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'like' ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500'}`}
+                                            className={`flex items-center gap-1.5 text-xs font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'like' ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-500'}`}
                                         >
-                                            <ThumbsUp className={`h-4 w-4 ${votes[String(announcement.id)]?.myVote === 'like' ? 'fill-blue-600' : ''}`} />
+                                            <ThumbsUp className={`h-4 w-4 ${votes[String(announcement.id)]?.myVote === 'like' ? 'fill-indigo-600' : ''}`} />
                                             <span>{votes[String(announcement.id)]?.likes ?? 0}</span>
                                         </button>
                                         <button
@@ -142,7 +153,7 @@ export default function StudentAnnouncementsPage() {
                                         <SlideshowMedia media={announcement.media as any} title={announcement.title} />
                                     </div>
                                 ) : announcement.imageUrl ? (
-                                    <div className="mt-6 rounded-xl overflow-hidden border border-blue-100 shadow-sm bg-blue-50/20">
+                                    <div className="mt-6 rounded-xl overflow-hidden border border-indigo-100 shadow-sm bg-indigo-50/20">
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={announcement.imageUrl}
@@ -157,11 +168,11 @@ export default function StudentAnnouncementsPage() {
                 ) : (
                     <Card>
                         <div className="flex flex-col items-center justify-center py-16 text-center">
-                            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 border border-blue-100">
-                                <Bell className="h-8 w-8 text-blue-300" />
+                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                                <Bell className="h-8 w-8 text-slate-300" />
                             </div>
-                            <h3 className="text-lg font-bold text-blue-900">No Announcements</h3>
-                            <p className="text-blue-400">There are no new announcements at the moment.</p>
+                            <h3 className="text-lg font-bold text-slate-800 uppercase tracking-tight">No Announcements</h3>
+                            <p className="text-slate-400 text-sm italic">There are no new faculty announcements at the moment.</p>
                         </div>
                     </Card>
                 )}
