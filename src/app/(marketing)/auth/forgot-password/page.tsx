@@ -6,6 +6,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Label } from '@/components/ui/label';
 import { KeyRound, ArrowLeft, Loader2, Info } from 'lucide-react';
 import Link from 'next/link';
@@ -167,9 +168,8 @@ export default function ForgotPassword() {
 
                         <div className="space-y-2 pt-4 border-t">
                             <Label htmlFor="newPassword">New Password</Label>
-                            <Input
+                            <PasswordInput
                                 id="newPassword"
-                                type="password"
                                 value={formData.newPassword}
                                 onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                                 placeholder="Enter a secure password"

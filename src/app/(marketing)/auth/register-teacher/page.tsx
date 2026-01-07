@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
@@ -210,7 +211,7 @@ export default function RegisterTeacherPage() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="password" className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Account Security Password</Label>
-                                    <Input id="password" type="password" value={form.password} onChange={handleChange} required placeholder="Min 6 characters" className="h-12 rounded-xl border-slate-200 focus:ring-blue-600/20 focus:border-blue-600 font-bold" />
+                                    <PasswordInput id="password" value={form.password} onChange={handleChange} required placeholder="Min 6 characters" className="h-12 rounded-xl border-slate-200 focus:ring-blue-600/20 focus:border-blue-600 font-bold" />
                                 </div>
                             </div>
 

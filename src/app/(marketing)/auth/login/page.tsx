@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
@@ -192,9 +193,8 @@ export default function LoginPage() {
                                             </Link>
                                         )}
                                     </div>
-                                    <Input
+                                    <PasswordInput
                                         id="password"
-                                        type="password"
                                         placeholder="••••••••"
                                         className="h-12 border-slate-200 rounded-xl font-bold"
                                         value={password}

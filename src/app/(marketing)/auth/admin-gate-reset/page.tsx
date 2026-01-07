@@ -6,6 +6,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Label } from '@/components/ui/label';
 import { Shield, Key, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -106,8 +107,7 @@ export default function AdminGateReset() {
                             </div>
                             <div className="space-y-1.5 sm:space-y-2 pt-3 sm:pt-4 border-t border-slate-800">
                                 <Label className="text-blue-300 text-sm sm:text-base">Set New Password</Label>
-                                <Input
-                                    type="password"
+                                <PasswordInput
                                     value={formData.newPassword}
                                     onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                                     placeholder="Enter new password"

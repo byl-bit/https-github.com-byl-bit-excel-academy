@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardHeader } from "@/components/ui/glass-card";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Label } from '@/components/ui/label';
 import { Camera, Upload, Save, User as UserIcon, Mail, GraduationCap, Key, Edit2, X, Check } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
@@ -494,8 +495,7 @@ export default function ProfilePage() {
                                     <div className="grid gap-4">
                                         <div className="space-y-2">
                                             <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Current Secret</Label>
-                                            <Input
-                                                type="password"
+                                            <PasswordInput
                                                 placeholder="••••••••"
                                                 value={passwordData.currentPassword}
                                                 onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
@@ -505,8 +505,7 @@ export default function ProfilePage() {
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">New Secret</Label>
-                                                <Input
-                                                    type="password"
+                                                <PasswordInput
                                                     placeholder="••••••••"
                                                     value={passwordData.newPassword}
                                                     onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
@@ -515,8 +514,7 @@ export default function ProfilePage() {
                                             </div>
                                             <div className="space-y-2">
                                                 <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Authorize Shift</Label>
-                                                <Input
-                                                    type="password"
+                                                <PasswordInput
                                                     placeholder="••••••••"
                                                     value={passwordData.confirmPassword}
                                                     onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}

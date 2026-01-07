@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import Link from 'next/link';
@@ -453,11 +454,11 @@ export function SettingsManager({
                 <CardContent className="space-y-3">
                     <div className="space-y-1">
                         <Label>New Password</Label>
-                        <Input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} />
+                        <PasswordInput value={adminPassword} onChange={e => setAdminPassword(e.target.value)} />
                     </div>
                     <div className="space-y-1">
                         <Label>Confirm Password</Label>
-                        <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+                        <PasswordInput value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
                     </div>
                     <Button className="w-full mt-2" onClick={handlePasswordChange}>Change Password</Button>
                     <div className="pt-2">

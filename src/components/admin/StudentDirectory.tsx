@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { Search, Trash2, Edit, User, Mail, ShieldAlert, X, Save, Lock, Download, Upload, Users } from "lucide-react";
 import { PaginationControls } from "@/components/PaginationControls";
@@ -540,8 +541,7 @@ export function StudentDirectory({ students, onDelete, onUpdate }: StudentDirect
                             <Label className="flex items-center gap-2">
                                 <Lock className="h-3 w-3" /> New Password
                             </Label>
-                            <Input
-                                type="password"
+                            <PasswordInput
                                 placeholder="Leave blank to keep current"
                                 value={editForm.password}
                                 onChange={e => setEditForm({ ...editForm, password: e.target.value })}
