@@ -73,7 +73,10 @@ export default function TeacherPage() {
                         const sortedStudents = [...classStudents].sort((a: any, b: any) => {
                             const nameA = (a.name || a.fullName || '').toLowerCase();
                             const nameB = (b.name || b.fullName || '').toLowerCase();
-                            return nameA.localeCompare(nameB);
+                            if (nameA !== nameB) return nameA.localeCompare(nameB);
+                            const rollA = parseInt(String(a.rollNumber || '0'));
+                            const rollB = parseInt(String(b.rollNumber || '0'));
+                            return rollA - rollB;
                         });
                         setStudents(sortedStudents);
                     }

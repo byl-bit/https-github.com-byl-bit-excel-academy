@@ -179,7 +179,14 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                                             <p className="text-xs">Students must be active and correctly assigned to this Grade and Section.</p>
                                         </div>
                                     ) : (
-                                        [...students].sort((a, b) => (a.fullName || a.name || '').localeCompare(b.fullName || b.name || '')).map(student => {
+                                        [...students].sort((a, b) => {
+                                            const nameA = (a.fullName || a.name || '').toLowerCase();
+                                            const nameB = (b.fullName || b.name || '').toLowerCase();
+                                            if (nameA !== nameB) return nameA.localeCompare(nameB);
+                                            const rollA = parseInt(String(a.rollNumber || '0'));
+                                            const rollB = parseInt(String(b.rollNumber || '0'));
+                                            return rollA - rollB;
+                                        }).map(student => {
                                             const sid = student.student_id || student.id;
                                             const isPresent = attendance.includes(sid);
                                             return (

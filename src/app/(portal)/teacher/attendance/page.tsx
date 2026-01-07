@@ -25,7 +25,15 @@ export default function AttendancePage() {
                 const usersRes = await fetch(`/api/users?role=student&grade=${user.grade}&section=${user.section}&status=active`);
                 if (usersRes.ok) {
                     const classStudents = await usersRes.json();
-                    setStudents(classStudents);
+                    const sorted = [...classStudents].sort((a: any, b: any) => {
+                        const nameA = (a.name || a.fullName || '').toLowerCase();
+                        const nameB = (b.name || b.fullName || '').toLowerCase();
+                        if (nameA !== nameB) return nameA.localeCompare(nameB);
+                        const rollA = parseInt(String(a.rollNumber || '0'));
+                        const rollB = parseInt(String(b.rollNumber || '0'));
+                        return rollA - rollB;
+                    });
+                    setStudents(sorted);
                 }
             } catch (e) {
                 console.error(e);

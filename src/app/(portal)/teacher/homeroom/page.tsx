@@ -36,7 +36,16 @@ export default function HomeroomPage() {
 
                 if (usersRes.ok) {
                     const classStudents = await usersRes.json();
-                    setStudents(classStudents.filter((u: any) => u.status === 'active'));
+                    const activeStudents = classStudents.filter((u: any) => u.status === 'active');
+                    activeStudents.sort((a: any, b: any) => {
+                        const nameA = (a.name || a.fullName || '').toLowerCase();
+                        const nameB = (b.name || b.fullName || '').toLowerCase();
+                        if (nameA !== nameB) return nameA.localeCompare(nameB);
+                        const rollA = parseInt(String(a.rollNumber || '0'));
+                        const rollB = parseInt(String(b.rollNumber || '0'));
+                        return rollA - rollB;
+                    });
+                    setStudents(activeStudents);
                 }
 
                 if (resultsRes.ok) {
@@ -73,6 +82,14 @@ export default function HomeroomPage() {
             // Filter only published results for reports? Usually yes, but let's allow all for now or filter.
             // Let's use all results that seem final (published).
             const reportableResults = results.filter(r => r.status === 'published');
+            reportableResults.sort((a, b) => {
+                const nameA = (a.studentName || '').toLowerCase();
+                const nameB = (b.studentName || '').toLowerCase();
+                if (nameA !== nameB) return nameA.localeCompare(nameB);
+                const rollA = parseInt(String(a.rollNumber || '0'));
+                const rollB = parseInt(String(b.rollNumber || '0'));
+                return rollA - rollB;
+            });
 
             if (reportableResults.length === 0) {
                 toast("Only published results can be generated.", "error");
