@@ -249,12 +249,19 @@ export async function POST(request: Request) {
                 const resEntry = resultsObj[key];
                 if (!resEntry) continue;
 
-                const studentIdFromEntry = resEntry.studentId || resEntry.student || key;
+                const studentIdFromEntry = resEntry.studentId || resEntry.student || String(key);
                 let resolvedGrade = resEntry.grade;
                 let resolvedSection = resEntry.section;
 
+                // Match student from the pre-fetched users list
+                const studentUser = (users || []).find(u =>
+                    String(u.student_id).toLowerCase() === String(studentIdFromEntry).toLowerCase() ||
+                    String(u.id).toLowerCase() === String(studentIdFromEntry).toLowerCase()
+                );
+
+                const actualStudentId = studentUser?.student_id || studentIdFromEntry;
+
                 if (!resolvedGrade || !resolvedSection) {
-                    const studentUser = (users || []).find(u => u.student_id === studentIdFromEntry || u.id === studentIdFromEntry || u.id === key);
                     if (studentUser) {
                         resolvedGrade = studentUser.grade;
                         resolvedSection = studentUser.section;
@@ -301,35 +308,39 @@ export async function POST(request: Request) {
                     };
                 });
 
-                // Use the actual student_id (STU-001) not the key (UUID)
-                const actualStudentId = resEntry.studentId || studentIdFromEntry;
-                const existingPending = pendingResults[actualStudentId];
+                // Find existing pending record (using both possible keys for robustness)
+                let existingPending = pendingResults[actualStudentId];
+                if (!existingPending && studentUser) {
+                    existingPending = pendingResults[studentUser.id];
+                }
+
                 let mergedSubjects = [...processedSubjects];
                 if (existingPending && Array.isArray(existingPending.subjects)) {
                     const subMap = new Map<string, Subject>();
+                    // Preserve existing subjects from other teachers
                     existingPending.subjects.forEach((s: Subject) => subMap.set(s.name, s));
+                    // Overwrite with currently submitted subjects
                     processedSubjects.forEach((s: Subject) => subMap.set(s.name, s));
                     mergedSubjects = Array.from(subMap.values());
                 }
 
                 const totalMarks = mergedSubjects.reduce((sum: number, s: Subject) => sum + (Number(s.marks) || 0), 0);
-                // Keep totals and averages with 1-decimal precision as per school standard
                 const totalRounded = Math.round(totalMarks * 10) / 10;
                 const average = Math.round((totalRounded / (mergedSubjects.length || 1)) * 10) / 10;
                 const resultStatus = calculatePassStatus(average);
                 const promoStatus = calculatePromotionStatus(resultStatus === 'PASS');
                 const conductRemark = calculateConduct(average);
 
-                // Determine status: 'pending' when submitted for approval, 'draft' for local saves
                 let resultStatusValue = 'draft';
                 if (submissionLevel === 'subject-pending' || submissionLevel === 'roster') {
                     resultStatusValue = 'pending';
                 }
 
+                // Update the local pendingResults map
                 pendingResults[actualStudentId] = {
                     ...resEntry,
                     student_id: actualStudentId,
-                    student_name: resEntry.studentName || resEntry.student_name || '',
+                    student_name: resEntry.studentName || resEntry.student_name || studentUser?.name || '',
                     subjects: mergedSubjects,
                     total: totalRounded,
                     average: average,
@@ -376,48 +387,42 @@ export async function POST(request: Request) {
                 }
             }
 
-            // Save to Supabase - only update the students submitted in this request
-            if (studentsToUpdate.length > 0) {
-                // Get all pending results to preserve ones we're not updating
-                const allPendingResultsToSave: PendingResult[] = [];
+            // Prepare the final array for upsert
+            const pendingArray = studentsToUpdate.map(studentId => {
+                const r = pendingResults[studentId];
+                if (!r) return null;
 
-                // Add the updated ones
-                studentsToUpdate.forEach(studentId => {
-                    if (pendingResults[studentId]) {
-                        allPendingResultsToSave.push(pendingResults[studentId]);
-                    }
-                });
+                // Map to database schema (snake_case)
+                return {
+                    student_id: studentId,
+                    student_name: r.student_name || r.studentName || '',
+                    grade: String(r.grade || ''),
+                    section: String(r.section || ''),
+                    roll_number: r.roll_number || r.rollNumber || null,
+                    gender: normalizeGender(r.gender || (r as any).sex || null) || null,
+                    subjects: r.subjects || [],
+                    total: Number(r.total || 0),
+                    average: Number(r.average || 0),
+                    rank: Number(r.rank || 0),
+                    conduct: r.conduct || null,
+                    result: r.result || null,
+                    promoted_or_detained: r.promoted_or_detained || r.promotedOrDetained || null,
+                    status: r.status || resultStatusValue,
+                    submission_level: r.submission_level || r.submissionLevel || submissionLevel,
+                    submitted_by: actorId,
+                    submitted_at: r.submitted_at || new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+            }).filter(Boolean);
 
-                // Delete only the ones we're updating (will re-insert them)
-                await supabase.from('results_pending').delete().in('student_id', studentsToUpdate);
+            if (pendingArray.length > 0) {
+                const { error: upsertError } = await supabase
+                    .from('results_pending')
+                    .upsert(pendingArray, { onConflict: 'student_id' });
 
-                // Map only the updated results to the proper format
-                const pendingArray = allPendingResultsToSave.map((r: PendingResult) => {
-                    // Ensure all required fields are present
-                    return {
-                        student_id: r.student_id,
-                        student_name: r.student_name || r.studentName || '',
-                        grade: r.grade,
-                        section: r.section,
-                        roll_number: r.roll_number || r.rollNumber || null,
-                        gender: normalizeGender(r.gender ?? (r as any)['sex'] ?? null) || null,
-                        subjects: r.subjects || [],
-                        total: r.total || 0,
-                        average: r.average || 0,
-                        rank: r.rank || null,
-                        conduct: r.conduct || null,
-                        result: r.result || null,
-                        promoted_or_detained: r.promoted_or_detained || null,
-                        status: r.status || 'pending',
-                        submission_level: r.submission_level || r.submissionLevel || null,
-                        submitted_by: r.submitted_by || actorId,
-                        submitted_at: r.submitted_at || new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    };
-                });
-
-                if (pendingArray.length > 0) {
-                    await supabase.from('results_pending').insert(pendingArray);
+                if (upsertError) {
+                    console.error('Upsert pending error:', upsertError);
+                    return NextResponse.json({ error: 'Failed to save pending results', details: upsertError.message }, { status: 500 });
                 }
             }
 
@@ -426,10 +431,13 @@ export async function POST(request: Request) {
                 userName: teacher?.name || 'Teacher',
                 action: submissionLevel === 'roster' ? 'Submitted Full Roster' : 'Submitted Subject Marks',
                 category: 'result',
-                details: `${submissionLevel === 'roster' ? 'Full roster' : 'Marks'} for ${Object.keys(resultsObj).length} students`
+                details: `${submissionLevel === 'roster' ? 'Full roster' : 'Marks'} for ${studentsToUpdate.length} students`
             });
 
-            return NextResponse.json({ success: true, message: submissionLevel === 'roster' ? 'Roster submitted for admin approval' : 'Subject marks submitted' });
+            return NextResponse.json({
+                success: true,
+                message: submissionLevel === 'roster' ? 'Roster submitted for admin approval' : 'Subject marks submitted'
+            });
         }
 
         // Admin publication logic
