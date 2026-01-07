@@ -226,14 +226,23 @@ export async function POST(request: Request) {
         const assessmentTypes = (settings['assessmentTypes'] ?? []) as AssessmentType[];
 
         if (role === 'teacher') {
-            const teacher = (users || []).find(u => u.id === actorId || u.teacher_id === actorId);
+            const teacher = (users || []).find(u =>
+                String(u.id).toLowerCase() === String(actorId).toLowerCase() ||
+                String(u.teacher_id).toLowerCase() === String(actorId).toLowerCase()
+            );
             if (!teacher) {
-                return NextResponse.json({ error: 'Unauthorized: teacher not found' }, { status: 403 });
+                return NextResponse.json({ error: 'Unauthorized: teacher profile not found' }, { status: 403 });
             }
 
-            const teacherAllocations = (allocations || []).filter(a => a.teacher_id === teacher.id || a.teacher_id === teacher.teacher_id);
+            const teacherAllocations = (allocations || []).filter(a =>
+                String(a.teacher_id).toLowerCase() === String(teacher.id).toLowerCase() ||
+                String(a.teacher_id).toLowerCase() === String(teacher.teacher_id).toLowerCase()
+            );
 
             const firstKey = Object.keys(resultsObj)[0];
+            if (!firstKey) {
+                return NextResponse.json({ error: 'No results provided' }, { status: 400 });
+            }
             const submissionLevel = resultsObj[firstKey]?.submissionLevel || 'subject';
 
             for (const key of Object.keys(resultsObj)) {
@@ -303,10 +312,10 @@ export async function POST(request: Request) {
                     mergedSubjects = Array.from(subMap.values());
                 }
 
-                const totalMarks = mergedSubjects.reduce((sum: number, s: Subject) => sum + (s.marks || 0), 0);
-                // Keep totals and averages to one decimal place (out of 100)
-                const totalRounded = Math.round(totalMarks * 10) / 10;
-                const average = Math.round((totalRounded / (mergedSubjects.length || 1)) * 10) / 10;
+                const totalMarks = mergedSubjects.reduce((sum: number, s: Subject) => sum + (Number(s.marks) || 0), 0);
+                // Keep totals and averages with good precision
+                const totalRounded = Number(totalMarks.toFixed(2));
+                const average = Number((totalRounded / (mergedSubjects.length || 1)).toFixed(2));
                 const resultStatus = calculatePassStatus(average);
                 const promoStatus = calculatePromotionStatus(resultStatus === 'PASS');
                 const conductRemark = calculateConduct(average);

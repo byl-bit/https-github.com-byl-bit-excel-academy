@@ -22,7 +22,7 @@ export const SlideshowMedia = ({ media, title }: SlideshowMediaProps) => {
 
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % media.length);
-        }, 10000); // 10 seconds shuffle
+        }, 5000); // 5 seconds shuffle
 
         return () => clearInterval(interval);
     }, [media.length]);

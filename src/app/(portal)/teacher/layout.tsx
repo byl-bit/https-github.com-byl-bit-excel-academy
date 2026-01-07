@@ -17,6 +17,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
     const [loadingAllocations, setLoadingAllocations] = useState(true);
     const [notifications, setNotifications] = useState<any[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [announcements, setAnnouncements] = useState<any[]>([]);
 
     useEffect(() => {
         if (!user) return;
@@ -58,6 +59,14 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
                     setNotifications(data.notifications || []);
                     setUnreadCount(data.unreadCount || 0);
                 }
+
+                // Fetch Announcements
+                const annRes = await fetch('/api/announcements', {
+                    headers: { 'x-actor-role': 'teacher' }
+                });
+                if (annRes.ok) {
+                    setAnnouncements(await annRes.json());
+                }
             } catch (e) {
                 console.error('Failed to sync teacher layout data', e);
             } finally {
@@ -97,6 +106,36 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
             items: ['dashboard', 'notifications']
         },
         {
+            label: 'Announcements',
+            icon: Bell,
+            customContent: (
+                <div className="relative grid gap-1">
+                    {announcements.length === 0 ? (
+                        <div className="p-4 text-center text-slate-400 font-medium text-xs">No recent announcements</div>
+                    ) : (
+                        announcements.slice(0, 5).map((ann) => (
+                            <div key={ann.id} className="p-3 rounded-xl hover:bg-orange-50 transition-colors group/ann">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className={cn(
+                                        "text-[8px] font-black uppercase px-1.5 py-0.5 rounded",
+                                        ann.type === 'emergency' ? "bg-red-100 text-red-600" : "bg-orange-100 text-orange-600"
+                                    )}>
+                                        {ann.type}
+                                    </span>
+                                    <span className="text-[10px] text-slate-400 font-medium">{ann.date}</span>
+                                </div>
+                                <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover/ann:text-orange-700">{ann.title}</h4>
+                                <p className="text-[10px] text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">{ann.body}</p>
+                            </div>
+                        ))
+                    )}
+                    <Link href="/teacher/notifications" className="block p-2 text-center text-[10px] font-black text-blue-600 hover:text-blue-700 bg-blue-50/50 rounded-lg mt-1 underline underline-offset-4">
+                        View All Announcements
+                    </Link>
+                </div>
+            )
+        },
+        {
             label: 'Academic',
             icon: BookOpen,
             items: ['subjects', 'attendance']
@@ -106,7 +145,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
             icon: Users,
             items: ['homeroom', 'profile']
         }
-    ].filter(group => group.items.some(id => navItems.find(n => n.id === id)?.show));
+    ].filter(group => (group.items && group.items.some(id => navItems.find(n => n.id === id)?.show)) || group.customContent);
 
     const TeacherHeaderMenus = (
         <div className="flex items-center gap-4">
@@ -122,7 +161,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
                     <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50 overflow-hidden">
                         <div className="absolute inset-0 bg-linear-to-br from-blue-50/20 to-indigo-50/20 pointer-events-none" />
                         <div className="relative grid gap-1">
-                            {group.items.map(itemId => {
+                            {group.customContent ? group.customContent : group.items?.map(itemId => {
                                 const item = navItems.find(n => n.id === itemId);
                                 if (!item || !item.show) return null;
                                 const isActive = item.href === '/teacher'

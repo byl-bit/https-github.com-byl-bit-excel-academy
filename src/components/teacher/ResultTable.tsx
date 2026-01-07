@@ -114,8 +114,8 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             setSubmitStatus(prev => ({ ...prev, [studentId]: 'saving' }));
 
             const { total, average } = calculateRowStats(studentId);
-            const totalRounded = Math.round(total * 10) / 10;
-            const avgRounded = Math.round(average * 10) / 10;
+            const totalRounded = total; // Removed aggressive rounding here
+            const avgRounded = average; // Removed aggressive rounding here
             const isPass = avgRounded >= 50;
 
             const subjectsArr = subjects.map(s => {
@@ -226,8 +226,8 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     }
                 });
 
-                const totalRounded = Math.round(total * 10) / 10;
-                const avgRounded = Math.round(average * 10) / 10;
+                const totalRounded = total;
+                const avgRounded = average;
                 batch[sid] = {
                     studentId: student.studentId || student.student_id || sid,
                     studentName: student.name || student.fullName || '',
@@ -336,7 +336,10 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             return row;
         });
 
-        exportToCSV(rows, `marks_${user.grade}_${user.section}_${new Date().toISOString().split('T')[0]}`, headers);
+        const grade = students[0]?.grade || user.grade;
+        const section = students[0]?.section || user.section;
+        const filename = `Marks_Grade_${grade}_${section}_${new Date().toISOString().split('T')[0]}`;
+        exportToCSV(rows, filename, headers);
     };
 
     const importFromCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
