@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const client = supabaseAdmin || supabase;
     let query = client
         .from('announcements')
-        .select('id, title, content, date, type, urgency, image_url, media, audience, created_at')
+        .select('id, title, content, date, type, urgency, image_url, media, target_audience, created_at')
         .order('created_at', { ascending: false });
 
     if (limit) {
@@ -24,9 +24,9 @@ export async function GET(request: Request) {
     }
 
     if (role && role !== 'admin') {
-        const targetAudience = role === 'student' ? 'students' : 'teachers';
-        // Match 'all', the specific role, OR null (for legacy/unassigned announcements)
-        query = query.or(`audience.eq.all,audience.eq.${targetAudience},audience.is.null`);
+        const targetAudienceValue = role === 'student' ? 'students' : 'teachers';
+        // Match 'all', the specific role, OR null (array containment syntax for Supabase)
+        query = query.or(`target_audience.cs.{all},target_audience.cs.{${targetAudienceValue}},target_audience.is.null`);
     }
 
     const { data, error } = await query;
@@ -45,7 +45,14 @@ export async function GET(request: Request) {
         const date = getString(item, 'date') || getString(item, 'created_at')?.split('T')[0] || new Date().toISOString().split('T')[0];
         const type = getString(item, 'type') || getString(item, 'urgency') || 'general';
         const imageUrl = getString(item, 'image_url') || getString(item, 'imageUrl') || null;
-        const audience = getString(item, 'audience') || 'all';
+
+        let audience = 'all';
+        const rawAudience = item['target_audience'];
+        if (Array.isArray(rawAudience) && rawAudience.length > 0) {
+            audience = rawAudience[0];
+        } else if (typeof rawAudience === 'string') {
+            audience = rawAudience;
+        }
 
         // Process media array efficiently
         let mediaArr: Array<Record<string, any>> = [];
@@ -107,7 +114,7 @@ export async function POST(request: Request) {
                 try { mediaVal = JSON.parse(mediaVal || '[]'); } catch { mediaVal = undefined; }
             }
 
-            const payload: Record<string, any> = { title, content, audience: audienceVal };
+            const payload: Record<string, any> = { title, content, target_audience: [audienceVal] };
             if (typeVal) { payload.urgency = typeVal; payload.type = typeVal; }
             if (dateVal) payload.date = dateVal;
             if (Array.isArray(mediaVal) && mediaVal.length) {
