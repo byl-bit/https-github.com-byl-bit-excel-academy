@@ -392,6 +392,8 @@ export async function POST(request: Request) {
                 const r = pendingResults[studentId];
                 if (!r) return null;
 
+                const statusVal = (submissionLevel === 'subject-pending' || submissionLevel === 'roster') ? 'pending' : 'draft';
+
                 // Map to database schema (snake_case)
                 return {
                     student_id: studentId,
@@ -407,7 +409,7 @@ export async function POST(request: Request) {
                     conduct: r.conduct || null,
                     result: r.result || null,
                     promoted_or_detained: r.promoted_or_detained || r.promotedOrDetained || null,
-                    status: r.status || resultStatusValue,
+                    status: r.status || statusVal,
                     submission_level: r.submission_level || r.submissionLevel || submissionLevel,
                     submitted_by: actorId,
                     submitted_at: r.submitted_at || new Date().toISOString(),
