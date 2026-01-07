@@ -158,4 +158,29 @@ const generateMockResults = (): StudentResult[] => {
 
 export const MOCK_RESULTS: StudentResult[] = generateMockResults();
 
-export const MOCK_ANNOUNCEMENTS: Announcement[] = [];
+export const MOCK_ANNOUNCEMENTS: Announcement[] = [
+    {
+        id: 'ann-1',
+        title: 'Welcome to the New Academic Semester!',
+        body: 'We are excited to welcome all students back for a successful and productive semester. Please check your schedule in the student portal.',
+        date: new Date().toISOString(),
+        type: 'general',
+        audience: 'all'
+    },
+    {
+        id: 'ann-2',
+        title: 'Upcoming Science Fair 2025',
+        body: 'Join us for our annual school science fair next Friday. Students from all grades are encouraged to showcase their projects!',
+        date: new Date(Date.now() + 86400000 * 7).toISOString(),
+        type: 'event',
+        audience: 'all'
+    },
+    {
+        id: 'ann-3',
+        title: 'Academic Excellence Awards Ceremony',
+        body: 'The awards ceremony for exceptional academic performance will be held next month in the school assembly hall.',
+        date: new Date(Date.now() + 86400000 * 30).toISOString(),
+        type: 'academic',
+        audience: 'all'
+    }
+];

@@ -32,11 +32,18 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
 
                 const res = await fetch(url, { headers });
                 const data = await res.json();
-                if (Array.isArray(data)) {
+                if (Array.isArray(data) && data.length > 0) {
                     setAnnouncements(data);
+                } else {
+                    const { MOCK_ANNOUNCEMENTS } = await import('@/lib/mockData');
+                    setAnnouncements(MOCK_ANNOUNCEMENTS as any);
                 }
             } catch (error) {
                 console.error('Failed to fetch announcements:', error);
+                try {
+                    const { MOCK_ANNOUNCEMENTS } = await import('@/lib/mockData');
+                    setAnnouncements(MOCK_ANNOUNCEMENTS as any);
+                } catch (e) { }
             } finally {
                 setLoading(false);
             }

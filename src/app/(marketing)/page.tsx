@@ -166,11 +166,16 @@ function HomeAnnouncements() {
     fetch('/api/announcements?limit=3')
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setAnnouncements(data);
+        } else {
+          // Fallback to mock data if DB is empty
+          import("@/lib/mockData").then(m => setAnnouncements(m.MOCK_ANNOUNCEMENTS.slice(0, 3)));
         }
       })
-      .catch(console.error)
+      .catch(() => {
+        import("@/lib/mockData").then(m => setAnnouncements(m.MOCK_ANNOUNCEMENTS.slice(0, 3)));
+      })
       .finally(() => setLoading(false));
   }, []);
 

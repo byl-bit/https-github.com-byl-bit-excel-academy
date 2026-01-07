@@ -24,8 +24,9 @@ export async function GET(request: Request) {
     }
 
     if (role && role !== 'admin') {
-        // Filter by audience: 'all' or specific role
-        query = query.or(`audience.eq.all,audience.eq.${role === 'student' ? 'students' : 'teachers'}`);
+        const targetAudience = role === 'student' ? 'students' : 'teachers';
+        // Match 'all', the specific role, OR null (for legacy/unassigned announcements)
+        query = query.or(`audience.eq.all,audience.eq.${targetAudience},audience.is.null`);
     }
 
     const { data, error } = await query;
