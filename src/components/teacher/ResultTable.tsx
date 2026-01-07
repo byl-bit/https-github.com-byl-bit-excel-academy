@@ -271,6 +271,86 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
         }
     };
 
+    // Autosave logic
+    useEffect(() => {
+        const dirtyIds = Object.keys(tableMarks).filter(id => {
+            // Check if current marks differ from what we last saved or loaded from classResults
+            // But a simpler way is to just save if it's currently being edited or just changed
+            return true;
+        });
+
+        if (dirtyIds.length === 0) return;
+
+        const timer = setTimeout(() => {
+            // Only autosave rows that are not locked
+            const toSave = dirtyIds.filter(id => {
+                const student = students.find(s => String(s.id || s.student_id || s.studentId) === id);
+                if (!student) return false;
+                const { isLocked } = getRowInfo(student);
+                return !isLocked;
+            });
+
+            if (toSave.length > 0) {
+                // Batch autosave as draft
+                const batch: Record<string, any> = {};
+                toSave.forEach(sid => {
+                    const student = students.find(s => String(s.id || s.student_id || s.studentId) === sid);
+                    if (!student) return;
+
+                    const { total, average } = calculateRowStats(sid);
+                    const marks = tableMarks[sid] || {};
+                    const isPass = average >= 50;
+
+                    const subjectsArr = subjects.map(s => {
+                        if (isDynamic) {
+                            const assessments: Record<string, number> = {};
+                            let subTotal = 0;
+                            assessmentTypes.forEach((type: AssessmentType) => {
+                                const val = marks[`${s}__${type.id}`];
+                                if (val !== undefined && typeof val === 'number') {
+                                    assessments[type.id] = val;
+                                    subTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                                }
+                            });
+                            return { name: s, assessments, marks: Math.round(subTotal * 10) / 10 };
+                        } else {
+                            return { name: s, marks: marks[s] || 0 };
+                        }
+                    });
+
+                    batch[sid] = {
+                        studentId: student.studentId || student.student_id || sid,
+                        studentName: student.name || student.fullName || '',
+                        grade: student.grade,
+                        section: student.section,
+                        gender: normalizeGender(student.gender ?? student.sex ?? null) || null,
+                        rollNumber: student.rollNumber || null,
+                        subjects: subjectsArr,
+                        total: total,
+                        average: average,
+                        rank: 0,
+                        conduct: 'Satisfactory',
+                        result: isPass ? 'PASS' : 'FAIL',
+                        promotedOrDetained: isPass ? 'PROMOTED' : 'DETAINED',
+                        submissionLevel: 'subject-draft'
+                    };
+                });
+
+                fetch('/api/results', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-actor-role': String(user?.role || 'teacher'),
+                        'x-actor-id': String(user?.id || user?.teacherId || '')
+                    },
+                    body: JSON.stringify(batch)
+                }).catch(console.error);
+            }
+        }, 2000);
+
+        return () => clearTimeout(timer);
+    }, [tableMarks]);
+
     const handleMarkChange = (studentId: string, key: string, value: string, max: number = 100) => {
         // Allow empty string for clearing
         if (value === '') {
@@ -282,12 +362,8 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             return;
         }
 
-        // Parse as float but don't clamp immediately if it ends with a dot or is just a minus sign
-        // though we have min=0, so minus sign isn't needed.
         let num = parseFloat(value);
         if (isNaN(num)) return;
-
-        // Clamp value
         num = Math.min(max, Math.max(0, num));
 
         setTableMarks(prev => ({
@@ -368,7 +444,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     const sid = String(student.id || student.student_id || student.studentId || '');
                     const studentMarks: Record<string, number> = { ...(newMarksMap[sid] || {}) } as Record<string, number>;
                     headers.forEach((header, index) => {
-                        if (header !== 'StudentID' && header !== 'FullName' && header !== 'RollNumber') {
+                        if (header !== 'StudentID' && header !== 'FullName' && header !== 'RollNumber' && header !== 'Total' && header !== 'Average') {
                             const val = parseFloat(values[index]);
                             if (!isNaN(val)) {
                                 studentMarks[header] = val;
@@ -380,7 +456,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             }
 
             setTableMarks(newMarksMap);
-            success('Marks imported successfully! Review and click Submit.');
+            success('Marks imported and autosaving as draft...');
         };
         reader.readAsText(file);
     };
@@ -420,7 +496,6 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
 
         const isLocalEditing = editingRows.has(sid);
 
-        // Locked if overall is published/pending AND (we are homeroom OR the specific subject is locked)
         const isLocked = (((isPublished && !allowEditSubmitted) || (isPendingAdmin && !allowEditSubmitted))) &&
             !isLocalEditing &&
             (resStatus !== 'draft' && resStatus !== '') &&
@@ -439,19 +514,10 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                         </div>
                         <div>
                             <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">Result Entry</h3>
-                            <p className="text-xs text-slate-500 font-medium">Enter marks below. Total calculates automatically.</p>
+                            <p className="text-xs text-slate-500 font-medium">Drafts autosave every 2 seconds. Total calculates automatically.</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => handleSubmitRoster('subject-draft')}
-                            disabled={loadingFull}
-                            className="h-9 px-4 text-xs font-bold border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all flex items-center gap-2 shadow-sm rounded-lg"
-                        >
-                            <Save className="h-4 w-4" />
-                            Save Draft
-                        </Button>
                         {(settings?.allowTeacherEditAfterSubmission || classResults.some(r => r.status === 'draft')) && (
                             <Button
                                 variant="outline"
@@ -724,7 +790,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                         </table>
                     </div>
                 </div>
-            </Card>
+            </Card >
 
             <ConfirmDialog
                 open={confirmSubmit.open}
