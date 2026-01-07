@@ -10,16 +10,22 @@ const getString = (o: Record<string, unknown>, k: string) => {
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get('limit');
+    const role = request.headers.get('x-actor-role');
 
     const client = supabaseAdmin || supabase;
     let query = client
         .from('announcements')
-        .select('id, title, content, date, type, urgency, image_url, media, created_at')
+        .select('id, title, content, date, type, urgency, image_url, media, audience, created_at')
         .order('created_at', { ascending: false });
 
     if (limit) {
         const parsedLimit = parseInt(limit);
         if (!isNaN(parsedLimit)) query = query.limit(parsedLimit);
+    }
+
+    if (role && role !== 'admin') {
+        // Filter by audience: 'all' or specific role
+        query = query.or(`audience.eq.all,audience.eq.${role === 'student' ? 'students' : 'teachers'}`);
     }
 
     const { data, error } = await query;
@@ -38,6 +44,7 @@ export async function GET(request: Request) {
         const date = getString(item, 'date') || getString(item, 'created_at')?.split('T')[0] || new Date().toISOString().split('T')[0];
         const type = getString(item, 'type') || getString(item, 'urgency') || 'general';
         const imageUrl = getString(item, 'image_url') || getString(item, 'imageUrl') || null;
+        const audience = getString(item, 'audience') || 'all';
 
         // Process media array efficiently
         let mediaArr: Array<Record<string, any>> = [];
@@ -62,7 +69,7 @@ export async function GET(request: Request) {
             mediaArr = [{ type: 'image', url: imageUrl, name: null }];
         }
 
-        return { id, title, body: bodyContent, date, type, imageUrl, media: mediaArr };
+        return { id, title, body: bodyContent, date, type, imageUrl, media: mediaArr, audience };
     }).filter(Boolean);
 
     return NextResponse.json(mappedData);
@@ -92,13 +99,14 @@ export async function POST(request: Request) {
             const typeVal = getString(item, 'type') || undefined;
             const dateVal = getString(item, 'date') || undefined;
             const imageVal = getString(item, 'imageUrl') || getString(item, 'image_url') || undefined;
+            const audienceVal = getString(item, 'audience') || 'all';
 
             let mediaVal = item['media'];
             if (typeof mediaVal === 'string') {
                 try { mediaVal = JSON.parse(mediaVal || '[]'); } catch { mediaVal = undefined; }
             }
 
-            const payload: Record<string, any> = { title, content };
+            const payload: Record<string, any> = { title, content, audience: audienceVal };
             if (typeVal) { payload.urgency = typeVal; payload.type = typeVal; }
             if (dateVal) payload.date = dateVal;
             if (Array.isArray(mediaVal) && mediaVal.length) {
@@ -109,6 +117,7 @@ export async function POST(request: Request) {
 
             return payload;
         });
+
 
         const { error: insertError } = await client.from('announcements').insert(mappedAnnouncements);
         if (insertError) {

@@ -418,7 +418,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
         const isLocalEditing = editingRows.has(sid);
 
         // Locked if overall is published/pending AND (we are homeroom OR the specific subject is locked)
-        const isLocked = (isPublished || (isPendingAdmin && !allowEditSubmitted)) &&
+        const isLocked = (((isPublished && !allowEditSubmitted) || (isPendingAdmin && !allowEditSubmitted))) &&
             !isLocalEditing &&
             (resStatus !== 'draft' && resStatus !== '') &&
             (isHomeroomView || isSubjectLocked);
@@ -665,9 +665,21 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                                             Save
                                                         </Button>
                                                     ) : isPublished ? (
-                                                        <span className="text-[10px] font-black uppercase px-2 py-1 bg-green-100 text-green-700 rounded-lg shadow-sm border border-green-200">
-                                                            Published
-                                                        </span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-black uppercase px-2 py-1 bg-green-100 text-green-700 rounded-lg shadow-sm border border-green-200">
+                                                                Published
+                                                            </span>
+                                                            {allowEditSubmitted && (
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                    className="h-7 w-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                                                                    onClick={() => toggleEditRow(sid)}
+                                                                >
+                                                                    <Edit className="h-3 w-3" />
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                     ) : isPendingAdmin ? (
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-[10px] font-black uppercase px-2 py-1 bg-amber-100 text-amber-700 rounded-lg shadow-sm border border-amber-200">

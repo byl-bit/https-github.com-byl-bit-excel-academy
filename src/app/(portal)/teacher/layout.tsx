@@ -85,6 +85,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
         { id: 'dashboard', href: '/teacher', label: 'Overview', icon: LayoutDashboard, show: true },
         { id: 'subjects', href: '/teacher/subjects', label: 'Subject Portal', icon: BookOpen, show: hasAllocations },
         { id: 'homeroom', href: '/teacher/homeroom', label: 'Homeroom', icon: Users, show: isHomeroomTeacher },
+        { id: 'notifications', href: '/teacher/notifications', label: 'Notifications', icon: Bell, show: true },
         { id: 'attendance', href: '/teacher/attendance', label: 'Attendance', icon: CalendarCheck, show: true },
         { id: 'profile', href: '/teacher/profile', label: 'My Profile', icon: UserIcon, show: true },
     ];
@@ -93,7 +94,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
         {
             label: 'Home',
             icon: LayoutDashboard,
-            items: ['dashboard']
+            items: ['dashboard', 'notifications']
         },
         {
             label: 'Academic',

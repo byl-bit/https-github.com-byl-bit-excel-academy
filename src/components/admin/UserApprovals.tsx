@@ -292,6 +292,15 @@ export function UserApprovals({
                     >
                         Detailed Manager <ArrowRight className="ml-2 h-3 w-3" />
                     </Button>
+                    {/* Reject All Results */}
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors ml-2"
+                        onClick={() => onRejectAll?.('result')}
+                    >
+                        Reject All Results
+                    </Button>
                 </div>
 
                 <div className="glass-panel rounded-2xl overflow-hidden shadow-sm">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Calendar, Bell } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Announcement {
     id: string | number;
@@ -18,6 +19,7 @@ interface AnnouncementListProps {
 }
 
 export function AnnouncementList({ limit }: AnnouncementListProps) {
+    const { user } = useAuth() as any;
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -25,7 +27,10 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
         const fetchAnnouncements = async () => {
             try {
                 const url = limit ? `/api/announcements?limit=${limit}` : '/api/announcements';
-                const res = await fetch(url);
+                const headers: Record<string, string> = {};
+                if (user?.role) headers['x-actor-role'] = user.role;
+
+                const res = await fetch(url, { headers });
                 const data = await res.json();
                 if (Array.isArray(data)) {
                     setAnnouncements(data);
@@ -38,7 +43,7 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
         };
 
         fetchAnnouncements();
-    }, []);
+    }, [limit, user?.role]);
 
     if (loading) {
         return (

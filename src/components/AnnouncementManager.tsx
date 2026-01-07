@@ -29,7 +29,8 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
         body: '',
         type: 'general',
         imageUrl: '',
-        media: []
+        media: [],
+        audience: 'all'
     });
     const [uploading, setUploading] = useState(false);
 
@@ -103,7 +104,8 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
                 date: new Date().toISOString().split('T')[0],
                 type: (formData.type as any) || 'general',
                 imageUrl: formData.imageUrl,
-                media: formData.media || []
+                media: formData.media || [],
+                audience: (formData.audience as any) || 'all'
             };
             updatedList = [newAnnouncement, ...announcements];
         }
@@ -113,7 +115,7 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
 
         setIsDialogOpen(false);
         setEditingId(null);
-        setFormData({ title: '', body: '', type: 'general', imageUrl: '', media: [] });
+        setFormData({ title: '', body: '', type: 'general', imageUrl: '', media: [], audience: 'all' });
         setUploading(false);
 
         // Refresh to get server-generated IDs
@@ -245,6 +247,19 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
                                     </select>
                                 </div>
                                 <div className="space-y-2">
+                                    <Label htmlFor="audience">Audience</Label>
+                                    <select
+                                        id="audience"
+                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                        value={formData.audience}
+                                        onChange={(e) => setFormData({ ...formData, audience: e.target.value as any })}
+                                    >
+                                        <option value="all">All Users</option>
+                                        <option value="students">Students Only</option>
+                                        <option value="teachers">Teachers Only</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
                                     <Label htmlFor="body">Content</Label>
                                     <textarea
                                         id="body"
@@ -308,6 +323,9 @@ export function AnnouncementManager({ isAdmin = false, initialData }: Announceme
                                             item.type === 'event' ? 'bg-purple-100 text-purple-800' :
                                                 'bg-gray-100 text-gray-800'}`}>
                                         {item.type}
+                                    </span>
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                        {item.audience || 'all'}
                                     </span>
                                 </div>
                                 <p className="text-sm text-muted-foreground">{item.date}</p>

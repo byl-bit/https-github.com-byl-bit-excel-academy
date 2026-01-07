@@ -24,7 +24,7 @@ import { TeacherDirectory } from '@/components/admin/TeacherDirectory';
 import { LibraryManager } from '@/components/admin/LibraryManager';
 import { SettingsManager } from '@/components/admin/SettingsManager';
 import { ActivityLogs } from '@/components/admin/ActivityLogs';
-import { Notifications } from '@/components/admin/Notifications';
+import { Notifications } from '@/components/Notifications';
 import { SubjectAllocations } from '@/components/admin/SubjectAllocations';
 import { AnnouncementManager } from '@/components/AnnouncementManager';
 import { ResetApprovals } from '@/components/admin/ResetApprovals';
@@ -804,6 +804,32 @@ export default function AdminPage() {
         } catch (e) { notifyError('Bulk rejection failed'); }
     };
 
+    const handleRejectAllResults = async () => {
+        if (pendingResults.length === 0) return;
+        if (!confirm(`Are you sure you want to REJECT ALL ${pendingResults.length} pending result submissions? This cannot be undone.`)) return;
+
+        try {
+            const keys = pendingResults.map(r => r.key);
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+                'x-actor-role': 'admin',
+                'x-actor-id': user?.id || ''
+            };
+            const res = await fetch('/api/results', {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify({ reject: keys })
+            });
+            if (res.ok) {
+                logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Bulk Reject Results', category: 'result', details: `Rejected ${keys.length} result submissions` });
+                success(`Rejected ${keys.length} results`);
+                refresh(true);
+            }
+        } catch (e) { notifyError('Bulk rejection failed'); }
+    };
+
+
+
     return (
         <PortalSidebarLayout
             role="admin"
@@ -835,6 +861,7 @@ export default function AdminPage() {
                         pendingResults={pendingResults}
                         onRejectAll={(role) => {
                             if (role === 'student') handleRejectAllStudents();
+                            if (role === 'result') handleRejectAllResults();
                         }}
                         onApprove={handleApproveUser}
                         onReject={handleRejectUser}

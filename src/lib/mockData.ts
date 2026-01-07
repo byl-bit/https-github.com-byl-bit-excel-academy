@@ -69,6 +69,7 @@ export interface Announcement {
     type: 'general' | 'academic' | 'event';
     imageUrl?: string; // Backwards-compatible single image field
     media?: Array<{ type: 'image' | 'video'; url: string; name?: string | null }>;
+    audience?: 'all' | 'students' | 'teachers';
 }
 
 

@@ -16,6 +16,8 @@ export interface User {
     email: string;
     role: 'admin' | 'student' | 'teacher';
     status: 'active' | 'pending';
+    student_id: string;
+    key?: string;
     studentId?: string;
     teacherId?: string;
     grade?: string;
@@ -58,6 +60,7 @@ export interface Announcement {
     date: string;
     type: 'general' | 'academic' | 'event';
     imageUrl?: string;
+    audience?: 'all' | 'students' | 'teachers';
 }
 
 export function useAdminData() {

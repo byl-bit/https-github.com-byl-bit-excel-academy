@@ -69,7 +69,13 @@ export default function TeacherPage() {
 
                     if (usersRes.ok) {
                         const classStudents = await usersRes.json();
-                        setStudents(classStudents);
+                        // Sort A-Z by name
+                        const sortedStudents = [...classStudents].sort((a: any, b: any) => {
+                            const nameA = (a.name || a.fullName || '').toLowerCase();
+                            const nameB = (b.name || b.fullName || '').toLowerCase();
+                            return nameA.localeCompare(nameB);
+                        });
+                        setStudents(sortedStudents);
                     }
 
                     if (resRes.ok) {

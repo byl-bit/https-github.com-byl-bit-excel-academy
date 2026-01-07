@@ -18,6 +18,7 @@ export interface AssessmentType {
 }
 
 export interface PendingResult {
+    key?: string;
     student_id: string;
     studentId?: string;
     student_name?: string;
@@ -75,7 +76,7 @@ export interface Allocation {
     section?: string | number;
 }
 
-export interface Setting{
+export interface Setting {
     key: string;
     value: unknown;
 }
