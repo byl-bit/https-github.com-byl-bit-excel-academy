@@ -584,7 +584,7 @@ export function ResultsManager({
         setSubjectMarks({});
     };
 
-    const filteredResults = publishedResults.filter(r => {
+    const filteredResults = [...publishedResults, ...pendingResults].filter(r => {
         const matchesSearch = (r.studentName || '').toLowerCase().includes(search.toLowerCase()) ||
             (r.studentId || '').toLowerCase().includes(search.toLowerCase());
         const matchesGrade = filterGrade ? String(r.grade) === String(filterGrade) : true;
@@ -668,115 +668,118 @@ export function ResultsManager({
                                         </td>
                                     </tr>
                                 ) : (
-                                    data.slice((localPage - 1) * ITEMS_PER_PAGE, localPage * ITEMS_PER_PAGE).map((r, idx) => (
-                                        <tr key={idx} className="hover:bg-blue-50/40 transition-all duration-300 group">
-                                            {!isPending && (
+                                    data.slice((localPage - 1) * ITEMS_PER_PAGE, localPage * ITEMS_PER_PAGE).map((r, idx) => {
+                                        const rowIsPending = r.status === 'pending' || r.status === 'pending_admin' || r.status === 'subject-pending';
+                                        return (
+                                            <tr key={idx} className="hover:bg-blue-50/40 transition-all duration-300 group">
+                                                {!isPending && (
+                                                    <td className="py-5 px-6 text-center">
+                                                        <span className="text-xl font-black text-slate-400 group-hover:text-blue-600 transition-colors">#{r.rank || '-'}</span>
+                                                    </td>
+                                                )}
                                                 <td className="py-5 px-6 text-center">
-                                                    <span className="text-xl font-black text-slate-400 group-hover:text-blue-600 transition-colors">#{r.rank || '-'}</span>
+                                                    <span className="font-black text-slate-700">{r.rollNumber || r.roll_number || '-'}</span>
                                                 </td>
-                                            )}
-                                            <td className="py-5 px-6 text-center">
-                                                <span className="font-black text-slate-700">{r.rollNumber || r.roll_number || '-'}</span>
-                                            </td>
-                                            <td className="py-5 px-6">
-                                                <div className="font-black text-slate-800 text-base leading-tight group-hover:text-blue-700 transition-colors uppercase tracking-tight">{r.studentName}</div>
-                                                <div className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 flex items-center gap-2">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-                                                    ID: {r.studentId || r.student_id}
-                                                </div>
-                                            </td>
-                                            <td className="py-5 px-6 text-center">
-                                                <span className="inline-flex items-center px-3 py-1.5 rounded-xl bg-white text-slate-600 text-[10px] font-black uppercase tracking-widest border border-slate-100 shadow-xs group-hover:border-blue-100 group-hover:text-blue-600 transition-all">
-                                                    {r.grade} - {r.section}
-                                                </span>
-                                            </td>
-                                            <td className="py-5 px-6 text-center">
-                                                <span className={cn(
-                                                    "text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider",
-                                                    normalizeGender(r.gender || (r as any).sex) === 'M' ? "bg-blue-50 text-blue-600 border-blue-100" :
-                                                        normalizeGender(r.gender || (r as any).sex) === 'F' ? "bg-pink-50 text-pink-600 border-pink-100" :
-                                                            "bg-slate-50 text-slate-500 border-slate-100"
-                                                )}>
-                                                    {normalizeGender(r.gender || (r as any).sex) || '-'}
-                                                </span>
-                                            </td>
-                                            <td className="py-5 px-6 text-center">
-                                                <span className="font-black text-slate-700 text-lg">{r.total || 0}</span>
-                                            </td>
-                                            <td className="py-5 px-6 text-center bg-slate-100/30 group-hover:bg-blue-50/50 transition-colors">
-                                                <div className="relative inline-block">
-                                                    <span className={`text-xl font-black ${(r.average || 0) >= 50 ? 'text-emerald-600' : 'text-red-500'}`}>
-                                                        {(r.average || 0).toFixed(1)}
-                                                    </span>
-                                                    <span className="text-[10px] text-slate-400 ml-0.5 font-bold">%</span>
-                                                </div>
-                                            </td>
-                                            <td className="py-5 px-6 text-center">
-                                                <span className={`text-[10px] px-3 py-1.5 rounded-xl font-black tracking-widest uppercase shadow-sm border ${r.promotedOrDetained === 'PROMOTED'
-                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100 shadow-emerald-50/50'
-                                                    : 'bg-red-50 text-red-700 border-red-100 shadow-red-50/50'
-                                                    }`}>
-                                                    {r.promotedOrDetained || 'PENDING'}
-                                                </span>
-                                            </td>
-                                            <td className="py-5 px-6 text-right">
-                                                <div className="flex flex-col items-end gap-3">
-                                                    {isPending && (
-                                                        <div className="flex flex-wrap justify-end gap-1.5 max-w-[200px]">
-                                                            {(r.subjects || []).filter((s: Subject) => s.status === 'pending_admin').map((s: Subject) => (
-                                                                <Button
-                                                                    key={s.name}
-                                                                    size="sm"
-                                                                    variant="ghost"
-                                                                    className="h-7 text-[9px] font-black uppercase px-2.5 rounded-lg bg-blue-50/50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all transform hover:scale-105"
-                                                                    onClick={() => onApproveSubject((r as any).key, s.name)}
-                                                                >
-                                                                    Approve {s.name}
-                                                                </Button>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-                                                        {isPending ? (
-                                                            <>
-                                                                <Button size="icon" variant="ghost" className="h-9 w-9 text-emerald-600 hover:bg-emerald-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onApprovePending((r as any).key, r.studentName || (r as any).studentName)} title="Approve Student">
-                                                                    <CheckCircle className="h-5 w-5" />
-                                                                </Button>
-                                                                <Button size="icon" variant="ghost" className="h-9 w-9 text-red-600 hover:bg-red-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onRejectPending((r as any).key, r.studentName || (r as any).studentName)} title="Reject Student">
-                                                                    <XCircle className="h-5 w-5" />
-                                                                </Button>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Button size="icon" variant="ghost" className="h-9 w-9 text-blue-600 hover:bg-blue-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => handlePrintSingle(r as PublishedResult)} title="Print Report">
-                                                                    <Printer className="h-5 w-5" />
-                                                                </Button>
-                                                                {((r as PublishedResult).average ?? 0) >= 90 && (
-                                                                    <Button
-                                                                        size="icon"
-                                                                        variant="ghost"
-                                                                        className="h-9 w-9 text-amber-500 hover:bg-amber-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs"
-                                                                        onClick={() => generateAppreciationLetter(r as PublishedResult, String(settings?.principalName || 'Principal'))}
-                                                                        title="Generate Appreciation Letter"
-                                                                    >
-                                                                        <Award className="h-5 w-5" />
-                                                                    </Button>
-                                                                )}
-                                                                {onUnlock && (
-                                                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-amber-500 hover:bg-amber-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onUnlock((r as any).key || r.studentId || (r as any).student_id)} title="Unlock for teacher edit">
-                                                                        <Lock className="h-5 w-5" />
-                                                                    </Button>
-                                                                )}
-                                                                <Button size="icon" variant="ghost" className="h-9 w-9 text-red-500 hover:bg-red-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onDeletePublished((r as any).key || r.studentId || (r as any).student_id)} title="Delete Result">
-                                                                    <Trash2 className="h-5 w-5" />
-                                                                </Button>
-                                                            </>
-                                                        )}
+                                                <td className="py-5 px-6">
+                                                    <div className="font-black text-slate-800 text-base leading-tight group-hover:text-blue-700 transition-colors uppercase tracking-tight">{r.studentName}</div>
+                                                    <div className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 flex items-center gap-2">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+                                                        ID: {r.studentId || r.student_id}
                                                     </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+                                                </td>
+                                                <td className="py-5 px-6 text-center">
+                                                    <span className="inline-flex items-center px-3 py-1.5 rounded-xl bg-white text-slate-600 text-[10px] font-black uppercase tracking-widest border border-slate-100 shadow-xs group-hover:border-blue-100 group-hover:text-blue-600 transition-all">
+                                                        {r.grade} - {r.section}
+                                                    </span>
+                                                </td>
+                                                <td className="py-5 px-6 text-center">
+                                                    <span className={cn(
+                                                        "text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider",
+                                                        normalizeGender(r.gender || (r as any).sex) === 'M' ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                                            normalizeGender(r.gender || (r as any).sex) === 'F' ? "bg-pink-50 text-pink-600 border-pink-100" :
+                                                                "bg-slate-50 text-slate-500 border-slate-100"
+                                                    )}>
+                                                        {normalizeGender(r.gender || (r as any).sex) || '-'}
+                                                    </span>
+                                                </td>
+                                                <td className="py-5 px-6 text-center">
+                                                    <span className="font-black text-slate-700 text-lg">{r.total || 0}</span>
+                                                </td>
+                                                <td className="py-5 px-6 text-center bg-slate-100/30 group-hover:bg-blue-50/50 transition-colors">
+                                                    <div className="relative inline-block">
+                                                        <span className={`text-xl font-black ${(r.average || 0) >= 50 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                                            {(r.average || 0).toFixed(1)}
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-400 ml-0.5 font-bold">%</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-5 px-6 text-center">
+                                                    <span className={`text-[10px] px-3 py-1.5 rounded-xl font-black tracking-widest uppercase shadow-sm border ${r.promotedOrDetained === 'PROMOTED'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100 shadow-emerald-50/50'
+                                                        : 'bg-red-50 text-red-700 border-red-100 shadow-red-50/50'
+                                                        }`}>
+                                                        {rowIsPending ? 'PENDING' : (r.promotedOrDetained || 'PENDING')}
+                                                    </span>
+                                                </td>
+                                                <td className="py-5 px-6 text-right">
+                                                    <div className="flex flex-col items-end gap-3">
+                                                        {rowIsPending && (
+                                                            <div className="flex flex-wrap justify-end gap-1.5 max-w-[200px]">
+                                                                {(r.subjects || []).filter((s: Subject) => s.status === 'pending_admin').map((s: Subject) => (
+                                                                    <Button
+                                                                        key={s.name}
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className="h-7 text-[9px] font-black uppercase px-2.5 rounded-lg bg-blue-50/50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all transform hover:scale-105"
+                                                                        onClick={() => onApproveSubject((r as any).key, s.name)}
+                                                                    >
+                                                                        Approve {s.name}
+                                                                    </Button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                                                            {rowIsPending ? (
+                                                                <>
+                                                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-emerald-600 hover:bg-emerald-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onApprovePending((r as any).key, r.studentName || (r as any).studentName)} title="Approve Student">
+                                                                        <CheckCircle className="h-5 w-5" />
+                                                                    </Button>
+                                                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-red-600 hover:bg-red-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onRejectPending((r as any).key, r.studentName || (r as any).studentName)} title="Reject Student">
+                                                                        <XCircle className="h-5 w-5" />
+                                                                    </Button>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-blue-600 hover:bg-blue-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => handlePrintSingle(r as PublishedResult)} title="Print Report">
+                                                                        <Printer className="h-5 w-5" />
+                                                                    </Button>
+                                                                    {((r as PublishedResult).average ?? 0) >= 90 && (
+                                                                        <Button
+                                                                            size="icon"
+                                                                            variant="ghost"
+                                                                            className="h-9 w-9 text-amber-500 hover:bg-amber-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs"
+                                                                            onClick={() => generateAppreciationLetter(r as PublishedResult, String(settings?.principalName || 'Principal'))}
+                                                                            title="Generate Appreciation Letter"
+                                                                        >
+                                                                            <Award className="h-5 w-5" />
+                                                                        </Button>
+                                                                    )}
+                                                                    {onUnlock && (
+                                                                        <Button size="icon" variant="ghost" className="h-9 w-9 text-amber-500 hover:bg-amber-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onUnlock((r as any).key || r.studentId || (r as any).student_id)} title="Unlock for teacher edit">
+                                                                            <Lock className="h-5 w-5" />
+                                                                        </Button>
+                                                                    )}
+                                                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-red-500 hover:bg-red-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onDeletePublished((r as any).key || r.studentId || (r as any).student_id)} title="Delete Result">
+                                                                        <Trash2 className="h-5 w-5" />
+                                                                    </Button>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>

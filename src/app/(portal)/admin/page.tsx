@@ -769,6 +769,41 @@ export default function AdminPage() {
         </div>
     );
 
+    const handleRejectAllStudents = async () => {
+        const pendingStudents = users.filter(u => u.status === 'pending' && u.role === 'student');
+        if (pendingStudents.length === 0) return;
+        if (!confirm(`Are you sure you want to REJECT ALL ${pendingStudents.length} pending student applications? This cannot be undone.`)) return;
+
+        let successCount = 0;
+        try {
+            // Processing in batches of 5 to avoid overwhelming the server/browser
+            const processBatch = async (batch: any[]) => {
+                await Promise.all(batch.map(async (u) => {
+                    try {
+                        const headers: Record<string, string> = {
+                            'x-actor-role': 'admin',
+                            'x-actor-id': user?.id || ''
+                        };
+                        const query = String(u.id).startsWith('ST-') ? `?studentId=${encodeURIComponent(u.id)}` : `?id=${encodeURIComponent(u.id)}`;
+                        const res = await fetch(`/api/users${query}`, {
+                            method: 'DELETE',
+                            headers
+                        });
+                        if (res.ok) successCount++;
+                    } catch (e) { console.error(e); }
+                }));
+            };
+
+            for (let i = 0; i < pendingStudents.length; i += 5) {
+                await processBatch(pendingStudents.slice(i, i + 5));
+            }
+
+            logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Bulk Reject Students', category: 'user', details: `Rejected ${successCount} students` });
+            success(`Rejected ${successCount} applications`);
+            refresh(true);
+        } catch (e) { notifyError('Bulk rejection failed'); }
+    };
+
     return (
         <PortalSidebarLayout
             role="admin"
@@ -798,6 +833,9 @@ export default function AdminPage() {
                         pendingUsers={users.filter(u => u.status === 'pending')}
                         admissionApplications={admissions}
                         pendingResults={pendingResults}
+                        onRejectAll={(role) => {
+                            if (role === 'student') handleRejectAllStudents();
+                        }}
                         onApprove={handleApproveUser}
                         onReject={handleRejectUser}
                         onAcceptAdmission={handleAcceptAdmission}

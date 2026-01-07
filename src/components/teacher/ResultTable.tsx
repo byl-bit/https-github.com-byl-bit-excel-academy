@@ -314,10 +314,12 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                 headers.push(sub);
             }
         });
+        headers.push('Total', 'Average');
 
         const rows = students.map(student => {
             const sid = String(student.id || student.student_id || student.studentId || '');
             const marks = tableMarks[sid] || {};
+            const { total, average } = calculateRowStats(sid);
             const row = [String(student.studentId || ''), String(student.rollNumber || ''), String(student.name || student.fullName || '')];
             subjects.forEach(sub => {
                 if (isDynamic) {
@@ -330,6 +332,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     row.push(val !== undefined ? String(val) : '');
                 }
             });
+            row.push(String(total), String(average.toFixed(2)));
             return row;
         });
 
@@ -627,7 +630,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                             })}
                                             <td className="p-4 text-center">
                                                 <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-slate-100/80 font-black text-slate-700 text-sm border border-slate-200">
-                                                    {total}
+                                                    {Number.isInteger(total) ? total : total.toFixed(1)}
                                                 </span>
                                             </td>
                                             {isHomeroomView && (
