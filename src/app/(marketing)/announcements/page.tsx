@@ -85,8 +85,8 @@ export default function AnnouncementsPage() {
                                     const count = media.length;
                                     return (
                                         <div className={`mt-6 grid gap-4 ${count === 1 ? 'grid-cols-1' :
-                                                count === 2 ? 'grid-cols-2' :
-                                                    'grid-cols-2 md:grid-cols-3'
+                                            count === 2 ? 'grid-cols-2' :
+                                                'grid-cols-2 md:grid-cols-3'
                                             }`}>
                                             {media.map((m, idx) => (
                                                 <div key={idx} className={`rounded-xl overflow-hidden border shadow-sm bg-blue-50 ${count === 1 ? 'max-h-[500px]' : 'aspect-square'
@@ -99,7 +99,7 @@ export default function AnnouncementsPage() {
                                                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                                                         />
                                                     ) : (
-                                                        <video src={m.url} className="w-full h-full object-cover" controls />
+                                                        <video src={m.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
                                                     )}
                                                 </div>
                                             ))}

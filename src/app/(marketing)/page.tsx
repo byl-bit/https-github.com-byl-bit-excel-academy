@@ -208,12 +208,23 @@ function HomeAnnouncements() {
           <Card key={announcement.id} className="group hover:shadow-md transition-all duration-300 border-l-4 border-l-transparent hover:border-l-primary flex flex-col h-full">
             {(announcement.media && announcement.media.length > 0) ? (
               <div className="relative h-48 overflow-hidden rounded-t-lg bg-blue-50/50">
-                <NextImage
-                  src={announcement.media[0].url}
-                  alt={announcement.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {announcement.media[0].type === 'video' ? (
+                  <video
+                    src={announcement.media[0].url}
+                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  />
+                ) : (
+                  <NextImage
+                    src={announcement.media[0].url}
+                    alt={announcement.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                )}
                 {announcement.media.length > 1 && (
                   <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold rounded-md z-10">
                     +{announcement.media.length - 1} more
