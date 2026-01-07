@@ -115,8 +115,9 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             setSubmitStatus(prev => ({ ...prev, [studentId]: 'saving' }));
 
             const { total, average } = calculateRowStats(studentId);
-            const totalRounded = total;
-            const avgRounded = average;
+            // Professional precision handling: round to 1 decimal to match UI display
+            const totalRounded = Math.round(total * 10) / 10;
+            const avgRounded = Math.round(average * 10) / 10;
             const isPass = avgRounded >= 35;
 
             const subjectsArr = subjects.map(s => {
@@ -130,6 +131,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                             subTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
                         }
                     });
+                    // Individual subject marks also preserved at 1 decimal
                     return { name: s, assessments, marks: Math.round(subTotal * 10) / 10 };
                 } else {
                     return { name: s, marks: marks[s] || 0 };
@@ -137,7 +139,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             });
 
             const resultObj = {
-                studentId: student.studentId,
+                studentId: student.studentId || student.student_id || studentId,
                 studentName: student.name || student.fullName,
                 grade: student.grade,
                 section: student.section,
@@ -204,11 +206,25 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
         setLoadingFull(true);
         try {
             const batch: Record<string, unknown> = {};
+            const subjectStatus = level === 'subject-draft' ? 'draft' : 'pending';
+
+            // Mark all relevant rows as saving for UI feedback
+            const affectedIds: string[] = [];
+
             students.forEach(student => {
                 const sid = String(student.id || student.student_id || student.studentId);
-                const { total, average } = calculateRowStats(sid);
                 const marks = tableMarks[sid] || {};
-                const isPass = average >= 35;
+
+                // Only include students who have some marks entered (professional skip empty)
+                if (Object.keys(marks).length === 0) return;
+
+                affectedIds.push(sid);
+                const { total, average } = calculateRowStats(sid);
+
+                // Preservation of decimal precision (1 decimal place)
+                const totalRounded = Math.round(total * 10) / 10;
+                const avgRounded = Math.round(average * 10) / 10;
+                const isPass = avgRounded >= 35;
 
                 const subjectsArr = subjects.map(s => {
                     if (isDynamic) {
@@ -227,14 +243,6 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     }
                 });
 
-                const totalRounded = total;
-                const avgRounded = average;
-
-                // Use grading logic from lib for consistency
-                const resultStatus = calculatePassStatus(avgRounded);
-                const promoStatus = calculatePromotionStatus(resultStatus === 'PASS');
-                const conductRemark = calculateConduct(avgRounded);
-
                 batch[sid] = {
                     studentId: student.studentId || student.student_id || sid,
                     studentName: student.name || student.fullName || '',
@@ -246,11 +254,25 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     total: totalRounded,
                     average: avgRounded,
                     rank: 0,
-                    conduct: conductRemark,
-                    result: resultStatus,
-                    promotedOrDetained: promoStatus,
-                    submissionLevel: level
+                    conduct: calculateConduct(avgRounded),
+                    result: calculatePassStatus(avgRounded),
+                    promotedOrDetained: calculatePromotionStatus(calculatePassStatus(avgRounded) === 'PASS'),
+                    submissionLevel: level,
+                    actorId: user?.id || user?.teacherId
                 };
+            });
+
+            if (Object.keys(batch).length === 0) {
+                setLoadingFull(false);
+                notifyError('No marks found to submit.');
+                return;
+            }
+
+            // Set UI to saving state
+            setSubmitStatus(prev => {
+                const next = { ...prev };
+                affectedIds.forEach(id => { next[id] = 'saving'; });
+                return next;
             });
 
             const response = await fetch('/api/results', {
@@ -264,15 +286,31 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             });
 
             if (response.ok) {
-                success(level === 'subject-draft' ? 'Drafts saved successfully' : 'Marks submitted to Admin successfully!');
-                onRefresh();
-                setEditingRows(new Set());
+                // Set UI to saved state
+                setSubmitStatus(prev => {
+                    const next = { ...prev };
+                    affectedIds.forEach(id => { next[id] = 'saved'; });
+                    return next;
+                });
+
+                success(level === 'subject-draft' ? 'Drafts saved successfully' : 'Final roster submitted successfully!');
+
+                setTimeout(() => {
+                    onRefresh();
+                    setEditingRows(new Set());
+                    setSubmitStatus({});
+                }, 1500);
             } else {
-                notifyError('Failed to process submission');
+                setSubmitStatus(prev => {
+                    const next = { ...prev };
+                    affectedIds.forEach(id => { next[id] = 'error'; });
+                    return next;
+                });
+                notifyError('Failed to process batch submission');
             }
         } catch (e) {
             console.error(e);
-            notifyError('Error processing results');
+            notifyError('Critical error during batch processing');
         } finally {
             setLoadingFull(false);
         }

@@ -313,9 +313,9 @@ export async function POST(request: Request) {
                 }
 
                 const totalMarks = mergedSubjects.reduce((sum: number, s: Subject) => sum + (Number(s.marks) || 0), 0);
-                // Keep totals and averages with good precision
-                const totalRounded = Number(totalMarks.toFixed(2));
-                const average = Number((totalRounded / (mergedSubjects.length || 1)).toFixed(2));
+                // Keep totals and averages with 1-decimal precision as per school standard
+                const totalRounded = Math.round(totalMarks * 10) / 10;
+                const average = Math.round((totalRounded / (mergedSubjects.length || 1)) * 10) / 10;
                 const resultStatus = calculatePassStatus(average);
                 const promoStatus = calculatePromotionStatus(resultStatus === 'PASS');
                 const conductRemark = calculateConduct(average);
