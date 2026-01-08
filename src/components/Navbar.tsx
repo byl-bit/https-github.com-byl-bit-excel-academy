@@ -47,7 +47,7 @@ export function Navbar() {
                         <div className="h-10 w-10 sm:h-12 sm:w-12 relative hover:scale-105 transition-transform duration-300 rounded-full overflow-hidden border border-white/50 shadow-md bg-white p-0.5">
                             <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-cover" />
                         </div>
-                        {/* <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-blue-900">Excel Academy <span className="animate-santa">🎅</span></span>*/}
+                        <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-blue-900">Excel Academy {/*<span className="animate-santa">🎅</span>*/}</span>
                     </Link>
                     <div className="hidden md:flex gap-8 text-sm font-semibold text-slate-600">
                         <Link href="/" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">
