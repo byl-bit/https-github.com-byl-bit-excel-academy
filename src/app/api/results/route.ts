@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { logActivity } from '@/lib/utils/activityLog';
 import { calculateRanks } from '@/lib/utils/excelCalculations';
 import { calculatePassStatus, calculatePromotionStatus, calculateConduct } from '@/lib/utils/gradingLogic';
@@ -11,14 +11,15 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const role = request.headers.get('x-actor-role') || '';
         const actorId = request.headers.get('x-actor-id') || '';
+        const db = supabaseAdmin || supabase;
         const gradeFilter = searchParams.get('grade');
         const sectionFilter = searchParams.get('section');
         const studentIdFilter = searchParams.get('studentId');
         const limit = searchParams.get('limit');
 
         // Fetch published and pending results with wildcard to avoid schema mismatch errors
-        let publishedQuery = supabase.from('results').select('*');
-        let pendingQuery = supabase.from('results_pending').select('*');
+        let publishedQuery = db.from('results').select('*');
+        let pendingQuery = db.from('results_pending').select('*');
 
         if (gradeFilter) {
             publishedQuery = publishedQuery.eq('grade', gradeFilter);
@@ -58,8 +59,8 @@ export async function GET(request: Request) {
         }
 
         // Fetch allocations and users
-        const { data: allocations } = await supabase.from('allocations').select('id, teacher_id, grade, section') as { data: Allocation[] };
-        const { data: users } = await supabase.from('users').select('id, student_id, teacher_id, name, grade, section, gender, roll_number') as { data: User[] };
+        const { data: allocations } = await db.from('allocations').select('id, teacher_id, grade, section') as { data: Allocation[] };
+        const { data: users } = await db.from('users').select('id, student_id, teacher_id, name, grade, section, gender, roll_number') as { data: User[] };
 
         const resolveGradeSection = (entry: PendingResult | PublishedResult | undefined) => {
             if (!entry) return { grade: '', section: '' };
@@ -208,17 +209,18 @@ export async function POST(request: Request) {
         }
 
         const resultsObj = (body && typeof body === 'object') ? body : {};
+        const db = supabaseAdmin || supabase;
 
         // Fetch current data defensibly
-        const { data: currentResultsArr, error: curError } = await supabase.from('results').select('student_id, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained');
+        const { data: currentResultsArr, error: curError } = await db.from('results').select('*');
         if (curError) console.warn('Note: Some expected columns might be missing in "results" table:', curError.message);
 
-        const { data: pendingResultsArr, error: penError } = await supabase.from('results_pending').select('student_id, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained');
+        const { data: pendingResultsArr, error: penError } = await db.from('results_pending').select('*');
         if (penError) console.warn('Note: Some expected columns might be missing in "results_pending" table:', penError.message);
 
-        const { data: allocations } = await supabase.from('allocations').select('id, teacher_id, grade, section');
-        const { data: users } = await supabase.from('users').select('id, student_id, teacher_id, name, grade, section, gender, roll_number');
-        const { data: settingsArr } = await supabase.from('settings').select('key, value');
+        const { data: allocations } = await db.from('allocations').select('id, teacher_id, grade, section');
+        const { data: users } = await db.from('users').select('id, student_id, teacher_id, name, grade, section, gender, roll_number');
+        const { data: settingsArr } = await db.from('settings').select('key, value');
 
         const currentResults: Record<string, PublishedResult> = {};
         const pendingResults: Record<string, PendingResult> = {};
@@ -390,7 +392,7 @@ export async function POST(request: Request) {
                 const studentIds = pendingArray.map(p => p.student_id);
 
                 // Delete existing records first since student_id might not have a UNIQUE constraint
-                const { error: delError } = await supabase
+                const { error: delError } = await db
                     .from('results_pending')
                     .delete()
                     .in('student_id', studentIds);
@@ -400,13 +402,13 @@ export async function POST(request: Request) {
                     return NextResponse.json({ error: 'Failed to clear old pending results', details: delError.message }, { status: 500 });
                 }
 
-                const { error: insError } = await supabase
+                const { error: insError } = await db
                     .from('results_pending')
                     .insert(pendingArray);
 
                 if (insError) {
                     console.error('Teacher insert pending error:', insError);
-                    return NextResponse.json({ error: 'Failed to save results', details: insError.message }, { status: 500 });
+                    return NextResponse.json({ error: `Failed to save results: ${insError.message}`, details: insError.message }, { status: 500 });
                 }
 
                 logActivity({
@@ -493,13 +495,13 @@ export async function POST(request: Request) {
             // Use administrative delete/insert
             const studentIds = resultsToPublish.map(r => r.student_id);
 
-            const { error: delError } = await supabase.from('results').delete().in('student_id', studentIds);
+            const { error: delError } = await db.from('results').delete().in('student_id', studentIds);
             if (delError) {
                 console.error('Admin delete error:', delError);
                 return NextResponse.json({ error: 'Failed to clear old results', details: delError.message }, { status: 500 });
             }
 
-            const { error: insError } = await supabase.from('results').insert(resultsToPublish);
+            const { error: insError } = await db.from('results').insert(resultsToPublish);
             if (insError) {
                 console.error('Admin insert error:', insError);
                 return NextResponse.json({ error: 'Failed to publish results', details: insError.message }, { status: 500 });
@@ -517,7 +519,7 @@ export async function POST(request: Request) {
                     target_id: r.student_id,
                     target_name: r.student_name
                 }));
-                await supabase.from('notifications').insert(notifications);
+                await db.from('notifications').insert(notifications);
             } catch (nErr) {
                 console.error('Failed to create result notifications in POST:', nErr);
             }
@@ -541,15 +543,16 @@ export async function PUT(request: Request) {
         if (role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
         const body = await request.json();
+        const db = supabaseAdmin || supabase;
 
         // Fetch data defensibly
-        const { data: publishedArr, error: pubErr } = await supabase.from('results').select('*');
+        const { data: publishedArr, error: pubErr } = await db.from('results').select('*');
         if (pubErr) console.warn('Note: Using "*" fallback for "results" fetch. Error:', pubErr.message);
 
-        const { data: pendingArr, error: penErr } = await supabase.from('results_pending').select('*');
+        const { data: pendingArr, error: penErr } = await db.from('results_pending').select('*');
         if (penErr) console.warn('Note: Using "*" fallback for "results_pending" fetch. Error:', penErr.message);
 
-        const { data: settingsArr } = await supabase.from('settings').select('key, value');
+        const { data: settingsArr } = await db.from('settings').select('key, value');
 
         // Build settings map and assessmentTypes
         const settings: Record<string, unknown> = {};
@@ -620,20 +623,20 @@ export async function PUT(request: Request) {
             if (toPublish.length > 0) {
                 // Delete existing published results for these students before inserting
                 const studentIds = toPublish.map(r => r.student_id);
-                const { error: delError } = await supabase.from('results').delete().in('student_id', studentIds);
+                const { error: delError } = await db.from('results').delete().in('student_id', studentIds);
                 if (delError) {
                     console.error('Approval delete error:', delError);
                     return NextResponse.json({ error: 'Failed to clear old results', details: delError.message }, { status: 500 });
                 }
 
-                const { error: insError } = await supabase.from('results').insert(toPublish);
+                const { error: insError } = await db.from('results').insert(toPublish);
                 if (insError) {
                     console.error('Approval insert error:', insError);
                     return NextResponse.json({ error: 'Failed to publish approved results', details: insError.message }, { status: 500 });
                 }
 
                 // Remove from pending after successful publish
-                const { error: penDelError } = await supabase.from('results_pending').delete().in('student_id', body.approve);
+                const { error: penDelError } = await db.from('results_pending').delete().in('student_id', body.approve);
                 if (penDelError) {
                     console.error('Approval pending-delete error:', penDelError);
                     // Not fatal for the operation success since results are already published, but good to log
@@ -651,7 +654,7 @@ export async function PUT(request: Request) {
                         target_id: r.student_id,
                         target_name: r.student_name
                     }));
-                    await supabase.from('notifications').insert(notifications);
+                    await db.from('notifications').insert(notifications);
                 } catch (nErr) {
                     console.error('Failed to create result notifications in PUT:', nErr);
                 }
@@ -669,7 +672,7 @@ export async function PUT(request: Request) {
                     entry.subjects[subIndex].approvedBy = actorId;
                     entry.subjects[subIndex].approvedAt = new Date().toISOString();
 
-                    await supabase
+                    await db
                         .from('results_pending')
                         .update(entry)
                         .eq('student_id', studentKey);
@@ -680,13 +683,13 @@ export async function PUT(request: Request) {
         // Reject - Now sets status to draft instead of deleting, so teacher can see it's rejected/editable
         if (Array.isArray(body.reject)) {
             // Move back to draft status in pending table
-            await supabase
+            await db
                 .from('results_pending')
                 .update({ status: 'draft', updated_at: new Date().toISOString() })
                 .in('student_id', body.reject);
 
             // ALSO delete from the public results table so it disappears from the student portal
-            await supabase
+            await db
                 .from('results')
                 .delete()
                 .in('student_id', body.reject);
@@ -699,12 +702,12 @@ export async function PUT(request: Request) {
                     const entry = published[key];
                     // Move back to results_pending as draft
                     const { published_at, approved_at, approved_by, ...rest } = entry as any;
-                    await supabase.from('results_pending').insert({
+                    await db.from('results_pending').insert({
                         ...rest,
                         status: 'draft',
                         updated_at: new Date().toISOString()
                     });
-                    await supabase.from('results').delete().eq('student_id', key);
+                    await db.from('results').delete().eq('student_id', key);
                 }
             }
         }
@@ -712,10 +715,10 @@ export async function PUT(request: Request) {
         // Delete published
         if (Array.isArray(body.deletePublished)) {
             // Delete from published results
-            await supabase.from('results').delete().in('student_id', body.deletePublished);
+            await db.from('results').delete().in('student_id', body.deletePublished);
 
             // ALSO delete from pending results to ensure it disappears everywhere
-            await supabase.from('results_pending').delete().in('student_id', body.deletePublished);
+            await db.from('results_pending').delete().in('student_id', body.deletePublished);
 
             logActivity({
                 userId: actorId,
