@@ -62,7 +62,7 @@ export function PortalSidebarLayout({
                             <img src="/school-logo-new.png" alt="Excel Academy" className="h-full w-full object-cover" />
                         </div>
                         <div>
-                            <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">EXCEL <span className="animate-santa">🎅</span></h1>
+                            <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">EXCEL {/*<span className="animate-santa">🎅</span>*/}</h1>
                             <p className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.2em] leading-none mt-1.5 opacity-90">ACADEMY</p>
                         </div>
                     </div>
