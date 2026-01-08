@@ -20,7 +20,12 @@ export async function GET() {
             return NextResponse.json([]);
         }
 
-        return NextResponse.json(data || []);
+        return new Response(JSON.stringify(data || []), {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=60'
+            }
+        });
     } catch (e) {
         console.error('API: Exception fetching resources:', e);
         return NextResponse.json([]);

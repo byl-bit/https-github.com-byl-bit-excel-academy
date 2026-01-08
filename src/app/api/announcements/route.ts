@@ -85,7 +85,12 @@ export async function GET(request: Request) {
         return { id, title, body: bodyContent, date, type, imageUrl, media: mediaArr, audience };
     }).filter(Boolean);
 
-    return NextResponse.json(mappedData);
+    return new Response(JSON.stringify(mappedData), {
+        headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=50'
+        }
+    });
 }
 
 export async function POST(request: Request) {

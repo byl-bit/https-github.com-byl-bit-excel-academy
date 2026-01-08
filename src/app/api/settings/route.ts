@@ -22,7 +22,7 @@ export async function GET() {
         });
     }
 
-    // If assessmentTypes is missing or empty, inject sane defaults and persist them
+    // Inject defaults into the object without blocking on database writes
     const defaultAssessments = [
         { id: 'test1', label: 'Test', weight: 10, maxMarks: 100 },
         { id: 'mid', label: 'Mid Exam', weight: 15, maxMarks: 100 },
@@ -31,38 +31,20 @@ export async function GET() {
         { id: 'final', label: 'Final Exam', weight: 60, maxMarks: 100 }
     ];
 
-    try {
-        const current = settings['assessmentTypes'];
-        // Only inject defaults if the setting is COMPLETELY missing/null.
-        // If it's an empty array, it means the user intentionally cleared it.
-        if (current === undefined || current === null) {
-            await supabase.from('settings').upsert({ key: 'assessmentTypes', value: defaultAssessments });
-            settings['assessmentTypes'] = defaultAssessments;
-        }
-
-        // Inject default signature and letterhead settings if missing
-        if (!settings['principalName']) {
-            await supabase.from('settings').upsert({ key: 'principalName', value: 'Principal' });
-            settings['principalName'] = 'Principal';
-        }
-        if (!settings['homeroomName']) {
-            await supabase.from('settings').upsert({ key: 'homeroomName', value: 'Class Teacher' });
-            settings['homeroomName'] = 'Class Teacher';
-        }
-        if (!settings['letterheadUrl']) {
-            // Default empty string; admins can configure a URL later
-            await supabase.from('settings').upsert({ key: 'letterheadUrl', value: '' });
-            settings['letterheadUrl'] = '';
-        }
-        if (settings['allowLibraryDownload'] === undefined || settings['allowLibraryDownload'] === null) {
-            await supabase.from('settings').upsert({ key: 'allowLibraryDownload', value: false });
-            settings['allowLibraryDownload'] = false;
-        }
-    } catch (injectErr) {
-        console.warn('Failed to inject default settings:', injectErr);
+    if (settings['assessmentTypes'] === undefined || settings['assessmentTypes'] === null) {
+        settings['assessmentTypes'] = defaultAssessments;
     }
+    if (!settings['principalName']) settings['principalName'] = 'Principal';
+    if (!settings['homeroomName']) settings['homeroomName'] = 'Class Teacher';
+    if (settings['letterheadUrl'] === undefined) settings['letterheadUrl'] = '';
+    if (settings['allowLibraryDownload'] === undefined) settings['allowLibraryDownload'] = false;
 
-    return NextResponse.json(settings);
+    return new Response(JSON.stringify(settings), {
+        headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120'
+        }
+    });
 }
 
 export async function POST(request: Request) {

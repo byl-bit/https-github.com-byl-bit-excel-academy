@@ -40,13 +40,18 @@ export async function GET(request: Request) {
             pendingQuery = pendingQuery.limit(l);
         }
 
-        const [publishedRes, pendingRes] = await Promise.all([
+        // Start fetching results in parallel with other common data
+        const [publishedRes, pendingRes, allocationsRes, usersRes] = await Promise.all([
             publishedQuery,
-            pendingQuery
+            pendingQuery,
+            role !== 'admin' ? db.from('allocations').select('id, teacher_id, grade, section') : Promise.resolve({ data: [] }),
+            role !== 'admin' ? db.from('users').select('id, student_id, teacher_id, name, grade, section, gender, roll_number') : Promise.resolve({ data: [] })
         ]);
 
         const published = publishedRes.data;
         const pending = pendingRes.data;
+        const allocations = (allocationsRes as any).data || [];
+        const users = (usersRes as any).data || [];
 
         const publishedObj: Record<string, PublishedResult> = {};
         const pendingObj: Record<string, PendingResult> = {};
@@ -54,19 +59,22 @@ export async function GET(request: Request) {
         (published || []).forEach((r) => { const rr = r as PublishedResult; publishedObj[String(rr.student_id)] = rr; });
         (pending || []).forEach((r) => { const rr = r as PendingResult; pendingObj[String(rr.student_id)] = rr; });
 
-        if (role === 'admin' || !role) {
-            return NextResponse.json({ published: publishedObj, pending: pendingObj });
-        }
+        // Build standard headers for performance
+        const headers = {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store, max-age=0, must-revalidate',
+            'X-Response-Time': `${Date.now()}`
+        };
 
-        // Fetch allocations and users
-        const { data: allocations } = await db.from('allocations').select('id, teacher_id, grade, section') as { data: Allocation[] };
-        const { data: users } = await db.from('users').select('id, student_id, teacher_id, name, grade, section, gender, roll_number') as { data: User[] };
+        if (role === 'admin' || !role) {
+            return new Response(JSON.stringify({ published: publishedObj, pending: pendingObj }), { headers });
+        }
 
         const resolveGradeSection = (entry: PendingResult | PublishedResult | undefined) => {
             if (!entry) return { grade: '', section: '' };
             if (entry.grade && entry.section) return { grade: String(entry.grade), section: String(entry.section) };
             if (entry.student_id) {
-                const s = (users || []).find(u => u.student_id === entry.student_id || u.id === entry.student_id);
+                const s = users.find((u: any) => u.student_id === entry.student_id || u.id === entry.student_id);
                 if (s) return { grade: String(s.grade), section: String(s.section) };
             }
             return { grade: '', section: '' };
@@ -77,7 +85,7 @@ export async function GET(request: Request) {
                 return NextResponse.json({ error: 'Teacher ID required' }, { status: 400 });
             }
 
-            const teacher = (users || []).find(u =>
+            const teacher = users.find((u: any) =>
                 u.id === actorId ||
                 u.teacher_id === actorId ||
                 String(u.id).toLowerCase() === String(actorId).toLowerCase() ||
@@ -85,17 +93,16 @@ export async function GET(request: Request) {
             );
 
             if (!teacher) {
-                // Return empty results instead of 403 - teacher might not have allocations yet
                 console.warn(`Teacher not found for actorId: ${actorId}`);
-                return NextResponse.json({ published: {}, pending: {} });
+                return new Response(JSON.stringify({ published: {}, pending: {} }), { headers });
             }
 
-            const teacherAllocations = (allocations || []).filter(a => a.teacher_id === teacher.id || a.teacher_id === teacher.teacher_id);
+            const teacherAllocations = allocations.filter((a: any) => a.teacher_id === teacher.id || a.teacher_id === teacher.teacher_id);
             const isHomeroomOfClass = (grade: string, section: string) =>
                 String(teacher.grade) === grade && String(teacher.section) === section;
 
             const isAllocated = (grade: string, section: string) => {
-                if (teacherAllocations.some(a => String(a.grade) === grade && String(a.section) === section)) return true;
+                if (teacherAllocations.some((a: any) => String(a.grade) === grade && String(a.section) === section)) return true;
                 if (isHomeroomOfClass(grade, section)) return true;
                 return false;
             };
@@ -114,21 +121,17 @@ export async function GET(request: Request) {
                 const entry = pendingObj[key];
                 const { grade, section } = resolveGradeSection(entry);
                 if (isAllocated(grade, section)) {
-                    // For homeroom teachers viewing their own class, show all pending results (they need to review before submitting roster)
-                    // For subject teachers, show all their pending results
                     filteredPending[key] = entry;
                 }
             });
 
-            return NextResponse.json({ published: filteredPublished, pending: filteredPending });
+            return new Response(JSON.stringify({ published: filteredPublished, pending: filteredPending }), { headers });
         }
 
         if (role === 'student') {
-            if (!actorId) {
-                return NextResponse.json({ error: 'Student ID required' }, { status: 400 });
-            }
+            if (!actorId) return NextResponse.json({ error: 'Student ID required' }, { status: 400 });
 
-            const student = (users || []).find(u =>
+            const student = users.find((u: any) =>
                 u.id === actorId ||
                 u.student_id === actorId ||
                 String(u.id).toLowerCase() === String(actorId).toLowerCase() ||
@@ -137,7 +140,7 @@ export async function GET(request: Request) {
 
             if (!student) {
                 console.warn(`Student not found for actorId: ${actorId}`);
-                return NextResponse.json({});
+                return new Response(JSON.stringify({}), { headers });
             }
 
             const found: Record<string, PublishedResult> = {};

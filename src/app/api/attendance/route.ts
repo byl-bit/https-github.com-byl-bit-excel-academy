@@ -8,6 +8,11 @@ export async function GET(request: Request) {
     const section = searchParams.get('section');
     const studentId = searchParams.get('studentId');
 
+    const headers = {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, s-maxage=5, stale-while-revalidate=30'
+    };
+
     if (studentId) {
         // Student view: get their attendance records
         const { data, error } = await supabase
@@ -18,10 +23,10 @@ export async function GET(request: Request) {
 
         if (error) {
             console.error('Supabase error fetching attendance:', error);
-            return NextResponse.json([]);
+            return new Response(JSON.stringify([]), { headers });
         }
 
-        return NextResponse.json(data || []);
+        return new Response(JSON.stringify(data || []), { headers });
     } else if (date && grade && section) {
         // Teacher view: specific day - need to join with users table to filter by grade/section
         const splitGrade = grade.split(' ')[1] || grade;
@@ -37,11 +42,11 @@ export async function GET(request: Request) {
 
         if (studentsError) {
             console.error('Supabase error fetching students:', studentsError);
-            return NextResponse.json([]);
+            return new Response(JSON.stringify([]), { headers });
         }
 
         if (!students || students.length === 0) {
-            return NextResponse.json([]);
+            return new Response(JSON.stringify([]), { headers });
         }
 
         // Get student IDs
@@ -51,19 +56,19 @@ export async function GET(request: Request) {
         const { data, error } = await supabase
             .from('attendance')
             .select('id, student_id, date, status, marked_by')
-            .eq('date', date) // Supabase should handle the date format conversion
+            .eq('date', date)
             .in('student_id', studentIds);
 
         if (error) {
             console.error('Supabase error fetching attendance:', error);
-            return NextResponse.json([]);
+            return new Response(JSON.stringify([]), { headers });
         }
 
-        return NextResponse.json(data || []);
+        return new Response(JSON.stringify(data || []), { headers });
     }
 
     // Default: return empty array if no valid query params
-    return NextResponse.json([]);
+    return new Response(JSON.stringify([]), { headers });
 }
 
 export async function POST(request: Request) {
