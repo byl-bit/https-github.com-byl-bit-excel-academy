@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Bell, BookOpen, AlertCircle, FileText, CheckCircle2, Clock, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/contexts/ToastContext';
+import Link from 'next/link';
 
 interface Notification {
     id: string;
@@ -213,6 +214,16 @@ export default function StudentNotifications() {
                                                     className="h-8 rounded-lg text-[10px] font-black uppercase tracking-wider bg-blue-600 text-white hover:bg-blue-700"
                                                 >
                                                     Mark as Read
+                                                </Button>
+                                            )}
+                                            {notif.category === 'result' && (
+                                                <Button variant="outline" size="sm" asChild className="h-8 rounded-lg text-[10px] font-black uppercase tracking-wider border-emerald-100 text-emerald-600 hover:bg-emerald-50">
+                                                    <Link href="/student/results">View Result</Link>
+                                                </Button>
+                                            )}
+                                            {notif.category === 'announcement' && (
+                                                <Button variant="outline" size="sm" asChild className="h-8 rounded-lg text-[10px] font-black uppercase tracking-wider border-amber-100 text-amber-600 hover:bg-amber-50">
+                                                    <Link href="/announcements">Read More</Link>
                                                 </Button>
                                             )}
                                             <Button

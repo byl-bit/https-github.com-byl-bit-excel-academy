@@ -15,6 +15,10 @@ export default function StudentDashboard() {
     const router = useRouter();
     const [academicSummary, setAcademicSummary] = useState<any>(null);
     const [attendanceCount, setAttendanceCount] = useState(0);
+    const [maintenanceMode, setMaintenanceMode] = useState(() => {
+        if (typeof window !== 'undefined') return localStorage.getItem('excel_academy_maintenance') === 'true';
+        return false;
+    });
 
     if (!user) return null;
 
@@ -53,6 +57,11 @@ export default function StudentDashboard() {
 
     useEffect(() => {
         fetchData();
+
+        // Listen for global sync from Navbar
+        const syncHandler = () => fetchData();
+        window.addEventListener('systemSync', syncHandler);
+        return () => window.removeEventListener('systemSync', syncHandler);
     }, [user]);
 
     useAutoRefresh(fetchData, {
@@ -122,19 +131,19 @@ export default function StudentDashboard() {
                     </CardHeader>
 
                     <div className="p-1">
-                        {academicSummary ? (
-                            <Link href="/student/results" className="block cursor-pointer">
+                        <Link href="/student/results" className="block cursor-pointer group/card">
+                            {academicSummary ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center p-4">
-                                    <div className="sm:col-span-1 flex flex-col items-center justify-center p-8 bg-blue-600 rounded-4xl shadow-xl shadow-blue-200 group-hover:scale-105 transition-transform duration-500">
+                                    <div className="sm:col-span-1 flex flex-col items-center justify-center p-8 bg-blue-600 rounded-4xl shadow-xl shadow-blue-200 group-hover/card:scale-105 transition-transform duration-500">
                                         <div className="text-6xl font-black text-white mb-1 leading-none">{academicSummary.average.toFixed(0)}<span className="text-2xl opacity-60">%</span></div>
                                         <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest">Global Avg</p>
                                     </div>
                                     <div className="sm:col-span-2 grid grid-cols-2 gap-4">
-                                        <div className="p-6 glass-panel bg-white/60 rounded-2xl shadow-xs group-hover:bg-white transition-colors">
+                                        <div className="p-6 glass-panel bg-white/60 rounded-2xl shadow-xs group-hover/card:bg-white transition-colors">
                                             <div className="text-3xl font-black text-slate-800 mb-1">#{academicSummary.rank}</div>
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Class Position</p>
                                         </div>
-                                        <div className="p-6 glass-panel bg-white/60 rounded-2xl shadow-xs group-hover:bg-white transition-colors">
+                                        <div className="p-6 glass-panel bg-white/60 rounded-2xl shadow-xs group-hover/card:bg-white transition-colors">
                                             <div className="text-3xl font-black text-slate-800 mb-1">{academicSummary.total}</div>
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Points Earned</p>
                                         </div>
@@ -151,16 +160,19 @@ export default function StudentDashboard() {
                                         </div>
                                     </div>
                                 </div>
-                            </Link>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-16 text-center">
-                                <div className="h-20 w-20 bg-slate-50 rounded-4xl flex items-center justify-center mb-6">
-                                    <FileText className="h-10 w-10 text-slate-300" />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-16 text-center group-hover/card:bg-slate-50/50 transition-colors rounded-3xl">
+                                    <div className="h-20 w-20 bg-slate-50 rounded-4xl flex items-center justify-center mb-6 group-hover/card:bg-white shadow-sm transition-colors">
+                                        <FileText className="h-10 w-10 text-slate-300" />
+                                    </div>
+                                    <h4 className="text-xl font-black text-slate-800 mb-2">No results found</h4>
+                                    <p className="text-sm font-medium text-slate-400 max-w-xs mx-auto">Your evaluations are currently being processed by the administration.</p>
+                                    <div className="mt-6 text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                        Check Grade Details <ArrowRight className="h-3 w-3" />
+                                    </div>
                                 </div>
-                                <h4 className="text-xl font-black text-slate-800 mb-2">No results found</h4>
-                                <p className="text-sm font-medium text-slate-400 max-w-xs mx-auto">Your evaluations are currently being processed by the administration.</p>
-                            </div>
-                        )}
+                            )}
+                        </Link>
                     </div>
                 </Card>
 

@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
-import { User, LogOut, GraduationCap, LayoutDashboard, Menu, X } from 'lucide-react';
+import { User, LogOut, GraduationCap, LayoutDashboard, Menu, X, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function Navbar() {
     const { user, logout, isAuthenticated } = useAuth();
@@ -13,6 +14,7 @@ export function Navbar() {
     const pathname = usePathname();
     const [teacherPortalEnabled, setTeacherPortalEnabled] = useState<boolean>(true);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
     const isHomePage = pathname === '/';
 
     useEffect(() => {
@@ -30,6 +32,12 @@ export function Navbar() {
     const handleLogout = () => {
         logout();
         router.push('/auth/login');
+    };
+
+    const handleSync = () => {
+        setIsSyncing(true);
+        window.dispatchEvent(new CustomEvent('systemSync'));
+        setTimeout(() => setIsSyncing(false), 1000);
     };
 
     const getDashboardLink = () => {
@@ -77,14 +85,28 @@ export function Navbar() {
                 <div className="flex items-center gap-2 sm:gap-4">
                     {isAuthenticated && user ? (
                         <>
-                            <div className="hidden md:flex items-center gap-3 text-sm bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
-                                <User className="h-4 w-4 text-blue-600" />
-                                <span className="font-bold text-blue-900 line-clamp-1">{user.fullName || user.name}</span>
+                            <div className="hidden md:flex items-center gap-3">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={cn(
+                                        "h-9 w-9 rounded-full text-blue-600 hover:bg-blue-50 transition-all shadow-sm",
+                                        isSyncing && "bg-blue-50"
+                                    )}
+                                    onClick={handleSync}
+                                    title="Sync All Data"
+                                >
+                                    <RefreshCw className={cn("h-4 w-4", isSyncing && "animate-spin")} />
+                                </Button>
+                                <div className="flex items-center gap-3 text-sm bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
+                                    <User className="h-4 w-4 text-blue-600" />
+                                    <span className="font-bold text-blue-900 line-clamp-1">{user.fullName || user.name}</span>
+                                </div>
+                                <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden xs:flex text-red-500 hover:text-red-700 hover:bg-red-50">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    Logout
+                                </Button>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden xs:flex text-red-500 hover:text-red-700 hover:bg-red-50">
-                                <LogOut className="mr-2 h-4 w-4" />
-                                Logout
-                            </Button>
                         </>
                     ) : (
                         <div className="hidden sm:flex items-center gap-3">

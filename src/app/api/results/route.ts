@@ -507,16 +507,25 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: 'Failed to publish results', details: insError.message }, { status: 500 });
             }
 
-            // Notify students
+            // Notify students - Resolve UUIDs for reliable delivery
             try {
+                const { data: userUUIDs } = await db.from('users')
+                    .select('id, student_id')
+                    .in('student_id', studentIds);
+
+                const uuidMap: Record<string, string> = {};
+                (userUUIDs || []).forEach(u => {
+                    if (u.student_id) uuidMap[u.student_id] = u.id;
+                });
+
                 const notifications = resultsToPublish.map(r => ({
                     type: 'result',
                     category: 'result',
-                    user_id: r.student_id,
+                    user_id: uuidMap[String(r.student_id)] || r.student_id, // Prefer UUID
                     user_name: r.student_name,
                     action: 'Results Published',
                     details: `Your results for Grade ${r.grade} have been published.`,
-                    target_id: r.student_id,
+                    target_id: uuidMap[String(r.student_id)] || r.student_id,
                     target_name: r.student_name
                 }));
                 await db.from('notifications').insert(notifications);
@@ -642,16 +651,25 @@ export async function PUT(request: Request) {
                     // Not fatal for the operation success since results are already published, but good to log
                 }
 
-                // Notify students
+                // Notify students - Resolve UUIDs first for reliable delivery
                 try {
+                    const { data: userUUIDs } = await db.from('users')
+                        .select('id, student_id')
+                        .in('student_id', studentIds);
+
+                    const uuidMap: Record<string, string> = {};
+                    (userUUIDs || []).forEach(u => {
+                        if (u.student_id) uuidMap[u.student_id] = u.id;
+                    });
+
                     const notifications = toPublish.map(r => ({
                         type: 'result',
                         category: 'result',
-                        user_id: r.student_id,
+                        user_id: uuidMap[String(r.student_id)] || r.student_id, // Prefer UUID
                         user_name: r.student_name,
                         action: 'Results Published',
                         details: `Your results for Grade ${r.grade} have been officially approved and published.`,
-                        target_id: r.student_id,
+                        target_id: uuidMap[String(r.student_id)] || r.student_id,
                         target_name: r.student_name
                     }));
                     await db.from('notifications').insert(notifications);
@@ -676,6 +694,29 @@ export async function PUT(request: Request) {
                         .from('results_pending')
                         .update(entry)
                         .eq('student_id', studentKey);
+
+                    // Notify student of individual subject approval
+                    try {
+                        const { data: studentUser } = await db.from('users')
+                            .select('id, name')
+                            .or(`student_id.eq.${studentKey},id.eq.${studentKey}`)
+                            .single();
+
+                        if (studentUser) {
+                            await db.from('notifications').insert({
+                                type: 'result',
+                                category: 'result',
+                                user_id: studentUser.id,
+                                user_name: studentUser.name,
+                                action: 'Subject Approved',
+                                details: `Your marks for ${subjectName} have been approved.`,
+                                target_id: studentUser.id,
+                                target_name: studentUser.name
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Failed to notify subject approval:', e);
+                    }
                 }
             }
         }

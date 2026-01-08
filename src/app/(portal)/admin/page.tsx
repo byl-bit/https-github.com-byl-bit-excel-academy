@@ -2,7 +2,7 @@
 
 import { PortalSidebarLayout } from '@/components/PortalSidebarLayout';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -52,6 +52,13 @@ export default function AdminPage() {
         if (typeof window !== 'undefined') return localStorage.getItem('excel_academy_maintenance') === 'true';
         return false;
     });
+
+    // Listen for global sync from Navbar
+    useEffect(() => {
+        const syncHandler = () => refresh(true);
+        window.addEventListener('systemSync', syncHandler);
+        return () => window.removeEventListener('systemSync', syncHandler);
+    }, [refresh]);
 
     // --- Actions ---
 
