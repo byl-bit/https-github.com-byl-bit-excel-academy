@@ -16,9 +16,9 @@ export async function GET(request: Request) {
         const studentIdFilter = searchParams.get('studentId');
         const limit = searchParams.get('limit');
 
-        // Fetch published and pending results with optional filters
-        let publishedQuery = supabase.from('results').select('student_id, student_name, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained, roll_number, gender, published_at');
-        let pendingQuery = supabase.from('results_pending').select('student_id, student_name, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained, roll_number, gender, status, submission_level');
+        // Fetch published and pending results with wildcard to avoid schema mismatch errors
+        let publishedQuery = supabase.from('results').select('*');
+        let pendingQuery = supabase.from('results_pending').select('*');
 
         if (gradeFilter) {
             publishedQuery = publishedQuery.eq('grade', gradeFilter);
@@ -209,9 +209,13 @@ export async function POST(request: Request) {
 
         const resultsObj = (body && typeof body === 'object') ? body : {};
 
-        // Fetch current data
-        const { data: currentResultsArr } = await supabase.from('results').select('student_id, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained');
-        const { data: pendingResultsArr } = await supabase.from('results_pending').select('student_id, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained, status');
+        // Fetch current data defensibly
+        const { data: currentResultsArr, error: curError } = await supabase.from('results').select('student_id, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained');
+        if (curError) console.warn('Note: Some expected columns might be missing in "results" table:', curError.message);
+
+        const { data: pendingResultsArr, error: penError } = await supabase.from('results_pending').select('student_id, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained');
+        if (penError) console.warn('Note: Some expected columns might be missing in "results_pending" table:', penError.message);
+
         const { data: allocations } = await supabase.from('allocations').select('id, teacher_id, grade, section');
         const { data: users } = await supabase.from('users').select('id, student_id, teacher_id, name, grade, section, gender, roll_number');
         const { data: settingsArr } = await supabase.from('settings').select('key, value');
@@ -538,9 +542,13 @@ export async function PUT(request: Request) {
 
         const body = await request.json();
 
-        // Fetch data
-        const { data: publishedArr } = await supabase.from('results').select('student_id, student_name, grade, section, roll_number, gender, subjects, total, average, rank, conduct, result, promoted_or_detained, status, submission_level, published_at, approved_by, approved_at');
-        const { data: pendingArr } = await supabase.from('results_pending').select('student_id, student_name, grade, section, roll_number, gender, subjects, total, average, rank, conduct, result, promoted_or_detained, status, submission_level, submitted_by, submitted_at');
+        // Fetch data defensibly
+        const { data: publishedArr, error: pubErr } = await supabase.from('results').select('*');
+        if (pubErr) console.warn('Note: Using "*" fallback for "results" fetch. Error:', pubErr.message);
+
+        const { data: pendingArr, error: penErr } = await supabase.from('results_pending').select('*');
+        if (penErr) console.warn('Note: Using "*" fallback for "results_pending" fetch. Error:', penErr.message);
+
         const { data: settingsArr } = await supabase.from('settings').select('key, value');
 
         // Build settings map and assessmentTypes
