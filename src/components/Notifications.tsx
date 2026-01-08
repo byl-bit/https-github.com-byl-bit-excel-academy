@@ -22,16 +22,47 @@ interface NotificationsProps {
     notifications: Notification[];
     onMarkRead?: (id: string) => Promise<void>;
     onDelete?: (id: string) => Promise<void>;
+    onMarkAllRead?: () => Promise<void>;
+    onDeleteAll?: () => Promise<void>;
 }
 
-export function Notifications({ notifications, onMarkRead, onDelete }: NotificationsProps) {
+export function Notifications({ notifications, onMarkRead, onDelete, onMarkAllRead, onDeleteAll }: NotificationsProps) {
+    const unreadCount = notifications.filter(n => !n.is_read).length;
+
     return (
         <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle className="flex items-center gap-2">
                     <Bell className="h-5 w-5 text-slate-700" />
                     Notifications
+                    {unreadCount > 0 && (
+                        <span className="ml-2 px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded-full">
+                            {unreadCount} new
+                        </span>
+                    )}
                 </CardTitle>
+                <div className="flex gap-2">
+                    {unreadCount > 0 && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-[10px] font-black uppercase tracking-widest border-blue-100 text-blue-600 hover:bg-blue-50"
+                            onClick={onMarkAllRead}
+                        >
+                            Read All
+                        </Button>
+                    )}
+                    {notifications.length > 0 && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-[10px] font-black uppercase tracking-widest border-red-100 text-red-600 hover:bg-red-50"
+                            onClick={onDeleteAll}
+                        >
+                            Clear All
+                        </Button>
+                    )}
+                </div>
             </CardHeader>
             <CardContent>
                 {notifications.length === 0 ? (

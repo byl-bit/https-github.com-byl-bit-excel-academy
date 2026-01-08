@@ -123,33 +123,35 @@ export default function StudentDashboard() {
 
                     <div className="p-1">
                         {academicSummary ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center p-4">
-                                <div className="sm:col-span-1 flex flex-col items-center justify-center p-8 bg-blue-600 rounded-4xl shadow-xl shadow-blue-200 group-hover:scale-105 transition-transform duration-500">
-                                    <div className="text-6xl font-black text-white mb-1 leading-none">{academicSummary.average.toFixed(0)}<span className="text-2xl opacity-60">%</span></div>
-                                    <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest">Global Avg</p>
-                                </div>
-                                <div className="sm:col-span-2 grid grid-cols-2 gap-4">
-                                    <div className="p-6 glass-panel bg-white/60 rounded-2xl shadow-xs group-hover:bg-white transition-colors">
-                                        <div className="text-3xl font-black text-slate-800 mb-1">#{academicSummary.rank}</div>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Class Position</p>
+                            <Link href="/student/results" className="block cursor-pointer">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center p-4">
+                                    <div className="sm:col-span-1 flex flex-col items-center justify-center p-8 bg-blue-600 rounded-4xl shadow-xl shadow-blue-200 group-hover:scale-105 transition-transform duration-500">
+                                        <div className="text-6xl font-black text-white mb-1 leading-none">{academicSummary.average.toFixed(0)}<span className="text-2xl opacity-60">%</span></div>
+                                        <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest">Global Avg</p>
                                     </div>
-                                    <div className="p-6 glass-panel bg-white/60 rounded-2xl shadow-xs group-hover:bg-white transition-colors">
-                                        <div className="text-3xl font-black text-slate-800 mb-1">{academicSummary.total}</div>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Points Earned</p>
-                                    </div>
-                                    <div className="col-span-2 p-5 glass-panel bg-emerald-50 border-emerald-100/50 rounded-2xl flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-8 w-8 rounded-xl bg-emerald-100 flex items-center justify-center">
-                                                <CheckCircle className="h-4 w-4 text-emerald-600" />
-                                            </div>
-                                            <span className="text-xs font-black text-emerald-800 uppercase tracking-widest">Final Status</span>
+                                    <div className="sm:col-span-2 grid grid-cols-2 gap-4">
+                                        <div className="p-6 glass-panel bg-white/60 rounded-2xl shadow-xs group-hover:bg-white transition-colors">
+                                            <div className="text-3xl font-black text-slate-800 mb-1">#{academicSummary.rank}</div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Class Position</p>
                                         </div>
-                                        <span className="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-emerald-600 text-white shadow-lg shadow-emerald-100">
-                                            {academicSummary.promotedOrDetained}
-                                        </span>
+                                        <div className="p-6 glass-panel bg-white/60 rounded-2xl shadow-xs group-hover:bg-white transition-colors">
+                                            <div className="text-3xl font-black text-slate-800 mb-1">{academicSummary.total}</div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Points Earned</p>
+                                        </div>
+                                        <div className="col-span-2 p-5 glass-panel bg-emerald-50 border-emerald-100/50 rounded-2xl flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-8 w-8 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                                    <CheckCircle className="h-4 w-4 text-emerald-600" />
+                                                </div>
+                                                <span className="text-xs font-black text-emerald-800 uppercase tracking-widest">Final Status</span>
+                                            </div>
+                                            <span className="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-emerald-600 text-white shadow-lg shadow-emerald-100">
+                                                {academicSummary.promotedOrDetained}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-16 text-center">
                                 <div className="h-20 w-20 bg-slate-50 rounded-4xl flex items-center justify-center mb-6">

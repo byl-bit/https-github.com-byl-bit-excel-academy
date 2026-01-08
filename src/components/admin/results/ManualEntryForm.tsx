@@ -118,6 +118,18 @@ export function ManualEntryForm({
         }
     };
 
+    const [filterGrade, setFilterGrade] = useState('');
+    const [filterSection, setFilterSection] = useState('');
+
+    const grades = Array.from(new Set(students.map(s => String(s.grade || '')))).sort();
+    const sections = Array.from(new Set(students.map(s => String(s.section || '')))).sort();
+
+    const filteredStudents = students.filter(s => {
+        const matchesGrade = !filterGrade || String(s.grade) === filterGrade;
+        const matchesSection = !filterSection || String(s.section) === filterSection;
+        return matchesGrade && matchesSection;
+    });
+
     return (
         <Card className="border-none shadow-xl glass-panel bg-linear-to-br from-white to-slate-50/50 overflow-hidden">
             <CardHeader className="p-8 border-b border-slate-100">
@@ -132,16 +144,40 @@ export function ManualEntryForm({
                 </div>
             </CardHeader>
             <CardContent className="p-8 space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="space-y-2">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Student Identity</Label>
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Grade Filter</Label>
+                        <select
+                            className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-100 outline-none cursor-pointer transition-all hover:border-indigo-300"
+                            value={filterGrade}
+                            onChange={e => setFilterGrade(e.target.value)}
+                        >
+                            <option value="">All Grades</option>
+                            {grades.map(g => <option key={g} value={g}>Grade {g}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Section Filter</Label>
+                        <select
+                            className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-100 outline-none cursor-pointer transition-all hover:border-indigo-300"
+                            value={filterSection}
+                            onChange={e => setFilterSection(e.target.value)}
+                        >
+                            <option value="">All Sections</option>
+                            {sections.map(s => <option key={s} value={s}>Section {s}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Student Selection</Label>
                         <select
                             className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-100 outline-none cursor-pointer transition-all hover:border-indigo-300"
                             value={selectedStudentId}
                             onChange={e => setSelectedStudentId(e.target.value)}
                         >
                             <option value="">Search Student...</option>
-                            {students.sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(s => (
+                            {filteredStudents.sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(s => (
                                 <option key={s.id} value={s.id}>{s.name} - {s.studentId || (s as any).student_id || 'No ID'}</option>
                             ))}
                         </select>

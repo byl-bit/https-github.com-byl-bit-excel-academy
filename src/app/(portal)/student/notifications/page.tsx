@@ -87,6 +87,45 @@ export default function StudentNotifications() {
         }
     };
 
+    const markAllRead = async () => {
+        try {
+            const res = await fetch(`/api/notifications`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-actor-role': 'student',
+                    'x-actor-id': user?.id || ''
+                },
+                body: JSON.stringify({ all: true })
+            });
+            if (res.ok) {
+                setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+                success("All notifications marked as read");
+            }
+        } catch (e) {
+            console.error('Failed to mark all read');
+        }
+    };
+
+    const deleteAllNotifications = async () => {
+        if (!confirm('Are you sure you want to clear all notifications?')) return;
+        try {
+            const res = await fetch(`/api/notifications?all=true`, {
+                method: 'DELETE',
+                headers: {
+                    'x-actor-role': 'student',
+                    'x-actor-id': user?.id || ''
+                }
+            });
+            if (res.ok) {
+                setNotifications([]);
+                success("All notifications cleared");
+            }
+        } catch (e) {
+            console.error('Failed to delete all notifications');
+        }
+    };
+
     const getIcon = (category: string) => {
         switch (category) {
             case 'library': return <BookOpen className="h-5 w-5 text-blue-500" />;
@@ -98,15 +137,39 @@ export default function StudentNotifications() {
 
     if (loading) return <div className="p-8 text-center text-slate-500 font-bold">Loading notifications...</div>;
 
+    const unreadCount = notifications.filter(n => !n.is_read).length;
+
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-10 animate-fade-in">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div>
                     <h1 className="text-4xl font-black text-slate-800 tracking-tight">System Notifications</h1>
                     <p className="text-slate-500 font-bold mt-1">Stay updated with the latest school activity.</p>
                 </div>
-                <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100 shadow-sm">
-                    <Bell className="h-6 w-6 text-blue-600" />
+                <div className="flex items-center gap-3">
+                    <div className="flex gap-2">
+                        {unreadCount > 0 && (
+                            <Button
+                                variant="outline"
+                                className="h-10 text-[10px] font-black uppercase tracking-widest border-blue-100 text-blue-600 hover:bg-blue-50 shadow-sm"
+                                onClick={markAllRead}
+                            >
+                                Read All
+                            </Button>
+                        )}
+                        {notifications.length > 0 && (
+                            <Button
+                                variant="outline"
+                                className="h-10 text-[10px] font-black uppercase tracking-widest border-red-100 text-red-600 hover:bg-red-50 shadow-sm"
+                                onClick={deleteAllNotifications}
+                            >
+                                Clear All
+                            </Button>
+                        )}
+                    </div>
+                    <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100 shadow-sm">
+                        <Bell className="h-6 w-6 text-blue-600" />
+                    </div>
                 </div>
             </div>
 

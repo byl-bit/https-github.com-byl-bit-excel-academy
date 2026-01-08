@@ -173,17 +173,34 @@ export default function AdminPage() {
                 'x-actor-role': 'admin',
                 'x-actor-id': user?.id || ''
             };
+
+            // If it's a single result object, wrap it in a map as the API expects
+            const payload = result.studentId ? { [result.studentId]: result } : result;
+
             const res = await fetch('/api/results', {
                 method: 'POST',
                 headers,
-                body: JSON.stringify({ [result.studentId]: result })
+                body: JSON.stringify(payload)
             });
             if (res.ok) {
-                logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Published Result', category: 'result', details: `Manually published result for ${result.studentName}` });
+                const details = result.studentId
+                    ? `Manually published result for ${result.studentName || result.studentId}`
+                    : `Bulk published ${Object.keys(result).length} results`;
+
+                logActivity({
+                    userId: user?.id || '',
+                    userName: user?.name || 'Admin',
+                    action: 'Published Result',
+                    category: 'result',
+                    details
+                });
                 refresh(true);
-                success('Result published successfully');
+                success(result.studentId ? 'Result published successfully' : 'Results published successfully');
             }
-        } catch (e) { notifyError('Failed to publish'); }
+        } catch (e) {
+            console.error('Publish error:', e);
+            notifyError('Failed to publish');
+        }
     };
 
     const handleApprovePendingResult = async (key: string, name: string) => {
@@ -991,6 +1008,44 @@ export default function AdminPage() {
                             } catch (e) {
                                 console.error('Failed to delete notification', e);
                                 notifyError('Failed to delete notification');
+                            }
+                        }}
+                        onMarkAllRead={async () => {
+                            try {
+                                const res = await fetch('/api/notifications', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'x-actor-role': 'admin',
+                                        'x-actor-id': user?.id || ''
+                                    },
+                                    body: JSON.stringify({ all: true })
+                                });
+                                if (res.ok) {
+                                    success('All notifications marked read');
+                                    refresh();
+                                }
+                            } catch (e) {
+                                console.error('Failed to mark all as read', e);
+                            }
+                        }}
+                        onDeleteAll={async () => {
+                            if (!confirm('Are you sure you want to clear all notifications?')) return;
+                            try {
+                                const res = await fetch('/api/notifications?all=true', {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'x-actor-role': 'admin',
+                                        'x-actor-id': user?.id || ''
+                                    }
+                                });
+                                if (res.ok) {
+                                    success('All notifications cleared');
+                                    refresh();
+                                }
+                            } catch (e) {
+                                console.error('Failed to clear notifications', e);
+                                notifyError('Failed to clear notifications');
                             }
                         }}
                     />

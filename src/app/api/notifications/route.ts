@@ -40,9 +40,24 @@ export async function DELETE(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
-        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+        const all = searchParams.get('all');
+        const actorRole = request.headers.get('x-actor-role') || '';
+        const actorId = request.headers.get('x-actor-id') || '';
 
-        const { error } = await supabase.from('notifications').delete().eq('id', id);
+        if (!id && all !== 'true') return NextResponse.json({ error: 'ID or all=true required' }, { status: 400 });
+
+        let query = supabase.from('notifications').delete();
+
+        if (all === 'true') {
+            if (actorRole !== 'admin') {
+                if (!actorId) return NextResponse.json({ error: 'Actor ID required' }, { status: 400 });
+                query = query.or(`user_id.eq.${actorId},target_id.eq.${actorId}`);
+            }
+        } else {
+            query = query.eq('id', id);
+        }
+
+        const { error } = await query;
         if (error) throw error;
 
         return NextResponse.json({ success: true });
@@ -61,26 +76,28 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        if (!body || !body.id) return NextResponse.json({ error: 'Notification id required' }, { status: 400 });
+        if (!body || (!body.id && !body.all)) return NextResponse.json({ error: 'Notification id or all:true required' }, { status: 400 });
 
         let query = supabase.from('notifications')
-            .update({ is_read: true })
-            .eq('id', body.id);
+            .update({ is_read: true });
 
-        // Security: if not admin, ensure they own or are the target of this notification
-        if (actorRole !== 'admin') {
-            if (!actorId) return NextResponse.json({ error: 'Actor ID required' }, { status: 400 });
-            query = query.or(`user_id.eq.${actorId},target_id.eq.${actorId}`);
+        if (body.all) {
+            if (actorRole !== 'admin') {
+                if (!actorId) return NextResponse.json({ error: 'Actor ID required' }, { status: 400 });
+                query = query.or(`user_id.eq.${actorId},target_id.eq.${actorId}`);
+            }
+        } else {
+            query = query.eq('id', body.id);
         }
 
-        const { data, error } = await query.select().single();
+        const { data, error } = await query;
 
         if (error) {
             console.error('Failed to mark notification read:', error);
             return NextResponse.json({ error: 'Failed to update notification' }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, notification: data });
+        return NextResponse.json({ success: true });
     } catch (e) {
         console.error('POST /api/notifications error', e);
         return NextResponse.json({ error: 'Failed to update notification' }, { status: 500 });

@@ -175,7 +175,7 @@ export default function StudentResultsPage() {
         const colWidth = 30;
         if (assessments.length > 0) {
             assessments.forEach((a: any) => {
-                doc.text(a.label, xPos, y + 2, { align: 'center' });
+                doc.text(`${a.label} (${a.maxMarks})`, xPos, y + 2, { align: 'center' });
                 xPos += colWidth;
             });
             doc.text("TOTAL", xPos, y + 2, { align: 'center' });
@@ -366,7 +366,10 @@ export default function StudentResultsPage() {
                                         <tr>
                                             <th className="px-6 py-4 font-bold">Subject</th>
                                             {assessmentTypes.length > 0 && assessmentTypes.map((type: any) => (
-                                                <th key={type.id} className="px-4 py-4 font-bold text-center text-xs uppercase">{type.label}</th>
+                                                <th key={type.id} className="px-4 py-4 font-bold text-center text-xs uppercase">
+                                                    {type.label}
+                                                    <span className="block text-[8px] opacity-60">({type.maxMarks})</span>
+                                                </th>
                                             ))}
                                             <th className="px-6 py-4 font-bold text-right">Total Marks</th>
                                             <th className="px-6 py-4 font-bold text-right">Grade</th>

@@ -374,9 +374,9 @@ export function ResultsManager({
 
             {view === 'subject' && (
                 <div className="space-y-6 animate-in fade-in duration-300">
-                    <div className="glass-panel p-6 rounded-3xl bg-white flex items-center gap-6">
-                        <div className="flex-1 space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Analysis Subject</label>
+                    <div className="glass-panel p-6 rounded-3xl bg-white grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Analysis Subject</label>
                             <select
                                 className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
                                 value={selectedSubject}
@@ -386,7 +386,7 @@ export function ResultsManager({
                                 {subjects.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
-                        <div className="flex-1 space-y-1">
+                        <div className="space-y-1">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Focus Grade</label>
                             <select
                                 className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
@@ -397,6 +397,29 @@ export function ResultsManager({
                                 {grades.map(g => <option key={g} value={g}>Grade {g}</option>)}
                             </select>
                         </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Section</label>
+                            <select
+                                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
+                                value={filterSection}
+                                onChange={e => setFilterSection(e.target.value)}
+                            >
+                                <option value="">All Sections</option>
+                                {sections.map(s => <option key={s} value={s}>Section {s}</option>)}
+                            </select>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Gender</label>
+                            <select
+                                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
+                                value={filterGender}
+                                onChange={e => setFilterGender(e.target.value)}
+                            >
+                                <option value="">All Genders</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
                     </div>
 
                     {selectedSubject && filterGrade ? (
@@ -405,11 +428,16 @@ export function ResultsManager({
                                 <div className="h-12 w-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center">
                                     <FileText className="h-6 w-6" />
                                 </div>
-                                <h3 className="text-xl font-black text-slate-900">{selectedSubject} Detailed Performance - Grade {filterGrade}</h3>
+                                <h3 className="text-xl font-black text-slate-900">{selectedSubject} Detailed Performance - Grade {filterGrade} {filterSection && `(${filterSection})`}</h3>
                             </div>
                             <ResultTable
                                 user={{ id: 'admin', role: 'admin' } as any}
-                                students={students.filter(s => String(s.grade) === filterGrade)}
+                                students={students.filter(s => {
+                                    const matchesGrade = String(s.grade) === filterGrade;
+                                    const matchesSection = !filterSection || String(s.section) === filterSection;
+                                    const matchesGender = !filterGender || normalizeGender(s.gender || (s as any).sex) === filterGender;
+                                    return matchesGrade && matchesSection && matchesGender;
+                                })}
                                 subjects={[selectedSubject]}
                                 classResults={[...publishedResults, ...pendingResults]}
                                 onRefresh={onRefresh || (() => { })}
