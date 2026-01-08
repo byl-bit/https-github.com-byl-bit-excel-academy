@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: Request) {
     try {
@@ -10,9 +10,9 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
+        // Use standard supabase for GET as RLS should allow users to see their own notifications
         let query = supabase.from('notifications').select('id, user_id, user_name, action, category, details, target_id, target_name, type, is_read, created_at');
 
-        // If not admin, show notifications targeting or created by the user OR broadcast notifications
         if (actorRole !== 'admin') {
             if (!actorId) return NextResponse.json({ error: 'Actor ID required' }, { status: 400 });
             query = query.or(`user_id.eq.${actorId},target_id.eq.${actorId},type.eq.broadcast`);
@@ -46,7 +46,9 @@ export async function DELETE(request: Request) {
 
         if (!id && all !== 'true') return NextResponse.json({ error: 'ID or all=true required' }, { status: 400 });
 
-        let query = supabase.from('notifications').delete();
+        // Use supabaseAdmin for DELETE to bypass RLS restrictions on bulk operations
+        const db = supabaseAdmin || supabase;
+        let query = db.from('notifications').delete();
 
         if (all === 'true') {
             if (actorRole !== 'admin') {
@@ -58,11 +60,15 @@ export async function DELETE(request: Request) {
         }
 
         const { error } = await query;
-        if (error) throw error;
+        if (error) {
+            console.error('Delete notifications error:', error);
+            throw error;
+        }
 
         return NextResponse.json({ success: true });
-    } catch (e) {
-        return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+    } catch (e: any) {
+        console.error('DELETE /api/notifications catch block:', e);
+        return NextResponse.json({ error: 'Failed to delete', message: e.message || String(e) }, { status: 500 });
     }
 }
 
@@ -78,7 +84,9 @@ export async function POST(request: Request) {
         const body = await request.json();
         if (!body || (!body.id && !body.all)) return NextResponse.json({ error: 'Notification id or all:true required' }, { status: 400 });
 
-        let query = supabase.from('notifications')
+        // Use supabaseAdmin for UPDATE to bypass RLS restrictions on bulk operations
+        const db = supabaseAdmin || supabase;
+        let query = db.from('notifications')
             .update({ is_read: true });
 
         if (body.all) {
@@ -90,16 +98,16 @@ export async function POST(request: Request) {
             query = query.eq('id', body.id);
         }
 
-        const { data, error } = await query;
+        const { error } = await query;
 
         if (error) {
             console.error('Failed to mark notification read:', error);
-            return NextResponse.json({ error: 'Failed to update notification' }, { status: 500 });
+            return NextResponse.json({ error: 'Failed to update notification', message: error.message }, { status: 500 });
         }
 
         return NextResponse.json({ success: true });
-    } catch (e) {
+    } catch (e: any) {
         console.error('POST /api/notifications error', e);
-        return NextResponse.json({ error: 'Failed to update notification' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to update notification', message: e.message || String(e) }, { status: 500 });
     }
 }
