@@ -199,7 +199,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
+        const body = await request.json().catch(() => ({}));
         const role = request.headers.get('x-actor-role') || '';
         const actorId = request.headers.get('x-actor-id') || '';
 
@@ -207,7 +207,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized: role not allowed' }, { status: 403 });
         }
 
-        const resultsObj = typeof body === 'object' ? body : {};
+        const resultsObj = (body && typeof body === 'object') ? body : {};
 
         // Fetch current data
         const { data: currentResultsArr } = await supabase.from('results').select('student_id, grade, section, subjects, total, average, rank, conduct, result, promoted_or_detained');
@@ -442,50 +442,89 @@ export async function POST(request: Request) {
             });
         }
 
-        // Admin publication logic
-        const resultsToPublish: Array<{ key: string; entry: PendingResult }> = [];
+        // Admin publication logic: Convert input to snake_case and ensure all fields are mapped correctly
+        const resultsToPublish: any[] = [];
         for (const key of Object.keys(resultsObj)) {
             const resEntry = resultsObj[key];
             if (!resEntry) continue;
-            resultsToPublish.push({ key, entry: { ...resEntry, student_id: key } });
+
+            const studentId = resEntry.studentId || resEntry.student_id || String(key);
+            const studentUser = (users || []).find(u =>
+                String(u.student_id).toLowerCase() === String(studentId).toLowerCase() ||
+                String(u.id).toLowerCase() === String(studentId).toLowerCase()
+            );
+
+            // Calculate status and remarks if not provided
+            const avg = Number(resEntry.average || 0);
+            const resStatus = calculatePassStatus(avg);
+            const promo = calculatePromotionStatus(resStatus === 'PASS');
+            const cond = calculateConduct(avg);
+
+            resultsToPublish.push({
+                student_id: studentId,
+                student_name: resEntry.studentName || resEntry.student_name || studentUser?.name || '',
+                grade: String(resEntry.grade || studentUser?.grade || ''),
+                section: String(resEntry.section || studentUser?.section || ''),
+                roll_number: resEntry.rollNumber || resEntry.roll_number || studentUser?.roll_number || null,
+                gender: normalizeGender(resEntry.gender || resEntry.sex || studentUser?.gender || null) || null,
+                subjects: resEntry.subjects || [],
+                total: Number(resEntry.total || 0),
+                average: avg,
+                rank: Number(resEntry.rank || 0),
+                conduct: resEntry.conduct || cond,
+                result: resEntry.result || resStatus,
+                promoted_or_detained: resEntry.promotedOrDetained || resEntry.promoted_or_detained || promo,
+                status: 'published',
+                published_at: new Date().toISOString(),
+                approved_by: actorId,
+                approved_at: new Date().toISOString()
+            });
         }
 
-        const classGroups: { [gs: string]: PendingResult[] } = {};
-        resultsToPublish.forEach(({ entry }) => {
+        const classGroups: { [gs: string]: any[] } = {};
+        resultsToPublish.forEach((entry) => {
             const gs = `${entry.grade}_${entry.section}`;
             if (!classGroups[gs]) classGroups[gs] = [];
             classGroups[gs].push(entry);
         });
 
-        Object.keys(classGroups).forEach(gs => {
+        for (const gs of Object.keys(classGroups)) {
             const classResults = classGroups[gs];
             const existing = Object.values(currentResults).filter((r: PublishedResult) => `${r.grade}_${r.section}` === gs);
             const all = [...existing, ...classResults];
-            // Map to expected shape for rank calculation and ensure studentId is string
-            const rankInput = all.map(r => {
-                const rr = r as unknown as Record<string, unknown>;
-                const studentId = String(rr['student_id'] ?? rr['studentId'] ?? '');
-                const total = typeof rr['total'] === 'number' ? (rr['total'] as number) : undefined;
-                const average = typeof rr['average'] === 'number' ? (rr['average'] as number) : undefined;
-                return { studentId, total, average };
-            });
+
+            // Map to expected shape for rank calculation
+            const rankInput = all.map(r => ({
+                studentId: String(r.student_id || (r as any).studentId || ''),
+                total: Number(r.total || 0),
+                average: Number(r.average || 0)
+            }));
+
             const ranks = calculateRanks(rankInput, true);
-            classResults.forEach(e => { e.rank = ranks[String(e.student_id)] || 1; });
-        });
+            classResults.forEach(e => {
+                e.rank = ranks[String(e.student_id)] || 1;
+            });
+        }
 
-        const toInsert = resultsToPublish.map(({ entry }) => ({
-            ...entry,
-            status: 'published',
-            published_at: new Date().toISOString()
-        }));
+        if (resultsToPublish.length > 0) {
+            // Use administrative delete/insert
+            const studentIds = resultsToPublish.map(r => r.student_id);
 
-        if (toInsert.length > 0) {
-            await supabase.from('results').delete().in('student_id', toInsert.map(r => r.student_id));
-            await supabase.from('results').insert(toInsert);
+            const { error: delError } = await supabase.from('results').delete().in('student_id', studentIds);
+            if (delError) {
+                console.error('Admin delete error:', delError);
+                return NextResponse.json({ error: 'Failed to clear old results', details: delError.message }, { status: 500 });
+            }
+
+            const { error: insError } = await supabase.from('results').insert(resultsToPublish);
+            if (insError) {
+                console.error('Admin insert error:', insError);
+                return NextResponse.json({ error: 'Failed to publish results', details: insError.message }, { status: 500 });
+            }
 
             // Notify students
             try {
-                const notifications = toInsert.map(r => ({
+                const notifications = resultsToPublish.map(r => ({
                     type: 'result',
                     category: 'result',
                     user_id: r.student_id,
@@ -501,10 +540,14 @@ export async function POST(request: Request) {
             }
         }
 
-        return NextResponse.json({ success: true });
-    } catch (err) {
-        console.error('Error saving results:', err);
-        return NextResponse.json({ error: 'Failed' }, { status: 500 });
+        return NextResponse.json({ success: true, count: resultsToPublish.length });
+    } catch (err: any) {
+        console.error('Critical internal error in /api/results POST:', err);
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            message: err?.message || 'Check server logs',
+            details: err?.stack || undefined
+        }, { status: 500 });
     }
 }
 
@@ -590,10 +633,24 @@ export async function PUT(request: Request) {
             if (toPublish.length > 0) {
                 // Delete existing published results for these students before inserting
                 const studentIds = toPublish.map(r => r.student_id);
-                await supabase.from('results').delete().in('student_id', studentIds);
-                await supabase.from('results').insert(toPublish);
+                const { error: delError } = await supabase.from('results').delete().in('student_id', studentIds);
+                if (delError) {
+                    console.error('Approval delete error:', delError);
+                    return NextResponse.json({ error: 'Failed to clear old results', details: delError.message }, { status: 500 });
+                }
+
+                const { error: insError } = await supabase.from('results').insert(toPublish);
+                if (insError) {
+                    console.error('Approval insert error:', insError);
+                    return NextResponse.json({ error: 'Failed to publish approved results', details: insError.message }, { status: 500 });
+                }
+
                 // Remove from pending after successful publish
-                await supabase.from('results_pending').delete().in('student_id', body.approve);
+                const { error: penDelError } = await supabase.from('results_pending').delete().in('student_id', body.approve);
+                if (penDelError) {
+                    console.error('Approval pending-delete error:', penDelError);
+                    // Not fatal for the operation success since results are already published, but good to log
+                }
 
                 // Notify students
                 try {
@@ -691,8 +748,12 @@ export async function PUT(request: Request) {
         });
 
         return NextResponse.json({ success: true });
-    } catch (e: unknown) {
+    } catch (e: any) {
         console.error('Results approval error:', e);
-        return NextResponse.json({ error: 'Error' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            message: e?.message || 'Check server logs',
+            details: e?.stack || undefined
+        }, { status: 500 });
     }
 }
