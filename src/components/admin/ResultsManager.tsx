@@ -1,17 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { normalizeGender, cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Award, FileText, CheckCircle, Trash2, Printer, Search, Download, Upload, Clock, Lock, XCircle } from "lucide-react";
-import { PaginationControls } from "@/components/PaginationControls";
-import { exportToCSV, parseCSV, generateAppreciationLetter } from '@/lib/utils/export';
-import { ResultTable } from '@/components/teacher/ResultTable'; // Detailed view integration
-
+import { Download, Upload, Plus, LayoutGrid, List, FileText, Search, RefreshCw, Award } from "lucide-react";
+import { ResultStats } from './results/ResultStats';
+import { ResultFilters } from './results/ResultFilters';
+import { ManualEntryForm } from './results/ManualEntryForm';
+import { ResultDirectoryTable } from './results/ResultDirectoryTable';
+import { ResultTable } from '@/components/teacher/ResultTable';
+import { parseCSV } from '@/lib/utils/export';
 import type { User, PendingResult, PublishedResult, Subject } from '@/lib/types';
+import { useToast } from '@/contexts/ToastContext';
 
 export interface ResultsManagerProps {
     students: User[];
@@ -33,7 +33,7 @@ export interface ResultsManagerProps {
 
 export function ResultsManager({
     students,
-    teachers: _teachers,
+    teachers,
     publishedResults,
     pendingResults,
     subjects,
@@ -46,1106 +46,384 @@ export function ResultsManager({
     onDeletePublished,
     onRefresh,
     onUnlock,
-    onTabChange: _onTabChange
+    onTabChange
 }: ResultsManagerProps) {
-    const [selectedStudent, setSelectedStudent] = useState('');
-    const [subjectMarks, setSubjectMarks] = useState<Record<string, number>>({});
-    const [conduct, setConduct] = useState('Satisfactory');
-    const [status, setStatus] = useState<'promoted' | 'detained'>('promoted');
+    const { success, error: notifyError } = useToast();
+    const [view, setView] = useState<'directory' | 'manual' | 'subject'>('directory');
 
+    // Filters
     const [search, setSearch] = useState('');
     const [filterGrade, setFilterGrade] = useState('');
     const [filterSection, setFilterSection] = useState('');
     const [filterGender, setFilterGender] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
-    const [filterSubject, setFilterSubject] = useState(''); // New Subject Filter
-    const [filterRollNumber, setFilterRollNumber] = useState('');
-    const [_filterTeacher, _setFilterTeacher] = useState('');
-    const [_currentPage, _setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 10;
+    const [selectedSubject, setSelectedSubject] = useState('');
 
-    // Reference unused variables to satisfy lint (placeholders for future features)
-    void _teachers; void _onTabChange; void _filterTeacher; void _setFilterTeacher; void _currentPage; void _setCurrentPage;
+    const grades = useMemo(() => Array.from(new Set(students.map(s => String(s.grade || '')))).sort(), [students]);
+    const sections = useMemo(() => Array.from(new Set(students.map(s => String(s.section || '')))).sort(), [students]);
 
-    const grades = Array.from(new Set(students.map(s => String(s.grade || '')))).sort();
-    const sections = Array.from(new Set(students.map(s => String(s.section || '')))).sort();
-
-    const handleExportAcademicRecord = async () => {
-        const ExcelJS = await import('exceljs');
-        const { saveAs } = await import('file-saver');
-
-        const getColumnLetter = (n: number): string => {
-            let letter = '';
-            while (n > 0) {
-                let temp = (n - 1) % 26;
-                letter = String.fromCharCode(65 + temp) + letter;
-                n = (n - temp - 1) / 26;
-            }
-            return letter;
-        };
-
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Academic Records');
-
-        // Dynamic Columns Definition
-        const dynamicCols = subjects.map(s => ({ header: s, key: s, width: 12 }));
-        const columns = [
-            { header: 'Rank', key: 'rank', width: 8 },
-            { header: 'Student ID', key: 'studentId', width: 18 },
-            { header: 'Full Name', key: 'studentName', width: 30 },
-            { header: 'Roll No', key: 'rollNumber', width: 10 },
-            { header: 'Gender', key: 'gender', width: 12 },
-            { header: 'Grade', key: 'grade', width: 8 },
-            { header: 'Section', key: 'section', width: 10 },
-            ...dynamicCols,
-            { header: 'Average (%)', key: 'average', width: 14 },
-            { header: 'Total Score', key: 'total', width: 14 },
-            { header: 'Conduct', key: 'conduct', width: 15 },
-            { header: 'Decision', key: 'decision', width: 15 },
-        ];
-
-        worksheet.columns = columns;
-
-        // --- Row 1: Logo and Title Banner ---
-        worksheet.insertRow(1, []); // Insert a blank row at the top
-        worksheet.getRow(1).height = 60;
-
-        // Merge cells for the title
-        const lastColLetter = getColumnLetter(columns.length);
-        const titleRange = `D1:${lastColLetter}1`;
-        worksheet.mergeCells(titleRange);
-        const titleCell = worksheet.getCell('D1');
-        titleCell.value = 'Excel Academy Roster';
-        titleCell.font = { name: 'Arial Black', size: 28, color: { argb: 'FFFFFFFF' } };
-        titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
-        titleCell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FF6897E2' } // Medium Blue Banner
-        };
-        titleCell.border = {
-            top: { style: 'medium', color: { argb: 'FF3B82F6' } },
-            left: { style: 'medium', color: { argb: 'FF3B82F6' } },
-            bottom: { style: 'medium', color: { argb: 'FF3B82F6' } },
-            right: { style: 'medium', color: { argb: 'FF3B82F6' } }
-        };
-
-        // --- Row 2: Header Styling ---
-        const headerRow = worksheet.getRow(2);
-        headerRow.height = 35;
-        headerRow.eachCell((cell) => {
-            cell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FFD9E9FF' } // Light Blue Background
-            };
-            cell.font = { bold: true, color: { argb: 'FF2563EB' }, size: 12 }; // Deep Blue Text
-            cell.alignment = { vertical: 'middle', horizontal: 'center' };
-            cell.border = {
-                top: { style: 'thin', color: { argb: 'FF94A3B8' } },
-                left: { style: 'thin', color: { argb: 'FF94A3B8' } },
-                bottom: { style: 'thin', color: { argb: 'FF94A3B8' } },
-                right: { style: 'thin', color: { argb: 'FF94A3B8' } }
-            };
-        });
-
-        // Filter students based on current view settings
-        const distinctStudents = students.filter(s => {
-            const r = publishedResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
-                pendingResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
-                ({} as PublishedResult | PendingResult);
-
-            const matchesGrade = !filterGrade || filterGrade === 'All' || String(s.grade) === filterGrade;
-            const matchesSection = !filterSection || filterSection === 'All' || String(s.section) === filterSection;
-            const matchesGender = !filterGender || normalizeGender(s.gender || s.sex) === filterGender;
-            const matchesRoll = !filterRollNumber || String(s.rollNumber || (s as any).roll_number || '').includes(filterRollNumber);
-            const matchesStatus = !filterStatus || (r.promotedOrDetained || (r as any).promoted_or_detained || '').includes(filterStatus);
+    // Derived Data
+    const filteredPublished = useMemo(() => {
+        return (publishedResults as PublishedResult[]).filter(r => {
+            const matchesGrade = !filterGrade || String(r.grade) === filterGrade;
+            const matchesSection = !filterSection || String(r.section) === filterSection;
+            const matchesGender = !filterGender || normalizeGender(r.gender || (r as any).sex) === filterGender;
+            const matchesStatus = !filterStatus || (r.promotedOrDetained || r.promoted_or_detained) === filterStatus;
             const matchesSearch = !search ||
-                ((s.name || '').toLowerCase().includes(search.toLowerCase())) ||
-                ((s.student_id || s.studentId || '').toLowerCase().includes(search.toLowerCase()));
-            return matchesGrade && matchesSection && matchesGender && matchesRoll && matchesStatus && matchesSearch;
-        }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                r.studentName?.toLowerCase().includes(search.toLowerCase()) ||
+                r.studentId?.toLowerCase().includes(search.toLowerCase()) ||
+                String(r.rollNumber || (r as any).roll_number || '').includes(search);
+            return matchesGrade && matchesSection && matchesGender && matchesStatus && matchesSearch;
+        }).sort((a, b) => (a.rank || 999) - (b.rank || 999));
+    }, [publishedResults, filterGrade, filterSection, filterGender, filterStatus, search]);
 
-        // Calculate Ranks for the exported set
-        const exportSetResults = distinctStudents.map(s => {
-            const r = publishedResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
-                pendingResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
-                ({} as PublishedResult | PendingResult);
-            return { studentId: s.studentId || s.student_id || '', average: r.average || 0 };
+    const filteredPending = useMemo(() => {
+        return pendingResults.filter(r => {
+            const matchesGrade = !filterGrade || String(r.grade) === filterGrade;
+            const matchesSection = !filterSection || String(r.section) === filterSection;
+            const matchesGender = !filterGender || normalizeGender(r.gender || (r as any).sex) === filterGender;
+            const matchesSearch = !search ||
+                r.studentName?.toLowerCase().includes(search.toLowerCase()) ||
+                r.studentId?.toLowerCase().includes(search.toLowerCase());
+            return matchesGrade && matchesSection && matchesGender && matchesSearch;
         });
-
-        const { calculateRanks } = await import('@/lib/utils/excelCalculations');
-        const calculatedRanks = calculateRanks(exportSetResults);
-
-        distinctStudents.forEach(s => {
-            const r = publishedResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
-                pendingResults.find(res => res.studentId === (s.student_id || s.studentId)) ||
-                ({} as PublishedResult | PendingResult);
-
-            const sid = s.studentId || s.student_id || '';
-            const marksMap = ((r.subjects || []) as Subject[]).reduce((acc: Record<string, number>, subj: Subject) => ({ ...acc, [subj.name]: subj.marks || 0 }), {});
-
-            const rawGender = s.gender || s.sex || r.gender || '';
-            const genderNorm = normalizeGender(rawGender);
-            const genderFull = genderNorm === 'M' ? 'Male' : genderNorm === 'F' ? 'Female' : genderNorm;
-
-            const rowData: any = {
-                rank: calculatedRanks[sid] || r.rank || '-',
-                studentId: sid,
-                studentName: s.name || s.fullName || '',
-                rollNumber: s.rollNumber || (s as any).roll_number || '',
-                gender: genderFull,
-                grade: s.grade || '',
-                section: s.section || '',
-                average: ((r.average || 0)).toFixed(1),
-                total: r.total || 0,
-                conduct: r.conduct || 'Satisfactory',
-                decision: (r.promotedOrDetained || (r as any).promoted_or_detained) || ((r.average || 0) >= 50 ? 'PROMOTED' : 'DETAINED')
-            };
-
-            subjects.forEach(sub => {
-                rowData[sub] = marksMap[sub] || 0;
-            });
-
-            const row = worksheet.addRow(rowData);
-            row.alignment = { vertical: 'middle', horizontal: 'center' };
-        });
-
-        // Add Logo if available
-        try {
-            const letterheadUrl = (settings && settings['letterheadUrl']) ? String(settings['letterheadUrl']) : '';
-            const logoSrc = letterheadUrl && letterheadUrl.length > 0 ? letterheadUrl : '/logo.png';
-
-            const response = await fetch(logoSrc);
-            const blob = await response.blob();
-            const arrayBuffer = await blob.arrayBuffer();
-
-            const imageId = workbook.addImage({
-                buffer: arrayBuffer,
-                extension: 'png',
-            });
-
-            worksheet.addImage(imageId, {
-                tl: { col: 0.5, row: 0.1 },
-                ext: { width: 80, height: 80 }
-            });
-        } catch (e) {
-            console.error("Could not add logo to Excel", e);
-        }
-
-        const buffer = await workbook.xlsx.writeBuffer();
-        const fileName = `Excel_Academy_Roster_${filterGrade || 'Global'}_Sec_${filterSection || 'All'}_${new Date().toISOString().split('T')[0]}`;
-        saveAs(new Blob([buffer]), `${fileName}.xlsx`);
-    };
-
-    const handleBatchExportPDF = async () => {
-        if (filteredResults.length === 0) return alert("No results to export.");
-        if (!confirm(`Export ${filteredResults.length} report cards into a single PDF?`)) return;
-
-        // Load Logo / Letterhead (prefer configured letterheadUrl)
-        const loadImage = (src: string) => new Promise<HTMLImageElement>((resolve) => {
-            const img = new Image();
-            img.src = src;
-            img.crossOrigin = "Anonymous";
-            img.onload = () => resolve(img);
-            img.onerror = () => resolve(new Image());
-        });
-        const letterheadUrl = (settings && settings['letterheadUrl']) ? String(settings['letterheadUrl']) : '';
-        const logoSrc = letterheadUrl && letterheadUrl.length > 0 ? letterheadUrl : '/logo.png';
-        const logoImg = await loadImage(logoSrc);
-        const principalName = settings?.['principalName'] ? String(settings['principalName']) : 'Principal';
-        const homeroomName = settings?.['homeroomName'] ? String(settings['homeroomName']) : 'Class Teacher';
-
-        const jsPDF = (await import('jspdf')).default;
-        const doc = new jsPDF();
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-
-        for (let i = 0; i < filteredResults.length; i++) {
-            const result = filteredResults[i] as PublishedResult;
-            if (i > 0) doc.addPage();
-
-            // Minimalistic Report Card Design for Batch Export
-            doc.setFillColor(30, 64, 175);
-            doc.rect(0, 0, pageWidth, 25, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(18);
-            doc.setFont("helvetica", "bold");
-            doc.text("EXCEL ACADEMY", pageWidth / 2, 12, { align: 'center' });
-            doc.setFontSize(10);
-            doc.text("STUDENT PROGRESS REPORT", pageWidth / 2, 18, { align: 'center' });
-
-            doc.setTextColor(0, 0, 0);
-            doc.setDrawColor(200, 200, 200);
-            doc.rect(10, 30, pageWidth - 20, 25);
-
-            doc.setFontSize(9);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Name: ${result.studentName}`, 15, 38);
-            doc.text(`Student ID: ${result.studentId}`, 15, 45);
-            doc.text(`Grade/Section: ${result.grade} - ${result.section}`, 120, 38);
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, 45);
-
-            // Table Header - only SUBJECT and MARKS (out of 100)
-            let y = 65;
-            doc.setFillColor(240, 240, 240);
-            doc.rect(10, y - 5, pageWidth - 20, 8, 'F');
-            doc.setFont("helvetica", "bold");
-            doc.text("SUBJECT", 15, y);
-            doc.text("MARKS (out of 100)", 110, y, { align: 'center' });
-
-            y += 8;
-            doc.setFont("helvetica", "normal");
-            ((result.subjects || []) as Subject[]).forEach((sub: Subject, sIdx: number) => {
-                if (sIdx % 2 === 0) {
-                    doc.setFillColor(252, 252, 252);
-                    doc.rect(10, y - 5, pageWidth - 20, 8, 'F');
-                }
-                doc.text(sub.name, 15, y);
-                doc.text(String(sub.marks || 0), 110, y, { align: 'center' });
-                y += 8;
-            });
-
-            // Summary: total, average, rank, result, conduct and signature lines
-            y += 10;
-            doc.setFont("helvetica", "bold");
-            doc.text(`TOTAL SCORE: ${result.total}`, 15, y);
-            doc.text(`AVERAGE: ${(result.average || 0).toFixed(1)} / 100`, 80, y);
-            doc.text(`RANK: ${result.rank || ''}`, 140, y);
-
-            y += 8;
-            doc.setFont("helvetica", "normal");
-            doc.text(`STATUS: ${(result.promotedOrDetained || result.promoted_or_detained) || ''}`, 15, y);
-            doc.text(`Conduct: ${result.conduct || 'Satisfactory'}`, 80, y);
-
-            y += 20;
-            // Signature placeholders
-            doc.text('Principal:', 15, y);
-            doc.text('______________________________', 48, y);
-            doc.text(principalName, 15, y + 6);
-            doc.text('Homeroom:', 120, y);
-            doc.text('______________________________', 160, y);
-            doc.text(homeroomName, 120, y + 6);
-
-            // Footer
-            if (logoImg && logoImg.src && logoImg.width > 0) {
-                // 1x1 inch approx 25mm
-                const logoSize = 25;
-                // Center at bottom
-                doc.addImage(logoImg, 'PNG', (pageWidth - logoSize) / 2, pageHeight - 40, logoSize, logoSize);
-            }
-            doc.setFontSize(8);
-            doc.text("Generated by Excel Academy CMS", pageWidth / 2, pageHeight - 10, { align: 'center' });
-            doc.rect(5, 5, pageWidth - 10, pageHeight - 10, 'S');
-        }
-
-        doc.save(`batch_report_cards_${filterGrade || 'All'}_${filterSection || 'All'}.pdf`);
-    };
-
-    const handlePrintSingle = async (result: PublishedResult) => {
-        // Safe-guard result data
-        if (!result) return;
-
-        const loadImage = (src: string) => new Promise<HTMLImageElement>((resolve) => {
-            const img = new Image();
-            img.src = src;
-            img.crossOrigin = "Anonymous";
-            img.onload = () => resolve(img);
-            img.onerror = () => resolve(new Image());
-        });
-
-        const letterheadUrl = (settings && settings['letterheadUrl']) ? String(settings['letterheadUrl']) : '';
-        const logoSrc = letterheadUrl && letterheadUrl.length > 0 ? letterheadUrl : '/logo.png';
-        const logoImg = await loadImage(logoSrc);
-        const jsPDF = (await import('jspdf')).default;
-        const doc = new jsPDF();
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-
-        // If we have a letterhead image, draw it top-left
-        if (logoImg && logoImg.src && logoImg.width > 0) {
-            const lhW = 40;
-            doc.addImage(logoImg, 'PNG', 10, 6, lhW, lhW * (logoImg.height / (logoImg.width || 1)));
-        }
-
-        doc.setFillColor(30, 64, 175);
-        doc.rect(0, 0, pageWidth, 25, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.text("EXCEL ACADEMY", pageWidth / 2, 12, { align: 'center' });
-        doc.setFontSize(10);
-        doc.text("STUDENT PROGRESS REPORT", pageWidth / 2, 18, { align: 'center' });
-
-        const principalName = settings?.['principalName'] ? String(settings['principalName']) : 'Principal';
-        const homeroomName = settings?.['homeroomName'] ? String(settings['homeroomName']) : 'Class Teacher';
-
-
-        doc.setTextColor(0, 0, 0);
-        doc.setDrawColor(200, 200, 200);
-        doc.rect(10, 30, pageWidth - 20, 25);
-
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Name: ${result.studentName || result.student_name || ''}`, 15, 38);
-        doc.text(`Student ID: ${result.studentId || result.student_id || result.id || ''}`, 15, 45);
-        doc.text(`Grade/Section: ${result.grade} - ${result.section}`, 120, 38);
-        doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, 45);
-
-        let y = 65;
-        doc.setFillColor(240, 240, 240);
-        doc.rect(10, y - 5, pageWidth - 20, 8, 'F');
-        doc.setFont("helvetica", "bold");
-        doc.text("SUBJECT", 15, y);
-        doc.text("MARKS (out of 100)", 110, y, { align: 'center' });
-
-        y += 8;
-        doc.setFont("helvetica", "normal");
-        ((result.subjects || []) as Subject[]).forEach((sub: Subject, sIdx: number) => {
-            if (sIdx % 2 === 0) {
-                doc.setFillColor(252, 252, 252);
-                doc.rect(10, y - 5, pageWidth - 20, 8, 'F');
-            }
-            doc.text(sub.name, 15, y);
-            doc.text(String(sub.marks || 0), 110, y, { align: 'center' });
-            y += 8;
-        });
-
-        y += 10;
-        doc.setFont("helvetica", "bold");
-        doc.text(`TOTAL SCORE: ${result.total || 0}`, 15, y);
-        doc.text(`AVERAGE: ${(result.average || 0).toFixed(1)} / 100`, 80, y);
-        doc.text(`RANK: ${result.rank || ''}`, 140, y);
-
-        y += 8;
-        doc.setFont("helvetica", "normal");
-        doc.text(`STATUS: ${(result.promotedOrDetained || (result as any).promoted_or_detained) || ''}`, 15, y);
-        doc.text(`Conduct: ${result.conduct || 'Satisfactory'}`, 80, y);
-
-        y += 20;
-        // Signatures
-        doc.text('Principal:', 15, y);
-        doc.text('______________________________', 40, y);
-        doc.text(principalName, 15, y + 6);
-        doc.text('Homeroom:', 120, y);
-        doc.text('______________________________', 150, y);
-        doc.text(homeroomName, 120, y + 6);
-
-        if (logoImg && logoImg.src && logoImg.width > 0) {
-            const logoSize = 25;
-            doc.addImage(logoImg, 'PNG', (pageWidth - logoSize) / 2, pageHeight - 40, logoSize, logoSize);
-        }
-        doc.setFontSize(8);
-        doc.text("Generated by Excel Academy CMS", pageWidth / 2, pageHeight - 10, { align: 'center' });
-        doc.rect(5, 5, pageWidth - 10, pageHeight - 10, 'S');
-
-        // Save single report
-        doc.save(`report_card_${result.studentId || result.student_id || result.id || 'student'}.pdf`);
-    };
+    }, [pendingResults, filterGrade, filterSection, filterGender, search]);
 
     const handleImportResults = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
-
-        if (isExcel) {
-            const data = await file.arrayBuffer();
-            const xlsx = await import('xlsx');
-            const wb = xlsx.read(data, { type: 'array' });
-            const ws = wb.Sheets[wb.SheetNames[0]];
-            const rows = xlsx.utils.sheet_to_json(ws);
-            processImportData(rows as unknown as Array<Record<string, unknown>>);
-        } else {
+        try {
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = async (event) => {
                 const text = event.target?.result as string;
-                const rows = parseCSV(text);
+                const rows = await parseCSV(text);
 
-                const headerIdx = rows.findIndex(r => r.some(cell => cell.toLowerCase().includes('studentid') || cell.toLowerCase().includes('student id')));
-                if (headerIdx === -1) return alert('Invalid CSV: Missing headers (StudentID required)');
+                if (rows && rows.length > 1) {
+                    const headers = rows[0];
+                    const dataRows = rows.slice(1);
 
-                const headers = rows[headerIdx].map(h => h.trim());
-                const dataRows = rows.slice(headerIdx + 1).map(rowValues => {
-                    const obj: Record<string, string> = {};
-                    headers.forEach((h, i) => obj[h] = rowValues[i] || '');
-                    return obj;
-                });
-                processImportData(dataRows as Array<Record<string, unknown>>);
+                    const processedResults: Record<string, any> = {};
+
+                    dataRows.forEach(row => {
+                        const res: any = {};
+                        headers.forEach((h, i) => {
+                            const val = row[i];
+                            if (h.toLowerCase() === 'studentid' || h.toLowerCase() === 'student_id') {
+                                res.studentId = val;
+                            } else if (h.toLowerCase() === 'name' || h.toLowerCase() === 'studentname') {
+                                res.studentName = val;
+                            } else if (subjects.includes(h)) {
+                                if (!res.subjects) res.subjects = [];
+                                res.subjects.push({ name: h, marks: parseFloat(val) || 0 });
+                            } else {
+                                res[h] = val;
+                            }
+                        });
+
+                        if (res.studentId) {
+                            processedResults[res.studentId] = res;
+                        }
+                    });
+
+                    await onPublish(processedResults);
+                    success('Import successful');
+                }
             };
             reader.readAsText(file);
+        } catch (err) {
+            console.error('Import failed:', err);
+            notifyError('Import failed. Please check the file format.');
         }
     };
 
-    const processImportData = (rows: Array<Record<string, unknown>>) => {
-        const payload: Record<string, unknown> = {};
-        rows.forEach(row => {
-            const sid = String((row['studentId'] ?? row['StudentID'] ?? row['ID']) ?? '');
-            if (!sid) return;
+    const handleExportXLSX = async () => {
+        const ExcelJS = await import('exceljs');
+        const { saveAs } = await import('file-saver');
 
-            const subArr = subjects.map(s => ({
-                name: s,
-                marks: Number((row[s] ?? 0) as unknown)
-            }));
-            const total = subArr.reduce((acc, s) => acc + s.marks, 0);
-            const average = total / (subjects.length || 1);
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Academic Results');
 
-            const rawGender = (row['Sex'] ?? row['gender'] ?? row['Gender']) ?? '';
-            const normalizedGender = normalizeGender(rawGender) || '';
+        // Dynamic Columns
+        const columns = [
+            { header: 'Rank', key: 'rank', width: 8 },
+            { header: 'Student ID', key: 'studentId', width: 18 },
+            { header: 'Name', key: 'studentName', width: 30 },
+            { header: 'Grade', key: 'grade', width: 10 },
+            { header: 'Section', key: 'section', width: 10 },
+            ...subjects.map(s => ({ header: s, key: s, width: 12 })),
+            { header: 'Average', key: 'average', width: 12 },
+            { header: 'Decision', key: 'decision', width: 15 }
+        ];
 
-            payload[sid] = {
-                studentId: sid,
-                studentName: (row['studentName'] ?? row['Name']) ?? 'Unknown Student',
-                gender: normalizedGender || '-',
-                grade: (row['grade'] ?? row['Grade']) ?? '',
-                section: (row['section'] ?? row['Section']) ?? '',
-                subjects: subArr,
-                total,
-                average,
-                conduct: (row['conduct'] ?? 'Satisfactory'),
-                promotedOrDetained: (row['promotedOrDetained'] ?? row['Status']) ?? (average >= 50 ? 'PROMOTED' : 'DETAINED'),
-                status: 'published'
-            };
+        worksheet.columns = columns;
+
+        filteredPublished.forEach(r => {
+            const marks: any = {};
+            (r.subjects || []).forEach(s => marks[s.name] = s.marks);
+            worksheet.addRow({
+                rank: r.rank || '-',
+                studentId: r.studentId,
+                studentName: r.studentName,
+                grade: r.grade,
+                section: r.section,
+                ...marks,
+                average: r.average?.toFixed(1),
+                decision: r.promotedOrDetained || r.promoted_or_detained
+            });
         });
 
-        if (confirm(`Import results for ${Object.keys(payload).length} students?`)) {
-            onPublish(payload);
-        }
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `Excel_Academy_Results_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
-    const handleMarkChange = (sub: string, val: string) => {
-        if (val === '') {
-            setSubjectMarks(prev => {
-                const updated = { ...prev };
-                delete updated[sub];
-                return updated;
-            });
-            return;
-        }
-        const num = parseFloat(val);
-        if (isNaN(num)) return;
-        setSubjectMarks(prev => ({ ...prev, [sub]: Math.min(100, Math.max(0, num)) }));
-    };
+    const handlePrintSingle = async (result: PublishedResult) => {
+        const jsPDF = (await import('jspdf')).default;
+        const doc = new jsPDF();
 
-    // Pre-fill manual entry when student is selected
-    const onStudentSelect = (studentId: string) => {
-        setSelectedStudent(studentId);
-        if (!studentId) {
-            setSubjectMarks({});
-            return;
-        }
+        doc.setFontSize(22);
+        doc.text("EXCEL ACADEMY", 105, 20, { align: 'center' });
+        doc.setFontSize(14);
+        doc.text("OFFICIAL REPORT CARD", 105, 30, { align: 'center' });
 
-        const student = students.find(s => s.id === studentId);
-        const sid = student?.studentId || student?.student_id || '';
+        doc.setLineWidth(0.5);
+        doc.line(20, 35, 190, 35);
 
-        const existing = publishedResults.find(r => (r as any).studentId === sid || (r as any).student_id === sid || (r as any).key === sid) ||
-            pendingResults.find(r => (r as any).studentId === sid || (r as any).student_id === sid || (r as any).key === sid);
+        doc.setFontSize(10);
+        doc.text(`Name: ${result.studentName}`, 20, 45);
+        doc.text(`ID: ${result.studentId}`, 20, 50);
+        doc.text(`Grade/Section: ${result.grade} - ${result.section}`, 140, 45);
+        doc.text(`Roll: ${result.rollNumber || '-'}`, 140, 50);
 
-        if (existing) {
-            const marks: Record<string, number> = {};
-            (existing.subjects || []).forEach((s: Subject) => {
-                marks[s.name] = Number((s as any).marks || 0);
-            });
-            setSubjectMarks(marks);
-            setConduct((existing as any).conduct || (existing as any).conduct || 'Satisfactory');
-            setStatus(((existing as any).promotedOrDetained || (existing as any).promoted_or_detained || '').toString().toLowerCase() === 'detained' ? 'detained' : 'promoted');
-        } else {
-            setSubjectMarks({});
-            setConduct('Satisfactory');
-            setStatus('promoted');
-        }
-    };
+        let y = 65;
+        doc.setFont("helvetica", "bold");
+        doc.text("Subject", 20, y);
+        doc.text("Marks (/100)", 100, y);
+        doc.line(20, y + 2, 190, y + 2);
 
-    const handleManualPublish = () => {
-        if (!selectedStudent) return alert('Select a student');
-
-        const student = students.find(s => s.id === selectedStudent);
-        const subArray = subjects.map(s => ({ name: s, marks: subjectMarks[s] || 0 }));
-        const total = subArray.reduce((acc, s) => acc + s.marks, 0);
-        const average = total / (subjects.length || 1);
-
-        onPublish({
-            [student?.studentId || student?.student_id || selectedStudent]: {
-                studentId: student?.studentId || student?.student_id || selectedStudent,
-                studentName: student?.name || student?.fullName || '',
-                grade: String(student?.grade || ''),
-                section: String(student?.section || ''),
-                gender: student?.gender || '',
-                subjects: subArray,
-                total,
-                average,
-                conduct,
-                status: 'published',
-                promotedOrDetained: status.toUpperCase()
-            }
+        doc.setFont("helvetica", "normal");
+        y += 10;
+        (result.subjects || []).forEach(s => {
+            doc.text(s.name, 20, y);
+            doc.text(String(s.marks || 0), 100, y);
+            y += 8;
         });
 
-        setSelectedStudent('');
-        setSubjectMarks({});
+        y += 10;
+        doc.line(20, y - 5, 190, y - 5);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Average: ${result.average?.toFixed(1)}%`, 20, y);
+        doc.text(`Outcome: ${result.promotedOrDetained || result.promoted_or_detained || 'N/A'}`, 100, y);
+
+        doc.save(`Report_${result.studentId}.pdf`);
     };
 
-    const filteredResults = [...publishedResults, ...pendingResults].filter(r => {
-        const matchesSearch = (r.studentName || '').toLowerCase().includes(search.toLowerCase()) ||
-            (r.studentId || '').toLowerCase().includes(search.toLowerCase());
-        const matchesGrade = filterGrade ? String(r.grade) === String(filterGrade) : true;
-        const matchesSection = filterSection ? String(r.section) === String(filterSection) : true;
-        const matchesGender = filterGender ? (normalizeGender(String(r.gender || '')) === filterGender) : true;
-        const matchesRoll = filterRollNumber ? String(r.rollNumber || (r as any).roll_number || '').includes(filterRollNumber) : true;
-        const matchesStatusLine = filterStatus ? (r.promotedOrDetained || (r as any).promoted_or_detained || '').includes(filterStatus) : true;
-        const matchesTeacher = _filterTeacher ? String(((r as any).submittedBy || (r as any).submitted_by || '')) === String(_filterTeacher) : true;
-        return matchesSearch && matchesGrade && matchesSection && matchesGender && matchesRoll && matchesStatusLine && matchesTeacher;
-    }).sort((a, b) => {
-        const nameA = (a.studentName || '').toLowerCase();
-        const nameB = (b.studentName || '').toLowerCase();
-        if (nameA < nameB) return -1;
-        if (nameA > nameB) return 1;
-        return (parseInt(String(a.rollNumber || '')) || 0) - (parseInt(String(b.rollNumber || '')) || 0);
-    });
+    const handleBatchPrint = async () => {
+        if (filteredPublished.length === 0) return;
+        const jsPDF = (await import('jspdf')).default;
+        const doc = new jsPDF();
 
-    const ResultTableHarmonized = ({ data, title, isPending }: { data: Array<PublishedResult | PendingResult>, title: string, isPending?: boolean }) => {
-        const [localPage, setLocalPage] = useState(1);
-        return (
-            <Card className="border-none shadow-none bg-transparent space-y-4">
-                <div className="glass-panel p-4 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shadow-inner ${isPending ? 'bg-amber-100' : 'bg-blue-100'}`}>
-                            {isPending ? <Clock className="h-5 w-5 text-amber-600" /> : <Award className="h-5 w-5 text-blue-600" />}
-                        </div>
-                        <div>
-                            <CardTitle className="text-lg flex items-center gap-2 font-black text-slate-800">
-                                {title}
-                            </CardTitle>
-                            <CardDescription className="text-xs text-slate-500 font-medium">Review and manage results {isPending ? 'awaiting approval' : 'already public'}.</CardDescription>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        {isPending && data.length > 0 && (
-                            <Button
-                                size="sm"
-                                className="bg-amber-500 hover:bg-amber-600 text-white font-bold h-9 shadow-lg shadow-amber-100 rounded-lg transition-transform hover:scale-105 active:scale-95"
-                                onClick={() => {
-                                    if (confirm(`Approve all ${data.length} results?`)) {
-                                        onApproveMany(data.map(r => (r as any).key), 'Teacher');
-                                    }
-                                }}
-                            >
-                                <CheckCircle className="h-4 w-4 mr-2" /> Approve All
-                            </Button>
-                        )}
-                        {!isPending && (
-                            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-9 shadow-lg shadow-indigo-100 rounded-lg transition-transform hover:scale-105 active:scale-95" onClick={handleBatchExportPDF}>
-                                <Printer className="h-4 w-4 mr-2" /> Class Report Cards (PDF)
-                            </Button>
-                        )}
-                    </div>
-                </div>
-
-                <div className="glass-panel rounded-2xl overflow-hidden shadow-sm border border-slate-100">
-                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                        <table className="w-full text-sm border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50/80 border-b border-slate-200">
-                                    {!isPending && <th className="py-5 px-6 text-center whitespace-nowrap font-black text-slate-400 text-[10px] uppercase tracking-widest">Rank</th>}
-                                    <th className="py-5 px-6 text-center whitespace-nowrap font-black text-slate-400 text-[10px] uppercase tracking-widest">Roll Number</th>
-                                    <th className="py-5 px-6 text-left whitespace-nowrap font-black text-slate-400 text-[10px] uppercase tracking-widest">Student Information</th>
-                                    <th className="py-5 px-6 text-center whitespace-nowrap font-black text-slate-400 text-[10px] uppercase tracking-widest">Grade / Section</th>
-                                    <th className="py-5 px-6 text-center font-black text-slate-400 text-[10px] uppercase tracking-widest">Gender</th>
-                                    <th className="py-5 px-6 text-center font-black text-slate-400 text-[10px] uppercase tracking-widest">Total</th>
-                                    <th className="py-5 px-6 text-center font-black text-slate-400 text-[10px] uppercase tracking-widest bg-slate-100/50">Average</th>
-                                    <th className="py-5 px-6 text-center font-black text-slate-400 text-[10px] uppercase tracking-widest">Status</th>
-                                    <th className="py-5 px-6 text-right font-black text-slate-400 text-[10px] uppercase tracking-widest">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {data.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={8} className="py-20 text-center">
-                                            <div className="flex flex-col items-center justify-center space-y-3 opacity-40">
-                                                <Award className="h-12 w-12 text-slate-300" />
-                                                <p className="font-bold uppercase tracking-widest text-[11px]">No matching records found</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    data.slice((localPage - 1) * ITEMS_PER_PAGE, localPage * ITEMS_PER_PAGE).map((r, idx) => {
-                                        const rowIsPending = r.status === 'pending' || r.status === 'pending_admin' || r.status === 'subject-pending';
-                                        return (
-                                            <tr key={idx} className="hover:bg-blue-50/40 transition-all duration-300 group">
-                                                {!isPending && (
-                                                    <td className="py-5 px-6 text-center">
-                                                        <span className="text-xl font-black text-slate-400 group-hover:text-blue-600 transition-colors">#{r.rank || '-'}</span>
-                                                    </td>
-                                                )}
-                                                <td className="py-5 px-6 text-center">
-                                                    <span className="font-black text-slate-700">{r.rollNumber || r.roll_number || '-'}</span>
-                                                </td>
-                                                <td className="py-5 px-6">
-                                                    <div className="font-black text-slate-800 text-base leading-tight group-hover:text-blue-700 transition-colors uppercase tracking-tight">{r.studentName}</div>
-                                                    <div className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-1 flex items-center gap-2">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-                                                        ID: {r.studentId || r.student_id}
-                                                    </div>
-                                                </td>
-                                                <td className="py-5 px-6 text-center">
-                                                    <span className="inline-flex items-center px-3 py-1.5 rounded-xl bg-white text-slate-600 text-[10px] font-black uppercase tracking-widest border border-slate-100 shadow-xs group-hover:border-blue-100 group-hover:text-blue-600 transition-all">
-                                                        {r.grade} - {r.section}
-                                                    </span>
-                                                </td>
-                                                <td className="py-5 px-6 text-center">
-                                                    <span className={cn(
-                                                        "text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider",
-                                                        normalizeGender(r.gender || (r as any).sex) === 'M' ? "bg-blue-50 text-blue-600 border-blue-100" :
-                                                            normalizeGender(r.gender || (r as any).sex) === 'F' ? "bg-pink-50 text-pink-600 border-pink-100" :
-                                                                "bg-slate-50 text-slate-500 border-slate-100"
-                                                    )}>
-                                                        {normalizeGender(r.gender || (r as any).sex) || '-'}
-                                                    </span>
-                                                </td>
-                                                <td className="py-5 px-6 text-center">
-                                                    <span className="font-black text-slate-700 text-lg">{r.total || 0}</span>
-                                                </td>
-                                                <td className="py-5 px-6 text-center bg-slate-100/30 group-hover:bg-blue-50/50 transition-colors">
-                                                    <div className="relative inline-block">
-                                                        <span className={`text-xl font-black ${(r.average || 0) >= 50 ? 'text-emerald-600' : 'text-red-500'}`}>
-                                                            {(r.average || 0).toFixed(1)}
-                                                        </span>
-                                                        <span className="text-[10px] text-slate-400 ml-0.5 font-bold">%</span>
-                                                    </div>
-                                                </td>
-                                                <td className="py-5 px-6 text-center">
-                                                    <span className={`text-[10px] px-3 py-1.5 rounded-xl font-black tracking-widest uppercase shadow-sm border ${r.promotedOrDetained === 'PROMOTED'
-                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100 shadow-emerald-50/50'
-                                                        : 'bg-red-50 text-red-700 border-red-100 shadow-red-50/50'
-                                                        }`}>
-                                                        {rowIsPending ? 'PENDING' : (r.promotedOrDetained || 'PENDING')}
-                                                    </span>
-                                                </td>
-                                                <td className="py-5 px-6 text-right">
-                                                    <div className="flex flex-col items-end gap-3">
-                                                        {rowIsPending && (
-                                                            <div className="flex flex-wrap justify-end gap-1.5 max-w-[200px]">
-                                                                {(r.subjects || []).filter((s: Subject) => s.status === 'pending_admin').map((s: Subject) => (
-                                                                    <Button
-                                                                        key={s.name}
-                                                                        size="sm"
-                                                                        variant="ghost"
-                                                                        className="h-7 text-[9px] font-black uppercase px-2.5 rounded-lg bg-blue-50/50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all transform hover:scale-105"
-                                                                        onClick={() => onApproveSubject((r as any).key, s.name)}
-                                                                    >
-                                                                        Approve {s.name}
-                                                                    </Button>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-                                                            {rowIsPending ? (
-                                                                <>
-                                                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-emerald-600 hover:bg-emerald-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onApprovePending((r as any).key, r.studentName || (r as any).studentName)} title="Approve Student">
-                                                                        <CheckCircle className="h-5 w-5" />
-                                                                    </Button>
-                                                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-red-600 hover:bg-red-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onRejectPending((r as any).key, r.studentName || (r as any).studentName)} title="Reject Student">
-                                                                        <XCircle className="h-5 w-5" />
-                                                                    </Button>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-blue-600 hover:bg-blue-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => handlePrintSingle(r as PublishedResult)} title="Print Report">
-                                                                        <Printer className="h-5 w-5" />
-                                                                    </Button>
-                                                                    {((r as PublishedResult).average ?? 0) >= 90 && (
-                                                                        <Button
-                                                                            size="icon"
-                                                                            variant="ghost"
-                                                                            className="h-9 w-9 text-amber-500 hover:bg-amber-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs"
-                                                                            onClick={() => generateAppreciationLetter(r as PublishedResult, String(settings?.principalName || 'Principal'))}
-                                                                            title="Generate Appreciation Letter"
-                                                                        >
-                                                                            <Award className="h-5 w-5" />
-                                                                        </Button>
-                                                                    )}
-                                                                    {onUnlock && (
-                                                                        <Button size="icon" variant="ghost" className="h-9 w-9 text-amber-500 hover:bg-amber-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onUnlock((r as any).key || r.studentId || (r as any).student_id)} title="Unlock for teacher edit">
-                                                                            <Lock className="h-5 w-5" />
-                                                                        </Button>
-                                                                    )}
-                                                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-red-500 hover:bg-red-50 hover:scale-110 active:scale-90 transition-all rounded-xl shadow-xs" onClick={() => onDeletePublished((r as any).key || r.studentId || (r as any).student_id)} title="Delete Result">
-                                                                        <Trash2 className="h-5 w-5" />
-                                                                    </Button>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                    {data.length > ITEMS_PER_PAGE && (
-                        <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                Displaying {(localPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(localPage * ITEMS_PER_PAGE, data.length)} of {data.length} records
-                            </p>
-                            <PaginationControls
-                                currentPage={localPage}
-                                totalItems={data.length}
-                                itemsPerPage={ITEMS_PER_PAGE}
-                                onPageChange={setLocalPage}
-                            />
-                        </div>
-                    )}
-                </div>
-            </Card>
-        );
+        for (let i = 0; i < filteredPublished.length; i++) {
+            if (i > 0) doc.addPage();
+            const r = filteredPublished[i];
+            doc.text(`Excel Academy - ${r.studentName}`, 20, 20);
+            doc.text(`Grade: ${r.grade} Section: ${r.section}`, 20, 30);
+            doc.text(`Average: ${r.average?.toFixed(1)}%`, 20, 40);
+        }
+        doc.save(`Batch_Results_${filterGrade || 'Global'}.pdf`);
     };
 
     return (
-        <div className="space-y-8 pb-32">
-            {/* Academic Record Export & Management Center */}
-            <div className="glass-panel p-8 rounded-3xl bg-linear-to-br from-white to-blue-50/20 border-blue-100/50 shadow-xl shadow-blue-900/5">
-                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-blue-600 rounded-2xl shadow-lg shadow-blue-200">
-                                <Award className="h-6 w-6 text-white" />
-                            </div>
-                            <h2 className="text-3xl font-black text-blue-950 tracking-tight">Academic Results Center</h2>
-                        </div>
-                        <p className="text-blue-600/70 font-bold text-sm ml-12">Finalize outcomes and export class-wise performance records.</p>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                        <input type="file" id="admin-results-import-top" className="hidden" accept=".csv,.xlsx,.xls" onChange={handleImportResults} />
-                        <Button
-                            variant="outline"
-                            className="bg-white border-blue-200 text-blue-600 h-12 px-6 rounded-2xl font-black hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
-                            onClick={() => document.getElementById('admin-results-import-top')?.click()}
-                        >
-                            <Upload className="h-4 w-4 mr-2" /> IMPORT DATA
-                        </Button>
-                        <Button
-                            className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-8 rounded-2xl font-black shadow-xl shadow-blue-200 transition-all transform hover:scale-105 active:scale-95"
-                            onClick={handleExportAcademicRecord}
-                        >
-                            <Download className="h-4 w-4 mr-2" /> EXPORT PERFORMANCE XLSX
-                        </Button>
-                    </div>
+        <div className="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Header Area */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <div>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                        <Award className="h-10 w-10 text-indigo-600" />
+                        Academic Results Center
+                    </h1>
+                    <p className="text-slate-500 font-bold text-sm uppercase tracking-widest mt-2 ml-1">Centralized verified records & performance oversight</p>
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Grade</Label>
-                        <select
-                            className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all"
-                            value={filterGrade}
-                            onChange={e => setFilterGrade(e.target.value)}
-                        >
-                            <option value="">All Grades</option>
-                            {grades.map(g => <option key={g} value={g}>Grade {g}</option>)}
-                        </select>
-                    </div>
-                    <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Section</Label>
-                        <select
-                            className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all"
-                            value={filterSection}
-                            onChange={e => setFilterSection(e.target.value)}
-                        >
-                            <option value="">All Sections</option>
-                            {sections.map(s => <option key={s} value={s}>Section {s}</option>)}
-                        </select>
-                    </div>
-                    <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Gender</Label>
-                        <select
-                            className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all"
-                            value={filterGender}
-                            onChange={e => setFilterGender(e.target.value)}
-                        >
-                            <option value="">All Genders</option>
-                            <option value="M">Male</option>
-                            <option value="F">Female</option>
-                        </select>
-                    </div>
-                    <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Promoted Status</Label>
-                        <select
-                            className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all"
-                            value={filterStatus}
-                            onChange={e => setFilterStatus(e.target.value)}
-                        >
-                            <option value="">All Outcomes</option>
-                            <option value="PROMOTED">PROMOTED</option>
-                            <option value="DETAINED">DETAINED</option>
-                        </select>
-                    </div>
-                    <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Roll / ID Search</Label>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
-                            <Input
-                                placeholder="Search here..."
-                                className="pl-10 h-11 rounded-xl border-slate-200 bg-white focus:ring-2 focus:ring-blue-100 font-bold text-sm"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
+                <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                        variant="outline"
+                        className="h-12 border-slate-200 bg-white shadow-sm hover:bg-slate-50 font-black rounded-2xl px-6 gap-2"
+                        onClick={onRefresh}
+                    >
+                        <RefreshCw className="h-4 w-4" /> REFRESH
+                    </Button>
+                    <input type="file" id="results-import" className="hidden" accept=".csv" onChange={handleImportResults} />
+                    <Button
+                        variant="outline"
+                        className="h-12 border-indigo-200 bg-indigo-50/50 text-indigo-700 shadow-sm hover:bg-indigo-100 font-black rounded-2xl px-6 gap-2"
+                        onClick={() => document.getElementById('results-import')?.click()}
+                    >
+                        <Upload className="h-4 w-4" /> IMPORT CSV
+                    </Button>
+                    <Button
+                        className="h-12 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100 font-black rounded-2xl px-8 gap-2"
+                        onClick={handleExportXLSX}
+                    >
+                        <Download className="h-4 w-4" /> EXPORT PERFORMANCE
+                    </Button>
+                </div>
+            </div>
+
+            {/* Stats Overview */}
+            <ResultStats published={filteredPublished} pending={filteredPending} />
+
+            {/* Navigation Tabs */}
+            <div className="flex bg-slate-100 p-1.5 rounded-2xl self-start w-fit">
+                <button
+                    onClick={() => setView('directory')}
+                    className={cn(
+                        "px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                        view === 'directory' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                    )}
+                >
+                    <List className="h-4 w-4 inline mr-2" /> Records Directory
+                </button>
+                <button
+                    onClick={() => setView('manual')}
+                    className={cn(
+                        "px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                        view === 'manual' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                    )}
+                >
+                    <Plus className="h-4 w-4 inline mr-2" /> Manual Publishing
+                </button>
+                <button
+                    onClick={() => setView('subject')}
+                    className={cn(
+                        "px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                        view === 'subject' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                    )}
+                >
+                    <LayoutGrid className="h-4 w-4 inline mr-2" /> Subject Analytics
+                </button>
+            </div>
+
+            {/* Main Content Area */}
+            {view === 'directory' && (
+                <div className="space-y-8">
+                    <ResultFilters
+                        grades={grades}
+                        sections={sections}
+                        filterGrade={filterGrade}
+                        setFilterGrade={setFilterGrade}
+                        filterSection={filterSection}
+                        setFilterSection={setFilterSection}
+                        filterGender={filterGender}
+                        setFilterGender={setFilterGender}
+                        filterStatus={filterStatus}
+                        setFilterStatus={setFilterStatus}
+                        search={search}
+                        setSearch={setSearch}
+                        onReset={() => {
+                            setFilterGrade('');
+                            setFilterSection('');
+                            setFilterGender('');
+                            setFilterStatus('');
+                            setSearch('');
+                        }}
+                    />
+
+                    {filteredPending.length > 0 && (
+                        <div className="animate-in slide-in-from-top-2 duration-300">
+                            <ResultDirectoryTable
+                                data={filteredPending}
+                                isPendingView={true}
+                                onApprovePending={onApprovePending}
+                                onRejectPending={onRejectPending}
+                                onPrintSingle={handlePrintSingle}
+                                onBatchPrint={() => { }}
+                                onApproveMany={onApproveMany}
                             />
                         </div>
-                    </div>
-                </div>
-            </div>
+                    )}
 
-            {/* Subject Filter Card */}
-            <div className="flex justify-start">
-                <div className="glass-panel p-2 rounded-2xl flex items-center gap-2 bg-amber-50/50 border-amber-100">
-                    <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest px-3">Subject Analytics:</span>
-                    <select
-                        className="rounded-xl border-amber-200 h-9 px-4 text-xs font-black bg-white text-amber-900 border outline-none cursor-pointer hover:border-amber-400 transition-all"
-                        value={filterSubject}
-                        onChange={e => setFilterSubject(e.target.value)}
-                    >
-                        <option value="">Global Overview (All Subjects)</option>
-                        {subjects.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                </div>
-            </div>
-            {/* Quick Result Editor Section */}
-            <div className="grid md:grid-cols-12 gap-6 mb-8">
-                {/* Left Col: Student & decision */}
-                <div className="md:col-span-12 lg:col-span-8 space-y-6">
-                    <div className="flex flex-col md:flex-row gap-6">
-                        <div className="glass-panel p-6 rounded-2xl flex-1 space-y-4">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="h-10 w-10 rounded-xl bg-blue-100/50 flex items-center justify-center">
-                                    <FileText className="h-5 w-5 text-blue-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">Result Details</h3>
-                                    <p className="text-xs text-slate-500 font-medium">Select a student to edit marks</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs font-bold text-slate-500 uppercase">Student Name</Label>
-                                    <select
-                                        className="w-full h-11 rounded-xl border border-slate-200 bg-white/50 px-3 text-sm font-bold focus:ring-2 focus:ring-blue-100 transition-all outline-none cursor-pointer hover:bg-white"
-                                        value={selectedStudent}
-                                        onChange={(e) => {
-                                            const s = students.find(st => st.id === e.target.value);
-                                            if (s) {
-                                                setSelectedStudent(s.id || '');
-                                                // Initialize marks if exists
-                                                setSubjectMarks({});
-                                            }
-                                        }}
-                                    >
-                                        <option value="">Select Student...</option>
-                                        {students.sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(s => (
-                                            <option key={s.id} value={s.id}>{s.name} ({s.studentId})</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs font-bold text-slate-500 uppercase">Conduct</Label>
-                                        <select
-                                            className="w-full h-11 rounded-xl border border-slate-200 bg-white/50 px-3 text-sm font-bold focus:ring-2 focus:ring-blue-100 transition-all outline-none cursor-pointer hover:bg-white"
-                                            value={conduct}
-                                            onChange={(e) => setConduct(e.target.value)}
-                                        >
-                                            <option value="Satisfactory">Satisfactory</option>
-                                            <option value="Good">Good</option>
-                                            <option value="Excellent">Excellent</option>
-                                            <option value="Poor">Poor</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs font-bold text-slate-500 uppercase">Decision</Label>
-                                        <select
-                                            className="w-full h-11 rounded-xl border border-slate-200 bg-white/50 px-3 text-sm font-bold focus:ring-2 focus:ring-blue-100 transition-all outline-none cursor-pointer hover:bg-white"
-                                            value={status}
-                                            onChange={(e) => setStatus(e.target.value as 'promoted' | 'detained')}
-                                        >
-                                            <option value="promoted">PROMOTED</option>
-                                            <option value="detained">DETAINED</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="glass-panel p-6 rounded-2xl shadow-sm">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="h-10 w-10 rounded-xl bg-purple-100/50 flex items-center justify-center">
-                                <Award className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">Subject Performance</h3>
-                                <p className="text-xs text-slate-500 font-medium">Enter marks for each subject (0-100)</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            {subjects.map(sub => (
-                                <div key={sub} className="space-y-1.5 p-3 rounded-xl bg-slate-50/50 hover:bg-slate-100/80 transition-colors border border-transparent hover:border-slate-200">
-                                    <Label className="text-[10px] font-black text-slate-400 truncate block uppercase tracking-wide">{sub}</Label>
-                                    <Input
-                                        type="number"
-                                        step="any"
-                                        value={subjectMarks[sub] ?? ''}
-                                        onChange={(e) => handleMarkChange(sub, e.target.value)}
-                                        className="h-10 text-center text-lg font-black border-slate-200 bg-white rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all"
-                                        placeholder="-"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Col: Actions & Summary (Could be expanded) */}
-                <div className="md:col-span-12 lg:col-span-4 space-y-6">
-                    <div className="glass-panel p-6 rounded-2xl h-full flex flex-col justify-center items-center text-center space-y-6 bg-linear-to-b from-white to-blue-50/30">
-                        <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center mb-2 animate-pulse">
-                            <Upload className="h-10 w-10 text-blue-600" />
-                        </div>
-                        <div className="space-y-2">
-                            <h3 className="text-xl font-black text-slate-800">Ready to Publish?</h3>
-                            <p className="text-sm text-slate-500 max-w-[200px] mx-auto">This will make the results immediately available to students and parents.</p>
-                        </div>
-                        <Button
-                            className="w-full h-14 bg-slate-900 hover:bg-blue-600 text-white rounded-xl font-bold shadow-xl shadow-slate-200 transition-all hover:scale-[1.02] active:scale-95 text-lg"
-                            onClick={handleManualPublish}
-                        >
-                            Publish Record
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Review Section */}
-            {
-                pendingResults.length > 0 && (
-                    <div className="space-y-4">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-black text-blue-400 uppercase tracking-widest mr-2">Approval Filters:</span>
-                            <select className="rounded-xl border-blue-200 h-9 px-3 text-[10px] font-bold bg-white" value={filterGrade} onChange={e => setFilterGrade(e.target.value)}>
-                                <option value="">Grades</option>
-                                {grades.map(g => <option key={g} value={g}>GRADE {g}</option>)}
-                            </select>
-                            <select className="rounded-xl border-blue-200 h-9 px-3 text-[10px] font-bold bg-white" value={filterSection} onChange={e => setFilterSection(e.target.value)}>
-                                <option value="">Sections</option>
-                                {sections.map(s => <option key={s} value={s}>SEC {s}</option>)}
-                            </select>
-                            <select className="rounded-xl border-blue-200 h-9 px-3 text-[10px] font-bold bg-white" value={filterGender} onChange={e => setFilterGender(e.target.value)}>
-                                <option value="">Gender</option>
-                                <option value="M">Male</option>
-                                <option value="F">Female</option>
-                            </select>
-                        </div>
-                        <ResultTableHarmonized
-                            data={[...pendingResults].filter(r => {
-                                // Only show results with status 'pending' (hide rejected/draft)
-                                const isPendingStatus = r.status === 'pending';
-                                const matchesGrade = filterGrade ? String(r.grade) === String(filterGrade) : true;
-                                const matchesSection = filterSection ? String(r.section) === String(filterSection) : true;
-                                const matchesGender = filterGender ? (normalizeGender(String(r.gender || '')) === filterGender) : true;
-                                const matchesSearch = !filterRollNumber ||
-                                    String(r.rollNumber || (r as any).roll_number || '').includes(filterRollNumber) ||
-                                    String(r.studentId || r.student_id || '').toLowerCase().includes(filterRollNumber.toLowerCase());
-                                return isPendingStatus && matchesGrade && matchesSection && matchesGender && matchesSearch;
-                            }).sort((a, b) => {
-                                const nameA = (a.studentName || '').toLowerCase();
-                                const nameB = (b.studentName || '').toLowerCase();
-                                if (nameA < nameB) return -1;
-                                if (nameA > nameB) return 1;
-                                return (parseInt(String(a.rollNumber || (a as any).roll_number || '')) || 0) - (parseInt(String(b.rollNumber || (b as any).roll_number || '')) || 0);
-                            })}
-                            title="Result Review (Pending)"
-                            isPending={true}
-                        />
-                    </div>
-                )
-            }
-
-            {/* Final Management Table or Detailed Result Table */}
-            {
-                filterSubject && filterGrade ? (
-                    <div className="animate-fade-in-up space-y-4">
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-amber-50 rounded-xl border border-amber-200">
-                            <div className="flex items-center gap-3">
-                                <Award className="h-6 w-6 text-amber-600" />
-                                <div>
-                                    <h3 className="text-lg font-black text-amber-900">Detailed Assessment View: {filterSubject}</h3>
-                                    <p className="text-xs text-amber-700 font-bold">Viewing breakdown (Test, Mid, etc) for Grade {filterGrade} {filterSection || '(All Sections)'}</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-2 flex-wrap items-center">
-                                <Label className="text-[10px] font-black text-amber-800 uppercase tracking-widest mr-2">Filters:</Label>
-                                <select
-                                    className="h-8 rounded-lg border border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900 outline-none"
-                                    value={filterGrade}
-                                    onChange={e => setFilterGrade(e.target.value)}
-                                >
-                                    <option value="">Grade</option>
-                                    {grades.map(g => <option key={g} value={g}>G-{g}</option>)}
-                                </select>
-                                <select
-                                    className="h-8 rounded-lg border border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900 outline-none"
-                                    value={filterSection}
-                                    onChange={e => setFilterSection(e.target.value)}
-                                >
-                                    <option value="">Section</option>
-                                    {sections.map(s => <option key={s} value={s}>S-{s}</option>)}
-                                </select>
-                                <select
-                                    className="h-8 rounded-lg border border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900 outline-none"
-                                    value={filterGender}
-                                    onChange={e => setFilterGender(e.target.value)}
-                                >
-                                    <option value="">Gender</option>
-                                    <option value="M">Male</option>
-                                    <option value="F">Female</option>
-                                </select>
-                                <Input
-                                    placeholder="Search ID / Roll..."
-                                    className="h-8 w-32 rounded-lg border-amber-200 bg-white px-2 text-[10px] font-bold text-amber-900"
-                                    value={filterRollNumber}
-                                    onChange={(e) => setFilterRollNumber(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                        <ResultTable
-                            user={{ id: 'admin', role: 'admin', name: 'System Administrator', email: 'admin@school.com', image: '' } as any}
-                            students={students.filter(s => {
-                                const matchesGrade = String(s.grade) === filterGrade;
-                                const matchesSection = !filterSection || String(s.section) === filterSection;
-                                const matchesGender = !filterGender || normalizeGender(s.gender || s.sex) === filterGender;
-                                const matchesSearch = !filterRollNumber ||
-                                    String(s.rollNumber || (s as any).roll_number || '').includes(filterRollNumber) ||
-                                    String(s.studentId || s.student_id || '').toLowerCase().includes(filterRollNumber.toLowerCase());
-                                return matchesGrade && matchesSection && matchesGender && matchesSearch;
-                            })}
-                            subjects={[filterSubject]}
-                            settings={settings}
-                            classResults={[...publishedResults, ...pendingResults]}
-                            onRefresh={() => {
-                                if (onRefresh) onRefresh();
-                                console.log("Refresh requested from detailed view");
+                    <div className="animate-in slide-in-from-top-4 duration-500">
+                        <ResultDirectoryTable
+                            data={filteredPublished}
+                            isPendingView={false}
+                            onDeletePublished={onDeletePublished}
+                            onUnlock={onUnlock}
+                            onPrintSingle={handlePrintSingle}
+                            onBatchPrint={handleBatchPrint}
+                            onGenerateLetter={(r) => {
+                                const principalName = (settings && settings.principalName) ? String(settings.principalName) : 'Principal';
+                                import('@/lib/utils/export').then(mod => mod.generateAppreciationLetter(r, principalName));
                             }}
-                            isHomeroomView={false} // Subject view
                         />
                     </div>
-                ) : (
-                    <ResultTableHarmonized
-                        data={filteredResults}
-                        title="Published Results Management"
+                </div>
+            )}
+
+            {view === 'manual' && (
+                <div className="animate-in zoom-in-95 duration-300">
+                    <ManualEntryForm
+                        students={students}
+                        subjects={subjects}
+                        publishedResults={publishedResults as PublishedResult[]}
+                        pendingResults={pendingResults}
+                        onPublish={onPublish}
                     />
-                )
-            }
-        </div >
+                </div>
+            )}
+
+            {view === 'subject' && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="glass-panel p-6 rounded-3xl bg-white flex items-center gap-6">
+                        <div className="flex-1 space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Analysis Subject</label>
+                            <select
+                                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
+                                value={selectedSubject}
+                                onChange={e => setSelectedSubject(e.target.value)}
+                            >
+                                <option value="">Global Breakdown...</option>
+                                {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+                        <div className="flex-1 space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Focus Grade</label>
+                            <select
+                                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
+                                value={filterGrade}
+                                onChange={e => setFilterGrade(e.target.value)}
+                            >
+                                <option value="">Specific Grade...</option>
+                                {grades.map(g => <option key={g} value={g}>Grade {g}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    {selectedSubject && filterGrade ? (
+                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 space-y-6">
+                            <div className="flex items-center gap-3">
+                                <div className="h-12 w-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                                    <FileText className="h-6 w-6" />
+                                </div>
+                                <h3 className="text-xl font-black text-slate-900">{selectedSubject} Detailed Performance - Grade {filterGrade}</h3>
+                            </div>
+                            <ResultTable
+                                user={{ id: 'admin', role: 'admin' } as any}
+                                students={students.filter(s => String(s.grade) === filterGrade)}
+                                subjects={[selectedSubject]}
+                                classResults={[...publishedResults, ...pendingResults]}
+                                onRefresh={onRefresh || (() => { })}
+                                isHomeroomView={false}
+                            />
+                        </div>
+                    ) : (
+                        <div className="py-20 text-center glass-panel rounded-3xl bg-slate-50/50 border-dashed border-2 border-slate-200">
+                            <Search className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                            <p className="font-black text-slate-400 uppercase tracking-widest text-sm">Select both a Subject and a Grade to view detailed analytics</p>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
     );
 }
