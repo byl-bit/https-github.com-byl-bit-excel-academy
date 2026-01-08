@@ -179,7 +179,9 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     setSubmitStatus(prev => ({ ...prev, [studentId]: '' }));
                 }, 3000);
             } else {
+                const errData = await response.json().catch(() => ({}));
                 setSubmitStatus(prev => ({ ...prev, [studentId]: 'error' }));
+                notifyError(errData.error || 'Failed to save marks');
             }
         } catch (e) {
             console.error('Submit error:', e);
@@ -301,12 +303,13 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     setSubmitStatus({});
                 }, 1500);
             } else {
+                const errData = await response.json().catch(() => ({}));
                 setSubmitStatus(prev => {
                     const next = { ...prev };
                     affectedIds.forEach(id => { next[id] = 'error'; });
                     return next;
                 });
-                notifyError('Failed to process batch submission');
+                notifyError(errData.error || 'Failed to process batch submission');
             }
         } catch (e) {
             console.error(e);
@@ -480,11 +483,15 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             const newMarksMap = { ...tableMarks };
 
             for (let i = 1; i < rows.length; i++) {
-                const values = rows[i];
-                if (values.length < headers.length) continue;
+                const values = rows[i].map(v => v.trim());
+                if (values.length < 1) continue;
 
-                const studentId = values[0];
-                const student = students.find(s => (s.studentId || s.student_id || s.id) === studentId);
+                const inputId = values[0];
+                if (!inputId) continue;
+
+                const student = students.find(s =>
+                    String(s.studentId || s.student_id || s.id).toLowerCase() === inputId.toLowerCase()
+                );
                 if (student) {
                     const sid = String(student.id || student.student_id || student.studentId || '');
                     const studentMarks: Record<string, number> = { ...(newMarksMap[sid] || {}) } as Record<string, number>;
