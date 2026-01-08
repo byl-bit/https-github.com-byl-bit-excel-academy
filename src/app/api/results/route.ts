@@ -383,13 +383,26 @@ export async function POST(request: Request) {
             }
 
             if (pendingArray.length > 0) {
-                const { error: upsertError } = await supabase
-                    .from('results_pending')
-                    .upsert(pendingArray, { onConflict: 'student_id' });
+                const studentIds = pendingArray.map(p => p.student_id);
 
-                if (upsertError) {
-                    console.error('Teacher upsert pending error:', upsertError);
-                    return NextResponse.json({ error: 'Failed to save results', details: upsertError.message }, { status: 500 });
+                // Delete existing records first since student_id might not have a UNIQUE constraint
+                const { error: delError } = await supabase
+                    .from('results_pending')
+                    .delete()
+                    .in('student_id', studentIds);
+
+                if (delError) {
+                    console.error('Teacher delete pending error:', delError);
+                    return NextResponse.json({ error: 'Failed to clear old pending results', details: delError.message }, { status: 500 });
+                }
+
+                const { error: insError } = await supabase
+                    .from('results_pending')
+                    .insert(pendingArray);
+
+                if (insError) {
+                    console.error('Teacher insert pending error:', insError);
+                    return NextResponse.json({ error: 'Failed to save results', details: insError.message }, { status: 500 });
                 }
 
                 logActivity({

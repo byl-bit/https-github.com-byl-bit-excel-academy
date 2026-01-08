@@ -186,6 +186,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
         } catch (e) {
             console.error('Submit error:', e);
             setSubmitStatus(prev => ({ ...prev, [studentId]: 'error' }));
+            notifyError('Critical error while saving results');
         }
     };
 
