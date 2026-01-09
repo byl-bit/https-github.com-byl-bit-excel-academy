@@ -383,11 +383,15 @@ export default function StudentResultsPage() {
                                             return (
                                                 <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
                                                     <td className="px-6 py-4 font-medium text-blue-900">{sub.name}</td>
-                                                    {assessmentTypes.length > 0 && assessmentTypes.map((type: any) => (
-                                                        <td key={type.id} className="px-4 py-4 text-center text-blue-500">
-                                                            {sub.assessments?.[type.id] !== undefined ? sub.assessments[type.id] : '-'}
-                                                        </td>
-                                                    ))}
+                                                    {assessmentTypes.length > 0 && assessmentTypes.map((type: any) => {
+                                                        const key = String(type.id);
+                                                        const val = sub.assessments?.[key];
+                                                        return (
+                                                            <td key={type.id} className="px-4 py-4 text-center text-blue-500" title={val === undefined ? `Missing ${key}. Available: ${JSON.stringify(Object.keys(sub.assessments || {}))}` : ''}>
+                                                                {val !== undefined && val !== null ? val : '-'}
+                                                            </td>
+                                                        );
+                                                    })}
                                                     <td className="px-6 py-4 text-right font-bold text-blue-900">{sub.marks}</td>
                                                     <td className="px-6 py-4 text-right font-bold text-blue-600">
                                                         <span className={`inline-block w-8 text-center rounded ${['F'].includes(grade) ? 'text-red-400' : 'text-blue-600'}`}>
