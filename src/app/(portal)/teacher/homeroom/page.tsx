@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Loader2, FileCheck, Users, Printer, AlertCircle } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { calculateGrade, calculateConduct } from '@/lib/utils/gradingLogic';
+import { ResultTable } from '@/components/teacher/ResultTable';
+import { normalizeGender } from '@/lib/utils';
 
 export default function HomeroomPage() {
     const { user } = useAuth();
@@ -68,6 +70,9 @@ export default function HomeroomPage() {
         fetchData();
     }, [user, isHomeroom]);
 
+    // Derive all subjects from the results for the table view
+    const allSubjects = Array.from(new Set(results.flatMap(r => r.subjects?.map((s: any) => s.name) || []))).sort();
+
     const generateBulkReports = async () => {
         if (!results.length) {
             toast("There are no results to generate reports for.", "error");
@@ -79,25 +84,53 @@ export default function HomeroomPage() {
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth(); // ~210mm
 
-            // Filter only published results for reports? Usually yes, but let's allow all for now or filter.
-            // Let's use all results that seem final (published).
-            const reportableResults = results.filter(r => r.status === 'published');
-            reportableResults.sort((a, b) => {
-                const nameA = (a.studentName || '').toLowerCase();
-                const nameB = (b.studentName || '').toLowerCase();
-                if (nameA !== nameB) return nameA.localeCompare(nameB);
-                const rollA = parseInt(String(a.rollNumber || '0'));
-                const rollB = parseInt(String(b.rollNumber || '0'));
-                return rollA - rollB;
+            // 1. Prepare Data: Sync latest student details and calculate Ranks
+            // Filter to include only results that match current students (to ensure sync)
+            const reportData = results
+                .map(r => {
+                    const studentProfile = students.find(s =>
+                        String(s.id || s.student_id || s.studentId) === String(r.studentId) ||
+                        String(s.name) === String(r.studentName)
+                    );
+
+                    if (!studentProfile) return r; // Fallback to existing result data
+
+                    // Sync latest details
+                    return {
+                        ...r,
+                        studentName: studentProfile.fullName || studentProfile.name, // Sync Name
+                        studentId: studentProfile.studentId || studentProfile.student_id || r.studentId, // Sync ID
+                        gender: normalizeGender(studentProfile.gender || studentProfile.sex), // Sync Gender
+                        rollNumber: studentProfile.rollNumber || r.rollNumber,
+                        grade: studentProfile.grade || r.grade,
+                        section: studentProfile.section || r.section
+                    };
+                })
+                .filter(r => r.status === 'published' || r.status === 'approved'); // Only final results
+
+            // Sort by Average for Rank Calculation
+            reportData.sort((a, b) => b.average - a.average);
+
+            // Assign Ranks
+            reportData.forEach((r, index) => {
+                r.rank = index + 1;
             });
 
-            if (reportableResults.length === 0) {
-                toast("Only published results can be generated.", "error");
+            // Re-sort by Roll Number or Name for printing order
+            reportData.sort((a, b) => {
+                const rollA = parseInt(String(a.rollNumber || '0'));
+                const rollB = parseInt(String(b.rollNumber || '0'));
+                if (rollA !== rollB) return rollA - rollB;
+                return (a.studentName || '').localeCompare(b.studentName || '');
+            });
+
+            if (reportData.length === 0) {
+                toast("No published results found for active students.", "error");
                 return;
             }
 
-            for (let i = 0; i < reportableResults.length; i++) {
-                const result = reportableResults[i];
+            for (let i = 0; i < reportData.length; i++) {
+                const result = reportData[i];
                 if (i > 0) doc.addPage();
 
                 // --- Header ---
@@ -116,24 +149,39 @@ export default function HomeroomPage() {
                 let y = 60;
                 doc.setFontSize(11);
                 doc.setFont("helvetica", "bold");
-                doc.text("STUDENT DETAILS", 20, 60);
+                doc.text("STUDENT PROFILE", 20, 60);
 
                 doc.setFont("helvetica", "normal");
                 doc.text(`Name: ${result.studentName || 'Student'}`, 20, 70);
-                doc.text(`ID: ${result.studentId}`, 20, 78);
-                doc.text(`Grade: ${result.grade}-${result.section}`, 120, 70);
-                doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, 78);
+                doc.text(`ID: ${result.studentId}`, 20, 80);
+                doc.text(`Gender: ${result.gender || 'N/A'}`, 20, 90);
 
-                y = 100;
+                doc.text(`Grade: ${result.grade}-${result.section}`, 120, 70);
+                doc.text(`Roll No: ${result.rollNumber || '-'}`, 120, 80);
+                doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, 90);
+
+                // --- Rank Badge ---
+                doc.setFillColor(254, 243, 199); // Amber-100
+                doc.setDrawColor(245, 158, 11); // Amber-500
+                doc.roundedRect(pageWidth - 50, 55, 30, 25, 3, 3, 'FD');
+                doc.setTextColor(180, 83, 9); // Amber-700
+                doc.setFontSize(9);
+                doc.text("CLASS RANK", pageWidth - 35, 62, { align: 'center' });
+                doc.setFontSize(18);
+                doc.setFont("helvetica", "bold");
+                doc.text(`${result.rank}`, pageWidth - 35, 73, { align: 'center' });
+
+                y = 110;
 
                 // --- Results Table Header ---
                 doc.setFillColor(239, 246, 255); // Blue-50
                 doc.rect(15, y - 5, pageWidth - 30, 10, 'F');
                 doc.setFont("helvetica", "bold");
                 doc.setTextColor(37, 99, 235); // Blue-600
+                doc.setFontSize(10);
 
                 doc.text("SUBJECT", 20, y + 2);
-                doc.text("MARKS", 110, y + 2, { align: 'center' });
+                doc.text("MARKS / 100", 110, y + 2, { align: 'center' });
                 doc.text("GRADE", 150, y + 2, { align: 'center' });
 
                 y += 10;
@@ -159,12 +207,14 @@ export default function HomeroomPage() {
                 y += 15;
 
                 doc.setFont("helvetica", "bold");
-                doc.text(`Total Score: ${result.total ?? 0}`, 20, y);
-                doc.text(`Average: ${(result.average ?? 0).toFixed(1)} / 100`, 70, y);
-                doc.text(`Conduct: ${calculateConduct(result.average ?? 0)}`, 130, y);
+                doc.text(`Total Score: ${Number.isInteger(result.total) ? result.total : result.total.toFixed(1)}`, 20, y);
+                doc.text(`Average: ${(result.average ?? 0).toFixed(1)}%`, 80, y);
+                doc.text(`Conduct: ${calculateConduct(result.average ?? 0)}`, 140, y);
 
-                y += 10;
-                doc.text(`Result: ${result.promotedOrDetained || result.result}`, 140, y);
+                y += 15;
+                const isPass = result.promotedOrDetained === 'PROMOTED' || result.result === 'PASS';
+                doc.setTextColor(isPass ? 22 : 220, isPass ? 163 : 38, isPass ? 74 : 38); // Green-600 or Red-600
+                doc.text(`FINAL RESULT: ${result.promotedOrDetained || result.result}`, 20, y);
 
                 // --- Footer ---
                 const bottomY = doc.internal.pageSize.getHeight() - 30;
@@ -173,8 +223,8 @@ export default function HomeroomPage() {
                 doc.text("Generated via Excel Academy Admin Portal", pageWidth / 2, bottomY, { align: 'center' });
             }
 
-            doc.save(`Homeroom_Report_${user?.grade}-${user?.section}.pdf`);
-            success(`Generated ${reportableResults.length} report cards.`);
+            doc.save(`Report_Cards_Class_${user?.grade}-${user?.section}.pdf`);
+            success(`Generated ${reportData.length} report cards successfully.`);
 
         } catch (e) {
             console.error(e);
@@ -219,67 +269,20 @@ export default function HomeroomPage() {
                     className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100 font-bold h-10 px-6 rounded-xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
                 >
                     <Printer className="h-4 w-4" />
-                    <span>Class Report Cards</span>
+                    <span>Generate Report Cards</span>
                 </Button>
             </div>
 
-            <div className="grid gap-3">
-                {students.map(student => {
-                    const studentRes = results.find(r => r.studentId === student.studentId || r.studentId === student.id);
-                    const hasResult = !!studentRes;
-                    const isPassed = hasResult && (studentRes.promotedOrDetained === 'PROMOTED' || studentRes.result === 'PASS');
-                    const average = studentRes?.average || studentRes?.total / (studentRes?.subjects?.length || 1) || 0;
-
-                    return (
-                        <div key={student.id} className="glass-panel p-4 rounded-xl flex items-center justify-between hover:bg-white transition-all group border border-transparent hover:border-blue-100 hover:shadow-md">
-                            <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-600 border border-slate-100 shadow-sm group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                                    {student.name?.charAt(0) || 'S'}
-                                </div>
-                                <div className="space-y-0.5">
-                                    <p className="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors">{student.name}</p>
-                                    <p className="text-xs text-slate-400 font-mono tracking-tight">{student.rollNumber ? `Roll: ${student.rollNumber}` : 'No Roll #'}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-6">
-                                {hasResult ? (
-                                    <>
-                                        <div className="text-right hidden sm:block">
-                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Average</p>
-                                            <p className={`font-black text-lg ${average >= 35 ? 'text-green-600' : 'text-red-500'}`}>
-                                                {average.toFixed(1)}<span className="text-xs text-slate-300 ml-0.5">%</span>
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide border shadow-sm ${isPassed
-                                                ? 'bg-green-100 text-green-700 border-green-200'
-                                                : 'bg-red-100 text-red-700 border-red-200'
-                                                }`}>
-                                                {studentRes.promotedOrDetained || studentRes.result || 'PUBLISHED'}
-                                            </span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <span className="px-3 py-1.5 rounded-lg bg-slate-50 text-slate-400 text-[10px] font-bold uppercase border border-slate-100">
-                                        No Result
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-
-                {students.length === 0 && (
-                    <div className="glass-panel p-12 rounded-2xl flex flex-col items-center justify-center text-center space-y-4">
-                        <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-2">
-                            <Users className="h-8 w-8 text-slate-300" />
-                        </div>
-                        <h3 className="text-lg font-bold text-slate-700">No Students Found</h3>
-                        <p className="text-slate-400 text-sm max-w-xs mx-auto">
-                            It looks like there are no students assigned to your homeroom class ({user.grade}-{user.section}) yet.
-                        </p>
-                    </div>
-                )}
+            {/* Table View of Results */}
+            <div className="glass-panel rounded-2xl p-1">
+                <ResultTable
+                    students={students}
+                    subjects={allSubjects}
+                    classResults={results}
+                    user={user}
+                    onRefresh={() => { }} // Read only, no refresh needed really
+                    isHomeroomView={true}
+                />
             </div>
         </div>
     );

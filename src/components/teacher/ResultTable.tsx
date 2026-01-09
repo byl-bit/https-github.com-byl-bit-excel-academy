@@ -571,7 +571,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        {(settings?.allowTeacherEditAfterSubmission || classResults.some(r => r.status === 'draft')) && (
+                        {!isHomeroomView && (settings?.allowTeacherEditAfterSubmission || classResults.some(r => r.status === 'draft')) && (
                             <Button
                                 variant="outline"
                                 onClick={() => {
@@ -606,17 +606,19 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                 {editingRows.size > 0 ? 'Finish Editing' : 'Edit Marks'}
                             </Button>
                         )}
-                        <Button
-                            onClick={() => handleSubmitRoster(isHomeroomView ? 'roster' : 'subject-pending')}
-                            disabled={loadingFull}
-                            className={cn(
-                                "h-9 px-6 text-xs font-black shadow-lg shadow-blue-100 border-none transition-all flex items-center gap-2 rounded-lg hover:scale-105 active:scale-95",
-                                isHomeroomView ? "bg-indigo-600 hover:bg-indigo-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"
-                            )}
-                        >
-                            {loadingFull ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
-                            {isHomeroomView ? 'Submit Roster' : 'Submit All'}
-                        </Button>
+                        {!isHomeroomView && (
+                            <Button
+                                onClick={() => handleSubmitRoster('subject-pending')}
+                                disabled={loadingFull}
+                                className={cn(
+                                    "h-9 px-6 text-xs font-black shadow-lg shadow-blue-100 border-none transition-all flex items-center gap-2 rounded-lg hover:scale-105 active:scale-95",
+                                    "bg-blue-600 hover:bg-blue-700 text-white"
+                                )}
+                            >
+                                {loadingFull ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
+                                Submit All
+                            </Button>
+                        )}
                         <div className="h-6 w-px bg-slate-200 mx-1" />
                         <Button
                             variant="ghost"
