@@ -23,7 +23,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-white pt-12 pb-20 sm:pt-20 sm:pb-32 overflow-hidden border-b border-blue-100">
+      <section className="relative bg-white pt-12 pb-20 sm:pt-20 sm:pb-32 overflow-hidden border-b border-border">
         <div className="absolute inset-0 bg-[url('/hero-banner.png')] bg-cover bg-center opacity-30"></div>
         <div className="absolute inset-0 bg-linear-to-b from-background/70 via-background/50 to-background"></div>
 
@@ -32,7 +32,7 @@ export default function Home() {
             Admissions Open for {academicYear || '2026-2027'}
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-[1.1]">
-            Welcome to <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-700 via-indigo-600 to-sky-500 hover:from-blue-600 hover:via-purple-600 hover:to-sky-400 transition-all duration-500 drop-shadow-sm filter">Excel Academy WDD PORTAL</span>
+            Welcome to <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-blue-800 to-destructive hover:to-red-600 transition-all duration-500 drop-shadow-sm filter">Excel Academy WDD PORTAL</span>
             <br className="hidden sm:inline" />
             <span className="text-muted-foreground block mt-4 text-xl sm:text-2xl font-medium tracking-normal">
               Empowering Excellence
@@ -56,7 +56,7 @@ export default function Home() {
                 </Link>
               </Button>
             )}
-            <Button variant="outline" asChild className="rounded-full text-sm font-semibold h-10 px-6 w-full sm:w-auto bg-white/50 backdrop-blur-sm hover:bg-white/80 border-blue-100">
+            <Button variant="outline" asChild className="rounded-full text-sm font-semibold h-10 px-6 w-full sm:w-auto bg-white/50 backdrop-blur-sm hover:bg-white/80 border-border">
               <Link href="/announcements">
                 Latest News
               </Link>
@@ -65,17 +65,17 @@ export default function Home() {
         </div>
 
         {/* Abstract Background Elements */}
-        <div className="absolute -bottom-32 -left-32 w-64 h-64 sm:w-96 sm:h-96 bg-blue-50/30 rounded-full blur-3xl"></div>
-        <div className="absolute top-20 -right-20 w-48 h-48 sm:w-72 sm:h-72 bg-blue-50/30 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-32 -left-32 w-64 h-64 sm:w-96 sm:h-96 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 -right-20 w-48 h-48 sm:w-72 sm:h-72 bg-destructive/5 rounded-full blur-3xl"></div>
       </section>
 
       {/* Features Grid */}
       <section className="container py-8 sm:py-16 md:py-24 -mt-12 sm:-mt-20 relative z-20">
         <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-3">
-          <Card className="bg-white shadow-xl border-t-4 border-t-blue-500 hover:-translate-y-1 transition-transform duration-300 border-blue-100">
+          <Card className="bg-white shadow-xl border-t-4 border-t-primary hover:-translate-y-1 transition-transform duration-300 border-border">
             <CardHeader className="p-5 sm:p-6">
               <div className="relative w-full h-24 sm:h-32 mb-4 rounded-lg overflow-hidden flex items-center justify-center">
-                <GraduationCap className="h-16 w-16 text-blue-500/20 absolute" />
+                <GraduationCap className="h-16 w-16 text-primary/20 absolute" />
                 <NextImage
                   src="/academic-icon.png"
                   alt="Academic Excellence"
@@ -92,10 +92,10 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-xl border-t-4 border-t-sky-400 hover:-translate-y-1 transition-transform duration-300 border-blue-100">
+          <Card className="bg-white shadow-xl border-t-4 border-t-destructive hover:-translate-y-1 transition-transform duration-300 border-border">
             <CardHeader className="p-5 sm:p-6">
               <div className="relative w-full h-24 sm:h-32 mb-4 rounded-lg overflow-hidden flex items-center justify-center">
-                <Users className="h-16 w-16 text-sky-400/20 absolute" />
+                <Users className="h-16 w-16 text-destructive/20 absolute" />
                 <NextImage
                   src="/student-life-icon.png"
                   alt="Student Life"
@@ -112,10 +112,10 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-xl border-t-4 border-t-indigo-400 hover:-translate-y-1 transition-transform duration-300 border-blue-100">
+          <Card className="bg-white shadow-xl border-t-4 border-t-primary/70 hover:-translate-y-1 transition-transform duration-300 border-border">
             <CardHeader className="p-5 sm:p-6">
               <div className="relative w-full h-24 sm:h-32 mb-4 rounded-lg overflow-hidden flex items-center justify-center">
-                <Award className="h-16 w-16 text-indigo-400/20 absolute" />
+                <Award className="h-16 w-16 text-primary/15 absolute" />
                 <NextImage
                   src="/results-icon.png"
                   alt="Proven Results"
@@ -140,7 +140,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-linear-to-b from-white to-blue-50 py-16 sm:py-24 border-t border-blue-100">
+      <section className="bg-linear-to-b from-white to-primary/5 py-16 sm:py-24 border-t border-border">
         <div className="container text-center px-6">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Ready to Join Excel Academy?</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-base sm:text-lg">
@@ -219,10 +219,10 @@ function HomeAnnouncements() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-10 w-48 bg-blue-50 animate-pulse rounded"></div>
+        <div className="h-10 w-48 bg-muted animate-pulse rounded"></div>
         <div className="grid gap-6 md:grid-cols-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-80 bg-blue-50 animate-pulse rounded-xl"></div>
+            <div key={i} className="h-80 bg-muted animate-pulse rounded-xl"></div>
           ))}
         </div>
       </div>
@@ -247,13 +247,13 @@ function HomeAnnouncements() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
         {announcements.map((announcement) => (
-          <Card key={announcement.id} className="group hover:shadow-md transition-all duration-300 border-l-4 border-l-transparent hover:border-l-primary flex flex-col h-full">
+          <Card key={announcement.id} className="group hover:shadow-md transition-all duration-300 border-l-4 border-l-transparent hover:border-l-destructive flex flex-col h-full">
             {(announcement.media && announcement.media.length > 0) ? (
-              <div className="relative h-48 overflow-hidden rounded-t-lg bg-blue-50/50">
+              <div className="relative h-48 overflow-hidden rounded-t-lg bg-muted">
                 <SlideshowMedia media={announcement.media} title={announcement.title} />
               </div>
             ) : announcement.imageUrl ? (
-              <div className="relative h-48 overflow-hidden rounded-t-lg bg-blue-50/50">
+              <div className="relative h-48 overflow-hidden rounded-t-lg bg-muted">
                 <NextImage
                   src={announcement.imageUrl || ''}
                   alt={announcement.title}
@@ -265,9 +265,9 @@ function HomeAnnouncements() {
             <CardHeader>
               <div className="flex justify-between items-start mb-2">
                 <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide
-                   ${announcement.type === 'academic' ? 'bg-blue-100/50 text-blue-700' :
-                    announcement.type === 'event' ? 'bg-sky-100/50 text-sky-700' :
-                      'bg-indigo-50 text-indigo-700'}`}>
+                   ${announcement.type === 'academic' ? 'bg-primary/10 text-primary' :
+                    announcement.type === 'event' ? 'bg-destructive/10 text-destructive' :
+                      'bg-primary/5 text-primary'}`}>
                   {announcement.type}
                 </span>
                 <div className="flex items-center text-muted-foreground text-xs">
@@ -286,17 +286,10 @@ function HomeAnnouncements() {
                 <div className="flex items-center gap-4 mt-auto pt-3 border-t border-slate-100">
                   <button
                     onClick={(e) => handleVote(announcement.id, 'like', e)}
-                    className={`flex items-center gap-1.5 text-xs font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'like' ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500'}`}
+                    className={`flex items-center gap-1.5 text-xs font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'like' ? 'text-primary' : 'text-slate-400 hover:text-primary'}`}
                   >
-                    <ThumbsUp className={`h-4 w-4 ${votes[String(announcement.id)]?.myVote === 'like' ? 'fill-blue-600' : ''}`} />
+                    <ThumbsUp className={`h-4 w-4 ${votes[String(announcement.id)]?.myVote === 'like' ? 'fill-primary' : ''}`} />
                     <span>{votes[String(announcement.id)]?.likes ?? 0}</span>
-                  </button>
-                  <button
-                    onClick={(e) => handleVote(announcement.id, 'dislike', e)}
-                    className={`flex items-center gap-1.5 text-xs font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'dislike' ? 'text-red-500' : 'text-slate-400 hover:text-red-500'}`}
-                  >
-                    <ThumbsDown className={`h-4 w-4 ${votes[String(announcement.id)]?.myVote === 'dislike' ? 'fill-red-600' : ''}`} />
-                    <span>{votes[String(announcement.id)]?.dislikes ?? 0}</span>
                   </button>
                 </div>
               )}

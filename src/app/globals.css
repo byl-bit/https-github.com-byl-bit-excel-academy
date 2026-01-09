@@ -2,77 +2,77 @@
 
 @layer base {
   :root {
-    /* Pure White & Light Blue Theme */
-    /* Primary: Sky Blue */
-    --primary: 199 89% 48%;
+    /* Excel Academy Theme */
+    /* Primary: Navy Blue */
+    --primary: 222 65% 25%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Very Light Blue */
-    --secondary: 199 89% 95%;
-    --secondary-foreground: 199 89% 20%;
+    /* Secondary: Light Gray/Blue */
+    --secondary: 222 20% 96%;
+    --secondary-foreground: 222 47% 20%;
 
     /* Backgrounds: Pure White */
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    /* Darker, richer text */
+    --foreground: 222 47% 15%;
 
     /* Surface Cards: Pure white */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 47% 15%;
 
-    /* Feedback Colors - Refined for blue theme */
+    /* Feedback Colors */
     --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
     --warning: 45 93% 47%;
     --warning-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    /* Destructive/Accent: Crimson Red (from Logo) */
+    --destructive: 348 83% 47%;
     --destructive-foreground: 0 0% 100%;
 
-    /* UI Elements - Strictly Light Blue shadows/borders */
-    --muted: 199 89% 97%;
-    --muted-foreground: 199 89% 40%;
+    /* UI Elements */
+    --muted: 222 20% 96%;
+    --muted-foreground: 215 25% 45%;
 
-    --accent: 199 89% 96%;
-    --accent-foreground: 199 89% 20%;
+    --accent: 222 20% 96%;
+    --accent-foreground: 222 47% 20%;
 
-    --border: 199 89% 92%;
-    --input: 199 89% 92%;
-    --ring: 199 89% 48%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 65% 25%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 222 47% 15%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 
   .dark {
-    /* Dark Mode - Consistent with Light Blue & White Theme */
-    --background: 0 0% 100%;
-    --foreground: 199 89% 10%;
+    /* Dark Mode - Deep Navy Theme */
+    --background: 222 47% 10%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 199 89% 10%;
+    --card: 222 47% 12%;
+    --card-foreground: 210 40% 98%;
 
-    --primary: 199 89% 48%;
+    --primary: 222 65% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 199 89% 92%;
-    --secondary-foreground: 199 89% 20%;
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 199 89% 94%;
-    --muted-foreground: 199 89% 40%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 199 89% 92%;
-    --accent-foreground: 199 89% 20%;
+    --accent: 217 32% 17%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62% 40%;
+    --destructive: 348 62% 40%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 199 89% 88%;
-    --input: 199 89% 88%;
-    --ring: 199 89% 48%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 222 65% 45%;
   }
 
   /* Reset & Base Styles */
@@ -125,11 +125,11 @@
 
   /* Regular Card Utilities */
   .card {
-    @apply bg-white border border-blue-100 shadow-sm;
+    @apply bg-white border border-border shadow-sm;
   }
 
   .card-input {
-    @apply bg-white border border-blue-200 focus:ring-2 focus:ring-primary/50 transition-all rounded-lg outline-none;
+    @apply bg-white border border-input focus:ring-2 focus:ring-primary/50 transition-all rounded-lg outline-none;
   }
 
   .glass {
@@ -202,29 +202,6 @@
 
   .delay-500 {
     animation-delay: 500ms;
-  }
-
-  /* Santa Animation */
-  @keyframes santa-bounce {
-
-    0%,
-    100% {
-      transform: translateY(0) rotate(0deg);
-    }
-
-    25% {
-      transform: translateY(-3px) rotate(-10deg);
-    }
-
-    75% {
-      transform: translateY(-3px) rotate(10deg);
-    }
-  }
-
-  .animate-santa {
-    display: inline-block;
-    animation: santa-bounce 2s ease-in-out infinite;
-    transform-origin: bottom center;
   }
 }
 
