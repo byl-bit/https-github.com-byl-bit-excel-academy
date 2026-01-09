@@ -29,6 +29,7 @@ interface AuthContextType {
     register: (firstName: string, middleName: string, lastName: string, password: string, grade?: string, section?: string, photo?: string, gender?: string, rollNumber?: string) => Promise<{ success: boolean; message?: string; studentId?: string }>;
     registerTeacher: (fullName: string, sex: string, grade: string, section: string, password: string, photo?: string) => Promise<{ success: boolean; message?: string; teacherId?: string }>;
     isAuthenticated: boolean;
+    isLoading: boolean;
     getPendingUsers: () => User[];
     approveUser: (userId: string) => boolean;
 }
@@ -81,7 +82,7 @@ const generateStudentId = (): string => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+    const [isLoading, setIsLoading] = useState(true);
 
     // Proactive cleanup for legacy storage that might be filling up quota
     useEffect(() => {
@@ -98,10 +99,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Check if user is logged in
         const savedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
         if (savedUser) {
-            const parsedUser = JSON.parse(savedUser);
-            setUser(parsedUser);
-            setIsAuthenticated(true);
+            try {
+                const parsedUser = JSON.parse(savedUser);
+                setUser(parsedUser);
+                setIsAuthenticated(true);
+            } catch (e) {
+                console.error("Failed to parse user session", e);
+            }
         }
+        setIsLoading(false);
     }, []);
 
     const login = async (emailOrId: string, password: string): Promise<{ success: boolean; message?: string; user?: User }> => {
@@ -366,7 +372,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, register, registerTeacher, isAuthenticated, getPendingUsers, approveUser } as any}>
+        <AuthContext.Provider value={{ user, login, logout, register, registerTeacher, isAuthenticated, isLoading, getPendingUsers, approveUser } as any}>
             {children}
         </AuthContext.Provider>
     );

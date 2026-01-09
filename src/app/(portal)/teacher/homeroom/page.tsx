@@ -86,22 +86,34 @@ export default function HomeroomPage() {
 
             // 1. Prepare Data: Sync latest student details and calculate Ranks
             // Filter to include only results that match current students (to ensure sync)
+            // 1. Prepare Data: Sync latest student details and calculate Ranks
+            // Filter to include only results that match current students (to ensure sync)
             const reportData = results
                 .map(r => {
-                    const studentProfile = students.find(s =>
-                        String(s.id || s.student_id || s.studentId) === String(r.studentId) ||
-                        String(s.name) === String(r.studentName)
-                    );
+                    // Try to find the student profile using UUID or Display ID
+                    const rUuid = r.student_id || r.id; // DB UUID in results
+                    const rDisplayId = r.studentId; // If available
+                    const rName = r.student_name || r.studentName;
 
-                    if (!studentProfile) return r; // Fallback to existing result data
+                    const studentProfile = students.find(s => {
+                        const sUuid = s.id;
+                        const sDisplayId = s.studentId || s.student_id; // API might return student_id as display id if aliased, or just id as uuid
+
+                        // Robust matching:
+                        if (rUuid && sUuid && String(rUuid) === String(sUuid)) return true;
+                        if (rDisplayId && sDisplayId && String(rDisplayId) === String(sDisplayId)) return true;
+                        return false;
+                    });
+
+                    if (!studentProfile) return r; // Fallback to existing result data if no profile (shouldn't happen for active students)
 
                     // Sync latest details
                     return {
                         ...r,
-                        studentName: studentProfile.fullName || studentProfile.name, // Sync Name
-                        studentId: studentProfile.studentId || studentProfile.student_id || r.studentId, // Sync ID
-                        gender: normalizeGender(studentProfile.gender || studentProfile.sex), // Sync Gender
-                        rollNumber: studentProfile.rollNumber || r.rollNumber,
+                        studentName: studentProfile.fullName || studentProfile.name || rName, // Sync Name
+                        studentId: studentProfile.studentId || studentProfile.student_id || rDisplayId || 'N/A', // Sync ID (Prefer display ID)
+                        gender: normalizeGender(studentProfile.gender || studentProfile.sex || r.gender), // Sync Gender
+                        rollNumber: studentProfile.rollNumber || r.rollNumber || r.roll_number || '-',
                         grade: studentProfile.grade || r.grade,
                         section: studentProfile.section || r.section
                     };

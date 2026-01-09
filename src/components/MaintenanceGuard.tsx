@@ -6,38 +6,51 @@ import { usePathname } from 'next/navigation';
 import { Lock } from 'lucide-react';
 
 export default function MaintenanceGuard({ children }: { children: React.ReactNode }) {
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
     const pathname = usePathname();
     const [isMaintenance, setIsMaintenance] = useState(false);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
-        // Check maintenance status
-        const checkMaintenance = () => {
-            const maintenance = localStorage.getItem('excel_academy_maintenance') === 'true';
-            setIsMaintenance(maintenance);
-            setIsLoaded(true);
+        const checkMaintenance = async () => {
+            try {
+                // Fetch latest settings from server
+                const res = await fetch('/api/settings', { cache: 'no-store' });
+                if (res.ok) {
+                    const settings = await res.json();
+                    setIsMaintenance(settings.maintenanceMode === true);
+                }
+            } catch (error) {
+                console.error('Failed to check maintenance status', error);
+            } finally {
+                setIsChecking(false);
+            }
         };
 
         checkMaintenance();
 
-        // Listen for storage changes (in case logged in as admin in another tab)
-        window.addEventListener('storage', checkMaintenance);
-        return () => window.removeEventListener('storage', checkMaintenance);
+        // Polling every 30 seconds to keep partial sync
+        const interval = setInterval(checkMaintenance, 30000);
+        return () => clearInterval(interval);
     }, []);
 
     // Allow admins to bypass
     const isAdmin = user?.role === 'admin';
 
-    // Always allow login/register
+    // Always allow login/register/admin pages (admin page has its own auth guard)
     const isAuthPage = pathname?.startsWith('/auth') || pathname === '/login' || pathname === '/admin';
 
-    if (!isLoaded) return null;
+    // Wait until we know the status of both auth and maintenance
+    if (authLoading || isChecking) {
+        // Optional: Return a spinner or just nothing (white screen for a split second)
+        // Returning null avoids layout shift if it's fast
+        return null;
+    }
 
     if (isMaintenance && !isAdmin && !isAuthPage) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-950 text-white text-center">
-                <div className="bg-slate-900 p-8 rounded-2xl shadow-2xl border border-slate-800 max-w-md w-full">
+                <div className="bg-slate-900 p-8 rounded-2xl shadow-2xl border border-slate-800 max-w-md w-full animate-fade-in">
                     <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Lock className="w-10 h-10 text-blue-400" />
                     </div>

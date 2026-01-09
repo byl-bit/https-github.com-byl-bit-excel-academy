@@ -48,17 +48,15 @@ export default function AdminPage() {
     const [activeTab, setActiveTab] = useState('overview');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [processingResetId, setProcessingResetId] = useState<string | null>(null);
-    const [maintenanceMode, setMaintenanceMode] = useState(() => {
-        if (typeof window !== 'undefined') return localStorage.getItem('excel_academy_maintenance') === 'true';
-        return false;
-    });
-
     // Listen for global sync from Navbar
     useEffect(() => {
         const syncHandler = () => refresh(true);
         window.addEventListener('systemSync', syncHandler);
         return () => window.removeEventListener('systemSync', syncHandler);
     }, [refresh]);
+
+    const maintenanceMode = settings?.maintenanceMode === true;
+
 
     // --- Actions ---
 
@@ -356,8 +354,7 @@ export default function AdminPage() {
 
     const handleToggleMaintenance = () => {
         const next = !maintenanceMode;
-        setMaintenanceMode(next);
-        localStorage.setItem('excel_academy_maintenance', String(next));
+        handleUpdateSettings('maintenanceMode', next);
         logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Toggle Maintenance', category: 'system', details: `Maintenance mode set to ${next}` });
     };
 
