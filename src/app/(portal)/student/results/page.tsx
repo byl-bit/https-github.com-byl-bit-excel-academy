@@ -151,7 +151,7 @@ export default function StudentResultsPage() {
         doc.setFont("helvetica", "normal");
         doc.text(`Student ID:`, 20, 78);
         doc.setFont("helvetica", "bold");
-        doc.text(`${user.studentId}`, 40, 78);
+        doc.text(`${user.studentId || (user as any).student_id || 'N/A'}`, 40, 78);
 
         doc.setFont("helvetica", "normal");
         doc.text(`Grade/Section:`, 120, 70);

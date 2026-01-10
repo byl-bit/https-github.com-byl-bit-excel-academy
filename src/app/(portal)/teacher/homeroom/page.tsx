@@ -164,8 +164,8 @@ export default function HomeroomPage() {
                 doc.text("STUDENT PROFILE", 20, 60);
 
                 doc.setFont("helvetica", "normal");
-                doc.text(`Name: ${result.studentName || 'Student'}`, 20, 70);
-                doc.text(`ID: ${result.studentId}`, 20, 80);
+                doc.text(`Name: ${result.studentName || result.student_name || 'Student'}`, 20, 70);
+                doc.text(`ID: ${result.studentId || result.student_id || 'N/A'}`, 20, 80);
                 doc.text(`Gender: ${result.gender || 'N/A'}`, 20, 90);
 
                 doc.text(`Grade: ${result.grade}-${result.section}`, 120, 70);

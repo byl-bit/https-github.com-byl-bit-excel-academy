@@ -61,8 +61,8 @@ export function TeacherOverview({ user, students, classResults, onExport, onImpo
             doc.text("STUDENT DETAILS", 20, 60);
 
             doc.setFont("helvetica", "normal");
-            doc.text(`Name: ${result.studentName || 'Student'}`, 20, 70);
-            doc.text(`ID: ${result.studentId || (result as any).student_id}`, 20, 78);
+            doc.text(`Name: ${result.studentName || (result as any).student_name || 'Student'}`, 20, 70);
+            doc.text(`ID: ${result.studentId || (result as any).student_id || 'N/A'}`, 20, 78);
             doc.text(`Gender: ${normalizeGender(result.gender || (result as any).sex) || '-'}`, 20, 86);
             doc.text(`Grade: ${result.grade}-${result.section}`, 120, 70);
             doc.text(`Roll No: ${result.rollNumber || (result as any).roll_number || '-'}`, 120, 78);
