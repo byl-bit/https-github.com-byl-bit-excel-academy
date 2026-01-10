@@ -18,22 +18,33 @@ export async function GET(request: Request) {
     const roleId = searchParams.get('role');
     const grade = searchParams.get('grade');
     const section = searchParams.get('section');
-    const limit = searchParams.get('limit');
+    const limitParam = searchParams.get('limit');
+    const pageParam = searchParams.get('page');
     const id = searchParams.get('id');
 
+    const db = supabaseAdmin || supabase;
+
     try {
-        let query = supabase.from('users').select('id, name, email, role, status, student_id, teacher_id, admin_id, roll_number, grade, section, gender, photo, created_at');
+        let query = db.from('users').select('id, name, email, role, status, student_id, teacher_id, admin_id, roll_number, grade, section, gender, photo, created_at', { count: 'exact' });
 
         if (id) query = query.eq('id', id);
         if (roleId) query = query.eq('role', roleId);
         if (grade) query = query.eq('grade', grade);
         if (section) query = query.eq('section', section);
 
-        if (limit) {
-            query = query.limit(parseInt(limit));
+        // Sorting
+        query = query.order('created_at', { ascending: false });
+
+        // Pagination
+        if (limitParam) {
+            const limit = parseInt(limitParam);
+            const page = pageParam ? parseInt(pageParam) : 1;
+            const from = (page - 1) * limit;
+            const to = from + limit - 1;
+            query = query.range(from, to);
         }
 
-        const { data: users, error } = await query.order('created_at', { ascending: false });
+        const { data: users, count, error } = await query;
 
         if (error) {
             console.error('Supabase error fetching users:', error);
@@ -80,6 +91,16 @@ export async function GET(request: Request) {
                 photo: getString(u, 'photo')
             };
         });
+
+        // Return simpler response if no pagination requested to maintain backward compatibility, 
+        // OR return structured response? 
+        // Existing clients expect Array. If I return { data, total }, it breaks them.
+        // So I must return Array, but pagination relies on headers or just "getting the slice you asked for".
+        // The user only asked for "performance", not "API contract change".
+        // Returning the array (slice) is correct behavior for `range`.
+
+        // If we want to expose 'total' for pagination UI, we usually wrap it.
+        // But let's stick to returning the array to avoid breaking the frontend.
 
         return NextResponse.json(mappedUsers);
     } catch (errorUnknown) {

@@ -170,51 +170,57 @@ export default function StudentResultsPage() {
         doc.setTextColor(30, 58, 138); // Blue 900
         doc.text("SUBJECT", 20, y + 2);
 
-        const assessments = assessmentTypes || [];
-        let xPos = 90;
-        const colWidth = 30;
-        if (assessments.length > 0) {
-            assessments.forEach((a: any) => {
-                doc.text(`${a.label} (${a.maxMarks})`, xPos, y + 2, { align: 'center' });
-                xPos += colWidth;
-            });
-            doc.text("TOTAL", xPos, y + 2, { align: 'center' });
-            xPos += colWidth;
-            doc.text("GRADE", xPos, y + 2, { align: 'center' });
-        } else {
-            doc.text("MARKS", 110, y + 2, { align: 'center' });
-            doc.text("GRADE", 150, y + 2, { align: 'center' });
-        }
+        if (result) {
+            const hasAssessmentData = result.subjects.some((s: any) => s.assessments && Object.keys(s.assessments).length > 0);
+            const showBreakdown = (assessmentTypes || []).length > 0 && hasAssessmentData;
 
-        y += 10;
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(0, 0, 0);
+            const assessments = showBreakdown ? (assessmentTypes || []) : [];
+            let xPos = 90;
+            const colWidth = 30;
 
-        result.subjects.forEach((sub, index) => {
-            if (index % 2 === 0) {
-                doc.setFillColor(239, 246, 255); // Blue 50
-                doc.rect(15, y - 6, pageWidth - 30, 10, 'F');
-            }
-            doc.text(`${sub.name}`, 20, y);
-
-            if (assessments.length > 0) {
-                let x = 90;
+            if (showBreakdown) {
                 assessments.forEach((a: any) => {
-                    const val = sub.assessments && sub.assessments[a.id] !== undefined ? String(sub.assessments[a.id]) : '-';
-                    doc.text(val, x, y, { align: 'center' });
-                    x += colWidth;
+                    doc.text(`${a.label} (${a.maxMarks})`, xPos, y + 2, { align: 'center' });
+                    xPos += colWidth;
                 });
-                doc.text(`${sub.marks}`, x, y, { align: 'center' });
-                x += colWidth;
-                const grade = calculateGrade(sub.marks);
-                doc.text(`${grade}`, x, y, { align: 'center' });
+                doc.text("TOTAL", xPos, y + 2, { align: 'center' });
+                xPos += colWidth;
+                doc.text("GRADE", xPos, y + 2, { align: 'center' });
             } else {
-                doc.text(`${sub.marks.toString()}`, 110, y, { align: 'center' });
-                const grade = calculateGrade(sub.marks);
-                doc.text(`${grade}`, 150, y, { align: 'center' });
+                doc.text("MARKS", 110, y + 2, { align: 'center' });
+                doc.text("GRADE", 150, y + 2, { align: 'center' });
             }
+
             y += 10;
-        });
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(0, 0, 0);
+
+            result.subjects.forEach((sub, index) => {
+                if (index % 2 === 0) {
+                    doc.setFillColor(239, 246, 255); // Blue 50
+                    doc.rect(15, y - 6, pageWidth - 30, 10, 'F');
+                }
+                doc.text(`${sub.name}`, 20, y);
+
+                if (showBreakdown) {
+                    let x = 90;
+                    assessments.forEach((a: any) => {
+                        const val = sub.assessments && sub.assessments[a.id] !== undefined ? String(sub.assessments[a.id]) : '-';
+                        doc.text(val, x, y, { align: 'center' });
+                        x += colWidth;
+                    });
+                    doc.text(`${sub.marks}`, x, y, { align: 'center' });
+                    x += colWidth;
+                    const grade = calculateGrade(sub.marks);
+                    doc.text(`${grade}`, x, y, { align: 'center' });
+                } else {
+                    doc.text(`${sub.marks.toString()}`, 110, y, { align: 'center' });
+                    const grade = calculateGrade(sub.marks);
+                    doc.text(`${grade}`, 150, y, { align: 'center' });
+                }
+                y += 10;
+            });
+        }
 
         doc.setDrawColor(30, 64, 175);
         doc.setLineWidth(0.5);
@@ -240,6 +246,10 @@ export default function StudentResultsPage() {
     };
 
     if (loading) return <div className="text-center py-12 text-blue-600">Loading results...</div>;
+
+    // Check if we have breakdown data to decide whether to show detailed columns
+    const hasAssessmentData = result?.subjects.some((s: any) => s.assessments && Object.keys(s.assessments).length > 0);
+    const showBreakdown = assessmentTypes.length > 0 && hasAssessmentData;
 
     return (
         <div className="space-y-6 animate-fade-in-up">
@@ -365,7 +375,7 @@ export default function StudentResultsPage() {
                                     <thead className="bg-blue-50/50 text-blue-900">
                                         <tr>
                                             <th className="px-6 py-4 font-bold">Subject</th>
-                                            {assessmentTypes.length > 0 && assessmentTypes.map((type: any) => (
+                                            {showBreakdown && assessmentTypes.map((type: any) => (
                                                 <th key={type.id} className="px-4 py-4 font-bold text-center text-xs uppercase">
                                                     {type.label}
                                                     <span className="block text-[8px] opacity-60">({type.maxMarks})</span>
@@ -383,7 +393,7 @@ export default function StudentResultsPage() {
                                             return (
                                                 <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
                                                     <td className="px-6 py-4 font-medium text-blue-900">{sub.name}</td>
-                                                    {assessmentTypes.length > 0 && assessmentTypes.map((type: any) => {
+                                                    {showBreakdown && assessmentTypes.map((type: any) => {
                                                         const key = String(type.id);
                                                         const val = sub.assessments?.[key];
                                                         return (
