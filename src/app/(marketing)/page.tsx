@@ -1,10 +1,13 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import NextImage from "next/image";
-import { ArrowRight, Calendar, FileText, CheckCircle, GraduationCap, Users, BookOpen, Award, Info, Phone, ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  ArrowRight, Calendar, GraduationCap, Users, Award,
+  ThumbsUp, ChevronRight, Star, TrendingUp, ShieldCheck
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { FormattedText } from "@/components/FormattedText";
@@ -12,7 +15,6 @@ import { SlideshowMedia } from "@/components/SlideshowMedia";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth() as any;
-
   const [academicYear, setAcademicYear] = useState('');
 
   useEffect(() => {
@@ -21,137 +23,160 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-white pt-12 pb-20 sm:pt-20 sm:pb-32 overflow-hidden border-b border-border">
-        <div className="absolute inset-0 bg-[url('/hero-banner.png')] bg-cover bg-center opacity-30"></div>
-        <div className="absolute inset-0 bg-linear-to-b from-background/70 via-background/50 to-background"></div>
+    <div className="flex flex-col min-h-screen font-sans">
 
-        <div className="container relative z-10 text-center space-y-4 sm:space-y-6">
-          <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs sm:text-sm font-medium backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* --- HERO SECTION --- */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-slate-900 text-white">
+        {/* Abstract Dynamic Background */}
+        <div className="absolute inset-0 z-0 select-none">
+          <NextImage
+            src="/hero-banner.png"
+            alt="Campus Background"
+            fill
+            className="object-cover opacity-20"
+            priority
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/80 to-slate-900/60" />
+          <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/30 blur-[120px] rounded-full mix-blend-screen animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-destructive/20 blur-[100px] rounded-full mix-blend-screen animate-pulse" style={{ animationDuration: '7s' }} />
+        </div>
+
+        <div className="container relative z-10 px-6 py-20 text-center">
+          {/* Admissions Tag */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium text-blue-100 mb-8 animate-fade-in-up">
+            <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
             Admissions Open for {academicYear || '2026-2027'}
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-[1.1]">
-            Welcome to <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-blue-800 to-destructive hover:to-red-600 transition-all duration-500 drop-shadow-sm filter">Excel Academy WDD PORTAL</span>
-            <br className="hidden sm:inline" />
-            <span className="text-muted-foreground block mt-4 text-xl sm:text-2xl font-medium tracking-normal">
-              Empowering Excellence
+
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6 animate-fade-in-up delay-100">
+            Welcome to <br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-300 via-white to-blue-200">
+              Excel Academy
             </span>
           </h1>
-          <p className="mx-auto max-w-[700px] text-muted-foreground text-base sm:text-xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 px-4">
-            Excel Academy WDD provides a world-class education fostering academic success,
-            character development, and future leaders.
+
+          <p className="max-w-2xl mx-auto text-lg sm:text-xl text-slate-300 mb-10 leading-relaxed animate-fade-in-up delay-200">
+            Empowering the next generation of leaders through world-class education,
+            character development, and verified academic excellence.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 pt-6 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300 px-6">
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300">
             {!isAuthenticated ? (
-              <Button asChild className="rounded-full text-sm font-semibold h-10 px-6 w-full sm:w-auto shadow-md hover:shadow-lg transition-all">
+              <Button asChild size="lg" className="h-14 px-8 rounded-full text-base font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:scale-105">
                 <Link href="/auth/login">
-                  Student Login <ArrowRight className="ml-2 h-4 w-4" />
+                  Student Login <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             ) : (
-              <Button asChild className="rounded-full text-sm font-semibold h-10 px-6 w-full sm:w-auto shadow-md hover:shadow-lg transition-all">
+              <Button asChild size="lg" className="h-14 px-8 rounded-full text-base font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:scale-105">
                 <Link href={user?.role === 'admin' ? '/admin' : user?.role === 'teacher' ? '/teacher' : '/student'}>
-                  Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                  Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             )}
-            <Button variant="outline" asChild className="rounded-full text-sm font-semibold h-10 px-6 w-full sm:w-auto bg-white/50 backdrop-blur-sm hover:bg-white/80 border-border">
-              <Link href="/announcements">
-                Latest News
+
+            <Button variant="outline" size="lg" asChild className="h-14 px-8 rounded-full text-base font-semibold bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white backdrop-blur-sm transition-all">
+              <Link href="/admissions/apply">
+                Apply Now
               </Link>
             </Button>
           </div>
         </div>
 
-        {/* Abstract Background Elements */}
-        <div className="absolute -bottom-32 -left-32 w-64 h-64 sm:w-96 sm:h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute top-20 -right-20 w-48 h-48 sm:w-72 sm:h-72 bg-destructive/5 rounded-full blur-3xl"></div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="container py-8 sm:py-16 md:py-24 -mt-12 sm:-mt-20 relative z-20">
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-3">
-          <Card className="bg-white shadow-xl border-t-4 border-t-primary hover:-translate-y-1 transition-transform duration-300 border-border">
-            <CardHeader className="p-5 sm:p-6">
-              <div className="relative w-full h-24 sm:h-32 mb-4 rounded-lg overflow-hidden flex items-center justify-center">
-                <GraduationCap className="h-16 w-16 text-primary/20 absolute" />
-                <NextImage
-                  src="/academic-icon.png"
-                  alt="Academic Excellence"
-                  fill
-                  className="object-contain p-2"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-              </div>
-              <CardTitle className="text-xl sm:text-2xl">Academic Excellence</CardTitle>
-              <CardDescription className="text-sm">Top-tier curriculum designed for success.</CardDescription>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6 text-sm sm:text-base leading-relaxed">
-              We consistently achieve 100% pass rates with our rigorous academic programs and dedicated faculty.
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white shadow-xl border-t-4 border-t-destructive hover:-translate-y-1 transition-transform duration-300 border-border">
-            <CardHeader className="p-5 sm:p-6">
-              <div className="relative w-full h-24 sm:h-32 mb-4 rounded-lg overflow-hidden flex items-center justify-center">
-                <Users className="h-16 w-16 text-destructive/20 absolute" />
-                <NextImage
-                  src="/student-life-icon.png"
-                  alt="Student Life"
-                  fill
-                  className="object-contain p-2"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-              </div>
-              <CardTitle className="text-xl sm:text-2xl">Student Life</CardTitle>
-              <CardDescription className="text-sm">Vibrant community and extracurriculars.</CardDescription>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6 text-sm sm:text-base leading-relaxed">
-              From sports to coding clubs, we nurture talent beyond the classroom ensuring holistic development.
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white shadow-xl border-t-4 border-t-primary/70 hover:-translate-y-1 transition-transform duration-300 border-border">
-            <CardHeader className="p-5 sm:p-6">
-              <div className="relative w-full h-24 sm:h-32 mb-4 rounded-lg overflow-hidden flex items-center justify-center">
-                <Award className="h-16 w-16 text-primary/15 absolute" />
-                <NextImage
-                  src="/results-icon.png"
-                  alt="Proven Results"
-                  fill
-                  className="object-contain p-2"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-              </div>
-              <CardTitle className="text-xl sm:text-2xl">Proven Results</CardTitle>
-              <CardDescription className="text-sm">Consistently ranked top in the region.</CardDescription>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6 text-sm sm:text-base leading-relaxed">
-              Our students gain admission to top universities worldwide, backed by our strong alumni network.
-            </CardContent>
-          </Card>
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-50 hidden sm:block">
+          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
+            <div className="w-1 h-2 bg-white/50 rounded-full mt-2"></div>
+          </div>
         </div>
       </section>
 
-      {/* Latest Updates Section */}
-      <section className="container py-8 sm:py-16">
-        <HomeAnnouncements />
+      {/* --- STATS SECTION --- */}
+      <section className="bg-white border-b border-slate-100 relative z-20 -mt-8 sm:-mt-16 mx-4 sm:mx-8 md:container md:mx-auto rounded-xl shadow-xl shadow-slate-200/50 overflow-hidden">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-100">
+          {[
+            { label: "Pass Rate", value: "100%", icon: TrendingUp, color: "text-green-600" },
+            { label: "Expert Faculty", value: "50+", icon: Users, color: "text-blue-600" },
+            { label: "Students", value: "1200+", icon: GraduationCap, color: "text-indigo-600" },
+            { label: "Years of Excellence", value: "25", icon: ShieldCheck, color: "text-purple-600" }
+          ].map((stat, i) => (
+            <div key={i} className="p-6 md:p-8 flex flex-col items-center justify-center text-center group hover:bg-slate-50 transition-colors">
+              <div className={`mb-3 p-3 rounded-full bg-slate-50 group-hover:bg-white group-hover:shadow-sm transition-all ${stat.color}`}>
+                <stat.icon className="w-6 h-6" />
+              </div>
+              <span className="text-2xl md:text-3xl font-bold text-slate-900">{stat.value}</span>
+              <span className="text-sm font-medium text-slate-500 uppercase tracking-wider mt-1">{stat.label}</span>
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-linear-to-b from-white to-primary/5 py-16 sm:py-24 border-t border-border">
-        <div className="container text-center px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">Ready to Join Excel Academy?</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-base sm:text-lg">
-            Secure your spot for the upcoming academic year. Applications are now open for Grades 9-12.
+      {/* --- FEATURES GRID --- */}
+      <section className="py-24 bg-slate-50">
+        <div className="container px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-sm font-bold text-primary uppercase tracking-widest mb-2">Why Excel Academy</h2>
+            <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Excellence in Every Aspect</h3>
+            <p className="text-slate-600 text-lg">We provide a holistic educational environment designed to foster growth, creativity, and leadership.</p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            <FeatureCard
+              icon={GraduationCap}
+              title="Academic Excellence"
+              desc="Our rigorous curriculum tailored to international standards ensures students excel in global assessments."
+              image="/academic-icon.png"
+              accent="border-blue-500"
+            />
+            <FeatureCard
+              icon={Users}
+              title="Vibrant Community"
+              desc="A diverse, inclusive environment where every student finds their voice through clubs, sports, and arts."
+              image="/student-life-icon.png"
+              accent="border-purple-500"
+            />
+            <FeatureCard
+              icon={Award}
+              title="Proven Results"
+              desc="Consistently ranked as the top performing institution with alumni in prestigious universities worldwide."
+              image="/results-icon.png"
+              accent="border-green-500"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* --- ANNOUNCEMENTS --- */}
+      <section className="py-24 bg-white">
+        <div className="container px-6">
+          <HomeAnnouncements />
+        </div>
+      </section>
+
+      {/* --- CTA SECTION --- */}
+      <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-br from-blue-900/20 to-purple-900/20 opacity-50"></div>
+        {/* Glow Effects */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[128px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-destructive/20 blur-[100px] rounded-full -translate-x-1/2 translate-y-1/2"></div>
+
+        <div className="container relative z-10 px-6 text-center">
+          <div className="inline-flex items-center justify-center p-3 mb-8 bg-white/5 rounded-full border border-white/10 backdrop-blur-sm">
+            <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 mr-2" />
+            <span className="text-sm font-medium">Join a community of achievers</span>
+          </div>
+
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Ready to start your journey?</h2>
+          <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10">
+            Applications are now open for the upcoming academic year. Secure your future with Excel Academy today.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-            <Button size="lg" asChild className="w-full sm:w-auto h-12">
-              <Link href="/admissions/apply">Apply Now</Link>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button size="lg" asChild className="h-14 px-8 rounded-full bg-white text-slate-900 hover:bg-slate-100 font-bold transition-transform hover:scale-105">
+              <Link href="/admissions/apply">Start Application</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="w-full sm:w-auto h-12">
-              <Link href="/about">Contact Admissions</Link>
+            <Button size="lg" variant="outline" asChild className="h-14 px-8 rounded-full border-white/20 text-white hover:bg-white/10 backdrop-blur-sm">
+              <Link href="/contact">Schedule a Visit</Link>
             </Button>
           </div>
         </div>
@@ -160,6 +185,36 @@ export default function Home() {
   );
 }
 
+function FeatureCard({ icon: Icon, title, desc, image, accent }: any) {
+  return (
+    <Card className="group relative overflow-hidden border-none shadow-lg bg-white hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+      <div className={`absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-current to-transparent opacity-0 group-hover:opacity-100 transition-opacity ${accent.replace('border-', 'text-')}`}></div>
+
+      <div className="relative h-48 bg-slate-100 overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-slate-900/5 group-hover:bg-slate-900/0 transition-colors z-10"></div>
+        <Icon className="absolute z-0 w-32 h-32 text-slate-200/50 -rotate-12 -bottom-4 -right-4 group-hover:scale-110 transition-transform duration-500" />
+        <NextImage
+          src={image}
+          alt={title}
+          width={120}
+          height={120}
+          className="relative z-20 object-contain drop-shadow-lg group-hover:scale-110 transition-transform duration-500"
+        />
+      </div>
+
+      <CardContent className="p-8">
+        <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors">{title}</h3>
+        <p className="text-slate-600 leading-relaxed">{desc}</p>
+
+        <div className="mt-6 flex items-center text-primary font-semibold text-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+          Learn more <ChevronRight className="w-4 h-4 ml-1" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Announcements Component (Preserved Logic, Updated UI)
 function HomeAnnouncements() {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,11 +242,10 @@ function HomeAnnouncements() {
       if (vote === 'like') newLikes--;
       else newDislikes--;
     } else {
-      if (current.myVote === 'like') newLikes--;
-      if (current.myVote === 'dislike') newDislikes--;
-
-      if (vote === 'like') newLikes++;
-      else newDislikes++;
+      current.myVote === 'like' && newLikes--;
+      current.myVote === 'dislike' && newDislikes--;
+      vote === 'like' && newLikes++;
+      vote === 'dislike' && newDislikes++;
     }
 
     const updated = { ...votes, [key]: { likes: newLikes, dislikes: newDislikes, myVote: newVote } };
@@ -203,28 +257,17 @@ function HomeAnnouncements() {
     fetch('/api/announcements?limit=3')
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setAnnouncements(data);
-        } else {
-          // Fallback to mock data if DB is empty
-          import("@/lib/mockData").then(m => setAnnouncements(m.MOCK_ANNOUNCEMENTS.slice(0, 3)));
-        }
+        if (Array.isArray(data) && data.length > 0) setAnnouncements(data);
+        else import("@/lib/mockData").then(m => setAnnouncements(m.MOCK_ANNOUNCEMENTS.slice(0, 3)));
       })
-      .catch(() => {
-        import("@/lib/mockData").then(m => setAnnouncements(m.MOCK_ANNOUNCEMENTS.slice(0, 3)));
-      })
+      .catch(() => import("@/lib/mockData").then(m => setAnnouncements(m.MOCK_ANNOUNCEMENTS.slice(0, 3))))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="h-10 w-48 bg-muted animate-pulse rounded"></div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-80 bg-muted animate-pulse rounded-xl"></div>
-          ))}
-        </div>
+      <div className="grid gap-8 md:grid-cols-3">
+        {[1, 2, 3].map(i => <div key={i} className="h-96 bg-slate-100 animate-pulse rounded-2xl"></div>)}
       </div>
     );
   }
@@ -233,64 +276,64 @@ function HomeAnnouncements() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Latest Updates</h2>
-          <p className="text-muted-foreground">Stay informed with the latest announcements from Excel Academy.</p>
+      <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+        <div className="max-w-xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Latest Updates</h2>
+          <p className="text-lg text-slate-600">Keep up with the latest news, events, and academic highlights from around the campus.</p>
         </div>
-        <Button variant="ghost" className="text-primary group" asChild>
+        <Button variant="outline" className="rounded-full border-slate-300 hover:border-primary hover:text-primary transition-colors px-6" asChild>
           <Link href="/announcements">
-            View All <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            View All Updates <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {announcements.map((announcement) => (
-          <Card key={announcement.id} className="group hover:shadow-md transition-all duration-300 border-l-4 border-l-transparent hover:border-l-destructive flex flex-col h-full">
-            {(announcement.media && announcement.media.length > 0) ? (
-              <div className="relative h-48 overflow-hidden rounded-t-lg bg-muted">
+          <Card key={announcement.id} className="group flex flex-col h-full bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden hover:-translate-y-1">
+            <div className="relative h-56 bg-slate-100 overflow-hidden">
+              {(announcement.media && announcement.media.length > 0) ? (
                 <SlideshowMedia media={announcement.media} title={announcement.title} />
-              </div>
-            ) : announcement.imageUrl ? (
-              <div className="relative h-48 overflow-hidden rounded-t-lg bg-muted">
+              ) : (
                 <NextImage
-                  src={announcement.imageUrl || ''}
+                  src={announcement.imageUrl || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1'}
                   alt={announcement.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
                 />
+              )}
+              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-slate-800 shadow-sm">
+                {announcement.type}
               </div>
-            ) : null}
-            <CardHeader>
-              <div className="flex justify-between items-start mb-2">
-                <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide
-                   ${announcement.type === 'academic' ? 'bg-primary/10 text-primary' :
-                    announcement.type === 'event' ? 'bg-destructive/10 text-destructive' :
-                      'bg-primary/5 text-primary'}`}>
-                  {announcement.type}
-                </span>
-                <div className="flex items-center text-muted-foreground text-xs">
-                  <Calendar className="mr-1 h-3 w-3" />
-                  {announcement.date}
-                </div>
+            </div>
+
+            <CardContent className="flex-1 p-6 flex flex-col">
+              <div className="flex items-center gap-2 text-slate-500 text-xs font-medium mb-3">
+                <Calendar className="w-3.5 h-3.5" />
+                {announcement.date}
               </div>
-              <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">{announcement.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <div className="line-clamp-3 text-foreground/80 text-sm mb-4">
+
+              <h3 className="text-xl font-bold text-slate-900 mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                {announcement.title}
+              </h3>
+
+              <div className="text-slate-600 text-sm line-clamp-3 mb-6 flex-1">
                 <FormattedText text={announcement.body} />
               </div>
 
               {announcement.type === 'event' && (
-                <div className="flex items-center gap-4 mt-auto pt-3 border-t border-slate-100">
+                <div className="pt-4 mt-auto border-t border-slate-100 flex items-center justify-between">
                   <button
                     onClick={(e) => handleVote(announcement.id, 'like', e)}
-                    className={`flex items-center gap-1.5 text-xs font-bold transition-all ${votes[String(announcement.id)]?.myVote === 'like' ? 'text-primary' : 'text-slate-400 hover:text-primary'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${votes[String(announcement.id)]?.myVote === 'like'
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                      }`}
                   >
-                    <ThumbsUp className={`h-4 w-4 ${votes[String(announcement.id)]?.myVote === 'like' ? 'fill-primary' : ''}`} />
-                    <span>{votes[String(announcement.id)]?.likes ?? 0}</span>
+                    <ThumbsUp className={`w-4 h-4 ${votes[String(announcement.id)]?.myVote === 'like' ? 'fill-current' : ''}`} />
+                    <span>{votes[String(announcement.id)]?.likes ?? 0} Likes</span>
                   </button>
+                  <span className="text-xs text-slate-400 font-medium">Event</span>
                 </div>
               )}
             </CardContent>
