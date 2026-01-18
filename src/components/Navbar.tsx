@@ -76,6 +76,12 @@ export function Navbar() {
                                 Teacher Portal
                             </Link>
                         )}
+                        <Link href="/about" className="hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
+                            About Us
+                        </Link>
+                        <Link href="/academics" className="hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
+                            Academics
+                        </Link>
                         <Link href="/announcements" className="hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
                             Announcements
                         </Link>
@@ -153,6 +159,20 @@ export function Navbar() {
                                     Your Dashboard
                                 </Link>
                                 <Link
+                                    href="/about"
+                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted font-semibold"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    About Us
+                                </Link>
+                                <Link
+                                    href="/academics"
+                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted font-semibold"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    Academics
+                                </Link>
+                                <Link
                                     href="/announcements"
                                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted font-semibold"
                                     onClick={() => setMobileMenuOpen(false)}
@@ -175,12 +195,35 @@ export function Navbar() {
                             </>
                         ) : (
                             <div className="flex flex-col gap-2 pt-2">
-                                <Button asChild variant="outline" className="w-full justify-start h-12" onClick={() => setMobileMenuOpen(false)}>
-                                    <Link href="/auth/login">Login</Link>
-                                </Button>
-                                <Button asChild className="w-full justify-start h-12 bg-primary" onClick={() => setMobileMenuOpen(false)}>
-                                    <Link href="/admissions/apply">Apply Now</Link>
-                                </Button>
+                                <Link
+                                    href="/about"
+                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted font-semibold"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    About Us
+                                </Link>
+                                <Link
+                                    href="/academics"
+                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted font-semibold"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    Academics
+                                </Link>
+                                <Link
+                                    href="/announcements"
+                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted font-semibold"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    Announcements
+                                </Link>
+                                <div className="border-t pt-4 mt-2">
+                                    <Button asChild variant="outline" className="w-full justify-start h-12" onClick={() => setMobileMenuOpen(false)}>
+                                        <Link href="/auth/login">Login</Link>
+                                    </Button>
+                                    <Button asChild className="w-full justify-start h-12 bg-primary mt-2" onClick={() => setMobileMenuOpen(false)}>
+                                        <Link href="/admissions/apply">Apply Now</Link>
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </div>
