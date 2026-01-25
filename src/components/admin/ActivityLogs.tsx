@@ -2,19 +2,31 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Search, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ActivityLogsProps {
     logs: any[];
+    onRefresh?: () => void;
 }
 
-export function ActivityLogs({ logs }: ActivityLogsProps) {
+export function ActivityLogs({ logs, onRefresh }: ActivityLogsProps) {
     return (
         <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-slate-600" />
                     System Activity Log
                 </CardTitle>
+                {onRefresh && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onRefresh}
+                        className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:bg-blue-50"
+                    >
+                        Recheck Activities
+                    </Button>
+                )}
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">

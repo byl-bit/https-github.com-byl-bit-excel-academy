@@ -825,6 +825,65 @@ export default function AdminPage() {
         } catch (e) { notifyError('Bulk rejection failed'); }
     };
 
+    const handleRejectAllTeachers = async () => {
+        const pendingTeachers = users.filter(u => u.status === 'pending' && u.role === 'teacher');
+        if (pendingTeachers.length === 0) return;
+        if (!confirm(`Are you sure you want to REJECT ALL ${pendingTeachers.length} pending teacher applications? This cannot be undone.`)) return;
+
+        let successCount = 0;
+        try {
+            const processBatch = async (batch: any[]) => {
+                await Promise.all(batch.map(async (u) => {
+                    try {
+                        const headers: Record<string, string> = {
+                            'x-actor-role': 'admin',
+                            'x-actor-id': user?.id || ''
+                        };
+                        const query = String(u.id).startsWith('ST-') ? `?studentId=${encodeURIComponent(u.id)}` : `?id=${encodeURIComponent(u.id)}`;
+                        const res = await fetch(`/api/users${query}`, {
+                            method: 'DELETE',
+                            headers
+                        });
+                        if (res.ok) successCount++;
+                    } catch (e) { console.error(e); }
+                }));
+            };
+
+            for (let i = 0; i < pendingTeachers.length; i += 5) {
+                await processBatch(pendingTeachers.slice(i, i + 5));
+            }
+
+            logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Bulk Reject Teachers', category: 'user', details: `Rejected ${successCount} teachers` });
+            success(`Rejected ${successCount} teacher applications`);
+            refresh(true);
+        } catch (e) { notifyError('Bulk rejection failed'); }
+    };
+
+    const handleRejectAllAdmissions = async () => {
+        if (admissions.length === 0) return;
+        if (!confirm(`Are you sure you want to REJECT ALL ${admissions.length} admission applications? This cannot be undone.`)) return;
+
+        let successCount = 0;
+        try {
+            const processBatch = async (batch: any[]) => {
+                await Promise.all(batch.map(async (app) => {
+                    try {
+                        const res = await fetch(`/api/admissions?id=${app.id}`, { method: 'DELETE' });
+                        if (res.ok) successCount++;
+                    } catch (e) { console.error(e); }
+                }));
+            };
+
+            for (let i = 0; i < admissions.length; i += 5) {
+                await processBatch(admissions.slice(i, i + 5));
+            }
+
+            logActivity({ userId: user?.id || '', userName: user?.name || 'Admin', action: 'Bulk Reject Admissions', category: 'user', details: `Rejected ${successCount} admission applications` });
+            success(`Rejected ${successCount} admission applications`);
+            refresh(true);
+        } catch (e) { notifyError('Bulk rejection failed'); }
+    };
+
     const handleRejectAllResults = async () => {
         if (pendingResults.length === 0) return;
         if (!confirm(`Are you sure you want to REJECT ALL ${pendingResults.length} pending result submissions? This cannot be undone.`)) return;
@@ -882,6 +941,8 @@ export default function AdminPage() {
                         pendingResults={pendingResults}
                         onRejectAll={(role) => {
                             if (role === 'student') handleRejectAllStudents();
+                            if (role === 'teacher') handleRejectAllTeachers();
+                            if (role === 'admission') handleRejectAllAdmissions();
                             if (role === 'result') handleRejectAllResults();
                         }}
                         onApprove={handleApproveUser}
@@ -971,7 +1032,7 @@ export default function AdminPage() {
                 )}
 
                 {activeTab === 'activity' && (
-                    <ActivityLogs logs={activityLogs} />
+                    <ActivityLogs logs={activityLogs} onRefresh={() => refresh(true)} />
                 )}
 
                 {activeTab === 'notifications' && (

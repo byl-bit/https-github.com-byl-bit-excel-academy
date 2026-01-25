@@ -84,7 +84,17 @@ export function UserApprovals({
                         <FileText className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black text-slate-800">New Admission Applications</h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-xl font-black text-slate-800">New Admission Applications</h3>
+                            {admissionApplications.length > 0 && (
+                                <button
+                                    onClick={() => onRejectAll && onRejectAll('admission')}
+                                    className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                                >
+                                    Reject All
+                                </button>
+                            )}
+                        </div>
                         <p className="text-xs text-slate-500 font-medium">Direct applications from the 'Apply Now' form.</p>
                     </div>
                 </div>
@@ -156,12 +166,14 @@ export function UserApprovals({
                         <div>
                             <div className="flex items-center gap-2">
                                 <h3 className="text-xl font-black text-slate-800">Student Accounts</h3>
-                                <button
-                                    onClick={() => onRejectAll && onRejectAll('student')}
-                                    className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
-                                >
-                                    Reject All
-                                </button>
+                                {pendingStudents.length > 0 && (
+                                    <button
+                                        onClick={() => onRejectAll && onRejectAll('student')}
+                                        className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                                    >
+                                        Reject All
+                                    </button>
+                                )}
                             </div>
                             <p className="text-xs text-slate-500 font-medium">Pending registrations.</p>
                         </div>
@@ -221,7 +233,17 @@ export function UserApprovals({
                         <ShieldAlert className="h-5 w-5 text-indigo-600" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black text-slate-800">Teacher Accounts</h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-xl font-black text-slate-800">Teacher Accounts</h3>
+                            {pendingTeachers.length > 0 && (
+                                <button
+                                    onClick={() => onRejectAll && onRejectAll('teacher')}
+                                    className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                                >
+                                    Reject All
+                                </button>
+                            )}
+                        </div>
                         <p className="text-xs text-slate-500 font-medium">Faculty verifications.</p>
                     </div>
                 </div>
@@ -292,15 +314,16 @@ export function UserApprovals({
                     >
                         Detailed Manager <ArrowRight className="ml-2 h-3 w-3" />
                     </Button>
-                    {/* Reject All Results */}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors ml-2"
-                        onClick={() => onRejectAll?.('result')}
-                    >
-                        Reject All Results
-                    </Button>
+                    {pendingResults.length > 0 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors ml-2"
+                            onClick={() => onRejectAll?.('result')}
+                        >
+                            Reject All Results
+                        </Button>
+                    )}
                 </div>
 
                 <div className="glass-panel rounded-2xl overflow-hidden shadow-sm">

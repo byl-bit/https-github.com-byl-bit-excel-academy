@@ -576,19 +576,16 @@ export async function DELETE(request: Request) {
             findErr = error;
         }
 
-        // 2. If not found or doesn't look like ST- ID, try by internal ID (if valid UUID or general string)
+        // 2. If not found or doesn't look like ST- ID, try by internal ID
         if (!foundUser && !findErr) {
-            // Only query 'id' column with eq if it's a valid UUID or if the column type allows it
-            // Based on earlier check, 'id' is a UUID in the database
-            if (isUUID(param) || !param.includes('-')) {
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('id, student_id')
-                    .eq('id', param)
-                    .maybeSingle();
-                foundUser = data;
-                findErr = error;
-            }
+            // Always try internal 'id' column if it's not a student ID
+            const { data, error } = await supabase
+                .from('users')
+                .select('id, student_id')
+                .eq('id', param)
+                .maybeSingle();
+            foundUser = data;
+            findErr = error;
         }
 
         if (findErr) {
