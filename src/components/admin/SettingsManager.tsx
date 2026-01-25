@@ -431,11 +431,25 @@ export function SettingsManager({
                 <CardContent className="space-y-4">
                     <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                         <div className="space-y-0.5">
+                            <Label>Teacher Portal Access</Label>
+                            <p className="text-xs text-muted-foreground">Enable or disable faculty login and portal</p>
+                        </div>
+                        <Switch
+                            checked={settings?.teacherPortalEnabled !== false && String(settings?.teacherPortalEnabled) !== 'false'}
+                            onCheckedChange={(checked: boolean) => {
+                                onUpdateSettings('teacherPortalEnabled', checked);
+                                // Broadcast event for Navbar to update immediately
+                                window.dispatchEvent(new CustomEvent('teacherPortalToggle', { detail: checked }));
+                            }}
+                        />
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="space-y-0.5">
                             <Label>Allow Editing After Submission</Label>
                             <p className="text-xs text-muted-foreground">Subject teachers can edit 'Pending Admin' marks</p>
                         </div>
                         <Switch
-                            checked={settings?.allowTeacherEditAfterSubmission === true}
+                            checked={settings?.allowTeacherEditAfterSubmission === true || String(settings?.allowTeacherEditAfterSubmission) === 'true'}
                             onCheckedChange={(checked: boolean) => onUpdateSettings('allowTeacherEditAfterSubmission', checked)}
                         />
                     </div>

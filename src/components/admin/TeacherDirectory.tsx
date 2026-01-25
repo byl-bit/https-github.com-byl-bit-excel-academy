@@ -212,12 +212,19 @@ export function TeacherDirectory({ teachers, onDelete, onUpdate }: TeacherDirect
                                             </span>
                                         </td>
                                         <td className="py-4 px-4 text-center">
-                                            <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest border shadow-sm ${teacher.status === 'active'
-                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                                : 'bg-amber-50 text-amber-600 border-amber-100'
-                                                }`}>
+                                            <button
+                                                onClick={() => {
+                                                    const nextStatus = teacher.status === 'active' ? 'pending' : 'active';
+                                                    onUpdate(teacher.id, { status: nextStatus });
+                                                }}
+                                                className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest border shadow-sm transition-all hover:scale-105 active:scale-95 ${teacher.status === 'active'
+                                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                    : 'bg-amber-50 text-amber-600 border-amber-100'
+                                                    }`}
+                                                title={teacher.status === 'active' ? 'Click to Deactivate' : 'Click to Activate'}
+                                            >
                                                 {teacher.status}
-                                            </span>
+                                            </button>
                                         </td>
                                         <td className="py-4 px-6 text-right">
                                             <div className="flex justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">

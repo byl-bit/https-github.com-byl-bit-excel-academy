@@ -37,7 +37,20 @@ export async function GET() {
     if (!settings['principalName']) settings['principalName'] = 'Principal';
     if (!settings['homeroomName']) settings['homeroomName'] = 'Class Teacher';
     if (settings['letterheadUrl'] === undefined) settings['letterheadUrl'] = '';
+
+    // Ensure boolean types are actually booleans
+    const boolKeys = ['allowLibraryDownload', 'allowTeacherEditAfterSubmission', 'reportCardDownload', 'certificateDownload', 'maintenanceMode'];
+    boolKeys.forEach(k => {
+        if (settings[k] !== undefined) {
+            settings[k] = String(settings[k]) === 'true';
+        }
+    });
+
     if (settings['allowLibraryDownload'] === undefined) settings['allowLibraryDownload'] = false;
+    if (settings['allowTeacherEditAfterSubmission'] === undefined) settings['allowTeacherEditAfterSubmission'] = false;
+    if (settings['reportCardDownload'] === undefined) settings['reportCardDownload'] = true;
+    if (settings['certificateDownload'] === undefined) settings['certificateDownload'] = true;
+    if (settings['maintenanceMode'] === undefined) settings['maintenanceMode'] = false;
 
     return new Response(JSON.stringify(settings), {
         headers: {
