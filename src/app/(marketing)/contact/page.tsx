@@ -63,7 +63,7 @@ export default function ContactPage() {
                                 <h3 className="font-bold text-lg mb-2">Visit Us</h3>
                                 <p className="text-sm text-slate-600">
                                     Excel Academy WDD<br />
-                                    Addis Ababa, Ethiopia
+                                    Adama, Ethiopia
                                 </p>
                             </CardContent>
                         </Card>

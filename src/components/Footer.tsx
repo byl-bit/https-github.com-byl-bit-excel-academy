@@ -121,7 +121,7 @@ export function Footer() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Location</p>
-                                    <p className="text-sm text-slate-300 font-medium">Addis Ababa, Ethiopia</p>
+                                    <p className="text-sm text-slate-300 font-medium">Adama, Ethiopia</p>
                                 </div>
                             </div>
                         </div>
