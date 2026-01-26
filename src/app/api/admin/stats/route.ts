@@ -46,11 +46,14 @@ export async function GET(request: Request) {
             passRate = (resultAggs.filter(r => (r.average || 0) >= 50).length / resultAggs.length) * 100;
         }
 
-        // Efficient count of students per grade
-        const { data: usersForGrades } = await db.from('users').select('grade').eq('role', 'student');
+        // Efficient count of students per grade and section
+        const { data: usersForGrades } = await db.from('users').select('grade, section').eq('role', 'student');
         const studentsByGrade: Record<string, number> = {};
+        const studentsBySection: Record<string, number> = {};
+
         (usersForGrades || []).forEach(u => {
             if (u.grade) studentsByGrade[u.grade] = (studentsByGrade[u.grade] || 0) + 1;
+            if (u.section) studentsBySection[u.section] = (studentsBySection[u.section] || 0) + 1;
         });
 
         return NextResponse.json({
@@ -66,6 +69,7 @@ export async function GET(request: Request) {
             totalAnnouncements: totalAnnouncements || 0,
             totalBooks: totalBooks || 0,
             studentsByGrade,
+            studentsBySection,
             topAverage,
             passRate: Math.round(passRate * 10) / 10
         });
