@@ -46,22 +46,12 @@ export async function GET(request: Request) {
             passRate = (resultAggs.filter(r => (r.average || 0) >= 50).length / resultAggs.length) * 100;
         }
 
-        // Get students by grade
-        const { data: gradeStats } = await db.rpc('get_student_counts_by_grade');
-        // If RPC isn't available, we might need a fallback, but let's assume we can add it or just fetch the data
-
-        // Fallback for grade stats if RPC fails or isn't implemented yet
-        let studentsByGrade: Record<string, number> = {};
-        if (!gradeStats) {
-            const { data: usersForGrades } = await db.from('users').select('grade').eq('role', 'student');
-            (usersForGrades || []).forEach(u => {
-                if (u.grade) studentsByGrade[u.grade] = (studentsByGrade[u.grade] || 0) + 1;
-            });
-        } else {
-            gradeStats.forEach((gs: any) => {
-                studentsByGrade[gs.grade] = gs.count;
-            });
-        }
+        // Efficient count of students per grade
+        const { data: usersForGrades } = await db.from('users').select('grade').eq('role', 'student');
+        const studentsByGrade: Record<string, number> = {};
+        (usersForGrades || []).forEach(u => {
+            if (u.grade) studentsByGrade[u.grade] = (studentsByGrade[u.grade] || 0) + 1;
+        });
 
         return NextResponse.json({
             totalStudents: totalStudents || 0,

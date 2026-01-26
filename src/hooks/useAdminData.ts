@@ -111,13 +111,13 @@ export function useAdminData() {
                 ]);
 
                 const fetchedSettings = settingsRes.ok ? await settingsRes.json() : {};
-                const fetchedAnnouncements = announceRes.ok ? await announceRes.json() : [];
-                const fetchedSubjects = subRes.ok ? await subRes.json() : [];
+                const fetchedAnnouncements = (announceRes.ok ? await announceRes.json() : []) || [];
+                const fetchedSubjects = (subRes.ok ? await subRes.json() : []) || [];
                 const fetchedStats = statsRes.ok ? await statsRes.json() : null;
 
                 setSettings(fetchedSettings);
                 setAnnouncements(fetchedAnnouncements);
-                setSubjects(fetchedSubjects.length ? fetchedSubjects : ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'History', 'Geography', 'Computer Science']);
+                setSubjects(Array.isArray(fetchedSubjects) && fetchedSubjects.length ? fetchedSubjects : ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'History', 'Geography', 'Computer Science']);
                 if (fetchedStats) setSystemStats(fetchedStats);
 
                 try {
@@ -127,6 +127,9 @@ export function useAdminData() {
                 } catch (e) { console.error('Notif parse err'); }
 
                 setLoadedCategories(prev => new Set(prev).add('essentials'));
+
+                // If loading all or specifically heavy categories, don't return, continue below
+                if (category === 'essentials') return;
             }
 
             // HEAVY DATA (Background load or On-Demand)
@@ -143,110 +146,117 @@ export function useAdminData() {
 
                 const results = await Promise.all(tasks);
 
-                results.forEach(async (res, i) => {
+                for (let i = 0; i < results.length; i++) {
+                    const res = results[i];
                     const type = taskMap[i];
-                    if (!res.ok) return;
-                    const data = await res.json();
+                    if (!res.ok) continue;
 
-                    if (type === 'users') {
-                        setUsers(data);
-                    } else if (type === 'results') {
-                        const published = data.published || {};
-                        const pending = data.pending || {};
+                    try {
+                        const data = await res.json();
 
-                        setAllResults(Object.keys(published).map(k => {
-                            const r = (published[k] as any) || {};
-                            return {
-                                key: k,
-                                studentId: (r['student_id'] ?? r['studentId'] ?? k) as string,
-                                studentName: (r['student_name'] ?? r['studentName'] ?? '') as string,
-                                grade: String(r['grade'] ?? ''),
-                                section: String(r['section'] ?? ''),
-                                rollNumber: r['roll_number'] ?? r['rollNumber'] ?? null,
-                                gender: normalizeGender(r['gender'] ?? r['sex'] ?? null) || null,
-                                subjects: ((r['subjects'] || []) as any[]).map(s => ({
-                                    name: s.name || s.subject || '',
-                                    marks: Number(s.marks || 0),
-                                    status: s.status || 'published',
-                                    ...(s.assessments ? { assessments: s.assessments } : {})
-                                })),
-                                total: Number(r['total'] ?? 0),
-                                average: Number(r['average'] ?? 0),
-                                rank: r['rank'] ?? null,
-                                conduct: r['conduct'] ?? null,
-                                result: r['result'] ?? null,
-                                promotedOrDetained: r['promoted_or_detained'] ?? r['promotedOrDetained'] ?? null,
-                                status: r['status'] ?? 'published',
-                                published_at: r['published_at'] ?? r['publishedAt'] ?? null
-                            } as PublishedResult;
-                        }));
+                        if (type === 'users') {
+                            setUsers(data);
+                        } else if (type === 'results') {
+                            const published = data.published || {};
+                            const pending = data.pending || {};
 
-                        setPendingResults(Object.keys(pending).map(k => {
-                            const r = (pending[k] as any) || {};
-                            return {
-                                key: k,
-                                studentId: (r['student_id'] ?? r['studentId'] ?? k) as string,
-                                studentName: (r['student_name'] ?? r['studentName'] ?? '') as string,
-                                grade: String(r['grade'] ?? ''),
-                                section: String(r['section'] ?? ''),
-                                rollNumber: r['roll_number'] ?? r['rollNumber'] ?? null,
-                                gender: normalizeGender(r['gender'] ?? r['sex'] ?? null) || null,
-                                subjects: ((r['subjects'] || []) as any[]).map(s => ({
-                                    name: s.name || s.subject || '',
-                                    marks: Number(s.marks || 0),
-                                    status: s.status || 'pending_admin',
-                                    ...(s.assessments ? { assessments: s.assessments } : {})
-                                })),
-                                total: Number(r['total'] ?? 0),
-                                average: Number(r['average'] ?? 0),
-                                rank: r['rank'] ?? null,
-                                conduct: r['conduct'] ?? null,
-                                result: r['result'] ?? null,
-                                promotedOrDetained: r['promoted_or_detained'] ?? r['promotedOrDetained'] ?? null,
-                                status: r['status'] ?? 'pending',
-                                submitted_by: r['submitted_by'] ?? r['submittedBy'] ?? null,
-                                submitted_at: r['submitted_at'] ?? r['submittedAt'] ?? null
-                            } as PendingResult;
-                        }));
-                    } else if (type === 'admissions') {
-                        setAdmissions(data);
-                    } else if (type === 'resources') {
-                        setBooks(data.map((r: any) => ({
-                            id: r.id,
-                            title: r.title,
-                            author: r.author || '',
-                            grade: r.grade || '',
-                            subject: r.subject || '',
-                            downloadUrl: r.file_url,
-                            videoUrl: r.video_url,
-                            description: r.description || '',
-                            uploadedAt: r.created_at
-                        })));
-                    } else if (type === 'allocations') {
-                        setAllocations(data);
-                    } else if (type === 'resets') {
-                        setResetRequests((data as any[]).map(r => {
-                            const userData = Array.isArray(r.users) ? r.users[0] : r.users;
-                            return {
+                            setAllResults(Object.keys(published).map(k => {
+                                const r = (published[k] as any) || {};
+                                return {
+                                    key: k,
+                                    studentId: (r['student_id'] ?? r['studentId'] ?? k) as string,
+                                    studentName: (r['student_name'] ?? r['studentName'] ?? '') as string,
+                                    grade: String(r['grade'] ?? ''),
+                                    section: String(r['section'] ?? ''),
+                                    rollNumber: r['roll_number'] ?? r['rollNumber'] ?? null,
+                                    gender: normalizeGender(r['gender'] ?? r['sex'] ?? null) || null,
+                                    subjects: ((r['subjects'] || []) as any[]).map(s => ({
+                                        name: s.name || s.subject || '',
+                                        marks: Number(s.marks || 0),
+                                        status: s.status || 'published',
+                                        ...(s.assessments ? { assessments: s.assessments } : {})
+                                    })),
+                                    total: Number(r['total'] ?? 0),
+                                    average: Number(r['average'] ?? 0),
+                                    rank: r['rank'] ?? null,
+                                    conduct: r['conduct'] ?? null,
+                                    result: r['result'] ?? null,
+                                    promotedOrDetained: r['promoted_or_detained'] ?? r['promotedOrDetained'] ?? null,
+                                    status: r['status'] ?? 'published',
+                                    published_at: r['published_at'] ?? r['publishedAt'] ?? null
+                                } as PublishedResult;
+                            }));
+
+                            setPendingResults(Object.keys(pending).map(k => {
+                                const r = (pending[k] as any) || {};
+                                return {
+                                    key: k,
+                                    studentId: (r['student_id'] ?? r['studentId'] ?? k) as string,
+                                    studentName: (r['student_name'] ?? r['studentName'] ?? '') as string,
+                                    grade: String(r['grade'] ?? ''),
+                                    section: String(r['section'] ?? ''),
+                                    rollNumber: r['roll_number'] ?? r['rollNumber'] ?? null,
+                                    gender: normalizeGender(r['gender'] ?? r['sex'] ?? null) || null,
+                                    subjects: ((r['subjects'] || []) as any[]).map(s => ({
+                                        name: s.name || s.subject || '',
+                                        marks: Number(s.marks || 0),
+                                        status: s.status || 'pending_admin',
+                                        ...(s.assessments ? { assessments: s.assessments } : {})
+                                    })),
+                                    total: Number(r['total'] ?? 0),
+                                    average: Number(r['average'] ?? 0),
+                                    rank: r['rank'] ?? null,
+                                    conduct: r['conduct'] ?? null,
+                                    result: r['result'] ?? null,
+                                    promotedOrDetained: r['promoted_or_detained'] ?? r['promotedOrDetained'] ?? null,
+                                    status: r['status'] ?? 'pending',
+                                    submitted_by: r['submitted_by'] ?? r['submittedBy'] ?? null,
+                                    submitted_at: r['submitted_at'] ?? r['submittedAt'] ?? null
+                                } as PendingResult;
+                            }));
+                        } else if (type === 'admissions') {
+                            setAdmissions(data);
+                        } else if (type === 'resources') {
+                            setBooks(data.map((r: any) => ({
                                 id: r.id,
-                                userId: r.user_id,
-                                userName: userData?.name || 'User',
-                                userRole: userData?.role || 'student',
-                                email: userData?.email || '',
-                                grade: userData?.grade || '',
-                                section: userData?.section || '',
-                                rollNumber: userData?.roll_number || '',
-                                gender: userData?.gender || '',
-                                photo: userData?.photo || '',
-                                studentId: userData?.student_id || '',
-                                teacherId: userData?.teacher_id || '',
-                                timestamp: r.created_at,
-                                token: r.token,
-                                expires_at: r.expires_at
-                            };
-                        }));
+                                title: r.title,
+                                author: r.author || '',
+                                grade: r.grade || '',
+                                subject: r.subject || '',
+                                downloadUrl: r.file_url,
+                                videoUrl: r.video_url,
+                                description: r.description || '',
+                                uploadedAt: r.created_at
+                            })));
+                        } else if (type === 'allocations') {
+                            setAllocations(data);
+                        } else if (type === 'resets') {
+                            setResetRequests((data as any[]).map(r => {
+                                const userData = Array.isArray(r.users) ? r.users[0] : r.users;
+                                return {
+                                    id: r.id,
+                                    userId: r.user_id,
+                                    userName: userData?.name || 'User',
+                                    userRole: userData?.role || 'student',
+                                    email: userData?.email || '',
+                                    grade: userData?.grade || '',
+                                    section: userData?.section || '',
+                                    rollNumber: userData?.roll_number || '',
+                                    gender: userData?.gender || '',
+                                    photo: userData?.photo || '',
+                                    studentId: userData?.student_id || '',
+                                    teacherId: userData?.teacher_id || '',
+                                    timestamp: r.created_at,
+                                    token: r.token,
+                                    expires_at: r.expires_at
+                                };
+                            }));
+                        }
+                    } catch (err) {
+                        console.error(`Error parsing ${type} data:`, err);
                     }
-                });
+                }
+
                 setLoadedCategories(prev => {
                     const next = new Set(prev);
                     if (category === 'all') {
@@ -269,12 +279,14 @@ export function useAdminData() {
 
     useEffect(() => {
         if (isAuthenticated && user?.role === 'admin') {
-            loadData(false, 'essentials');
-            setTimeout(() => {
-                loadData(true, 'all');
-            }, 100);
+            // Loading sequence: 1. Essentials first, then everything else
+            const init = async () => {
+                await loadData(false, 'essentials');
+                await loadData(true, 'all');
+            };
+            init();
         }
-    }, [isAuthenticated, user, loadData]);
+    }, [isAuthenticated, user?.role, loadData]); // Removed unnecessary dependencies and fixed trigger
 
     useEffect(() => {
         // Only calculate stats on client if we have the full data and server stats haven't loaded yet

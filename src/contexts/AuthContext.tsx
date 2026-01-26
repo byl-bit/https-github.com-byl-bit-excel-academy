@@ -176,25 +176,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 }
             }
 
-            // Construct full name (Trimmed and normalized)
+            // 1. SMART MATCHING: Check for collisions based on Full Name within the target class
+            let existingMatch = null;
+            if (grade && section) {
+                const checkRes = await fetch(`/api/users?role=student&grade=${grade}&section=${section}`);
+                const classUsers = checkRes.ok ? await checkRes.json() : [];
+                const cleanNormalize = (s: string) => (s || '').trim().replace(/\s+/g, ' ').toLowerCase();
+                const targetFullName = [firstName, middleName, lastName].filter(Boolean).join(' ').trim().replace(/\s+/g, ' ').toLowerCase();
+
+                existingMatch = classUsers.find((u: any) =>
+                    cleanNormalize(u.name || u.fullName || '') === targetFullName
+                );
+            }
+
             const clean = (s: string) => (s || '').trim().replace(/\s+/g, ' ');
             const fullName = [clean(firstName), clean(middleName), clean(lastName)].filter(Boolean).join(' ');
 
-            // Generate a Student ID as a fallback/draft (the API might override or sync this)
+            // If an active account already exists with this identity, block duplication
+            if (existingMatch && existingMatch.password) {
+                return { success: false, message: 'You already have an account.' };
+            }
+
+            // Always generate a FRESH Student ID during registration (as requested)
             const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
             const year = new Date().getFullYear();
             const finalStudentId = `ST-${year}-${randomPart}`;
 
+            let isUpdate = false;
+            let placeholder: any = null;
+
+            if (existingMatch && !existingMatch.password) {
+                // It's a placeholder from CSV import - we will sync the new ID and credentials to it
+                placeholder = existingMatch;
+                isUpdate = true;
+            }
+
             const newUser = {
-                id: `user-${Date.now()}`,
+                id: `user-${Date.now()}`, // Always use a unique ID for the application record
                 name: fullName,
                 firstName,
                 middleName,
                 lastName,
-                email: `${finalStudentId.toLowerCase()}@excel.edu`,
+                email: isUpdate ? placeholder.email : `${finalStudentId.toLowerCase()}@excel.edu`,
                 studentId: finalStudentId,
                 password,
                 role: 'student',
+                // Student accounts require admin approval before being active
                 status: 'pending',
                 grade,
                 section,
@@ -202,14 +229,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 photo,
                 gender,
                 createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                isImported: isUpdate // Flag to help admin linking
             };
 
-            const postRes = await fetch('/api/users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newUser)
-            });
+            let postRes: Response;
+
+            if (isUpdate && placeholder && placeholder.id) {
+                // Update the existing placeholder record instead of inserting a new one
+                const { isImported, ...payloadBase } = newUser as any;
+                const payload = { ...payloadBase, id: placeholder.id };
+                postRes = await fetch('/api/users', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                postRes = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newUser)
+                });
+            }
 
             const data = await postRes.json().catch(() => ({}));
 
