@@ -30,13 +30,11 @@ export default function StudentResultsPage() {
 
         try {
             setLoading(true);
-            const [uRes, rRes, sRes] = await Promise.all([
-                fetch('/api/users'),
+            const [rRes, sRes] = await Promise.all([
                 fetch('/api/results', { headers: { 'x-actor-role': 'student', 'x-actor-id': user.id } }),
                 fetch('/api/settings')
             ]);
 
-            const users: User[] = uRes.ok ? await uRes.json() : [];
             const storedResults = rRes.ok ? await rRes.json() : {};
             const settings = sRes.ok ? await sRes.json() : {};
 
@@ -44,20 +42,15 @@ export default function StudentResultsPage() {
             if (settings.certificateDownload !== undefined) setCertificateEnabled(settings.certificateDownload);
             if (settings.assessmentTypes) setAssessmentTypes(settings.assessmentTypes);
 
-            let student = users.find(s => s.studentId === user.studentId || s.id === user.id);
-            if (!student) student = MOCK_USERS.find(s => s.studentId === user.studentId);
-
-            if (!student) {
-                setError('Student record not found.');
-                return;
-            }
+            const student = user;
 
             let res = storedResults[student.id];
             if (!res) {
                 res = Object.values(storedResults).find((r: any) =>
                     r.studentId === student?.studentId ||
-                    r.studentId === user.studentId ||
-                    r.studentId === user.id
+                    r.student_id === student?.studentId ||
+                    r.studentId === user.id ||
+                    r.student_id === user.id
                 ) || null;
             }
 

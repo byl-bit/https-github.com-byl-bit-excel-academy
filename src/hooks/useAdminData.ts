@@ -106,17 +106,19 @@ export function useAdminData() {
                     fetch('/api/settings', noCache),
                     fetch('/api/announcements', noCache),
                     fetch('/api/subjects', noCache),
-                    fetch('/api/results?limit=1', authHeaders), // Just to trigger a warm-up or get basic count if API supported it
+                    fetch('/api/admin/stats', authHeaders),
                     fetch('/api/notifications', authHeaders)
                 ]);
 
                 const fetchedSettings = settingsRes.ok ? await settingsRes.json() : {};
                 const fetchedAnnouncements = announceRes.ok ? await announceRes.json() : [];
                 const fetchedSubjects = subRes.ok ? await subRes.json() : [];
+                const fetchedStats = statsRes.ok ? await statsRes.json() : null;
 
                 setSettings(fetchedSettings);
                 setAnnouncements(fetchedAnnouncements);
                 setSubjects(fetchedSubjects.length ? fetchedSubjects : ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'History', 'Geography', 'Computer Science']);
+                if (fetchedStats) setSystemStats(fetchedStats);
 
                 try {
                     const notifBody = notificationsRes.ok ? await notificationsRes.json() : { notifications: [], unreadCount: 0 };
@@ -275,12 +277,19 @@ export function useAdminData() {
     }, [isAuthenticated, user, loadData]);
 
     useEffect(() => {
-        const resultsRecord: Record<string, any> = {};
-        allResults.forEach(r => { if (r.studentId) resultsRecord[r.studentId] = r; });
-        const pendingRecord: Record<string, any> = {};
-        pendingResults.forEach(r => { if (r.studentId) pendingRecord[r.studentId] = r; });
+        // Only calculate stats on client if we have the full data and server stats haven't loaded yet
+        // In most cases, we prefer the server-calculated stats for accuracy and speed
+        if (users.length > 0 && (allResults.length > 0 || pendingResults.length > 0)) {
+            const resultsRecord: Record<string, any> = {};
+            allResults.forEach(r => { if (r.studentId) resultsRecord[r.studentId] = r; });
+            const pendingRecord: Record<string, any> = {};
+            pendingResults.forEach(r => { if (r.studentId) pendingRecord[r.studentId] = r; });
 
-        setSystemStats(calculateStats(users, resultsRecord, pendingRecord, announcements, books));
+            setSystemStats(prev => ({
+                ...(prev || {}),
+                ...calculateStats(users, resultsRecord, pendingRecord, announcements, books)
+            } as SystemStats));
+        }
     }, [users, allResults, pendingResults, announcements, books]);
 
     return {

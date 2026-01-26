@@ -175,69 +175,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     return { success: false, message: 'Roll number must be between 1 and 100.' };
                 }
             }
-            // Count Check for random email/ID logic (simplified)
-            // Fetch users first to check duplicates
-            const res = await fetch('/api/users');
-            const users = res.ok ? await res.json() : [];
 
             // Construct full name (Trimmed and normalized)
             const clean = (s: string) => (s || '').trim().replace(/\s+/g, ' ');
             const fullName = [clean(firstName), clean(middleName), clean(lastName)].filter(Boolean).join(' ');
 
-            // 1. SMART MATCHING & DEDUPLICATION: Check for collisions based on Full Name ONLY (Global Check)
-            const collisionMatch = users.find((u: any) =>
-                u.role === 'student' &&
-                clean(u.name || u.fullName || '').toLowerCase() === fullName.toLowerCase()
-            );
-
-            // If an active account already exists with this identity, block duplication
-            if (collisionMatch && collisionMatch.password) {
-                return { success: false, message: 'You already have an account.' };
-            }
-
-            // If a placeholder exists, verify it matches the Roll Number and Gender provided
-            // This prevents creating a second (duplicate) record for a student who IS in the directory
-            // but provided a different Roll Number accidentally.
-            if (collisionMatch && !collisionMatch.password) {
-                const isStrictMatch =
-                    String(collisionMatch.rollNumber || '') === String(rollNumber || '') &&
-                    String(collisionMatch.gender || '').toUpperCase() === String(gender || '').toUpperCase();
-
-                if (!isStrictMatch) {
-                    return {
-                        success: false,
-                        message: `A student named "${fullName}" is already in the class ${grade}-${section} directory. Please check your Roll Number and Gender to synchronize with your record, or contact administration.`
-                    };
-                }
-            }
-
-            const existingMatch = collisionMatch;
-
-            // Always generate a FRESH Student ID during registration (as requested)
+            // Generate a Student ID as a fallback/draft (the API might override or sync this)
             const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
             const year = new Date().getFullYear();
             const finalStudentId = `ST-${year}-${randomPart}`;
 
-            let isUpdate = false;
-            let placeholder: any = null;
-
-            if (existingMatch && !existingMatch.password) {
-                // It's a placeholder from CSV import - we will sync the new ID and credentials to it
-                placeholder = existingMatch;
-                isUpdate = true;
-            }
-
             const newUser = {
-                id: `user-${Date.now()}`, // Always use a unique ID for the application record
+                id: `user-${Date.now()}`,
                 name: fullName,
                 firstName,
                 middleName,
                 lastName,
-                email: isUpdate ? placeholder.email : `${finalStudentId.toLowerCase()}@excel.edu`,
+                email: `${finalStudentId.toLowerCase()}@excel.edu`,
                 studentId: finalStudentId,
                 password,
                 role: 'student',
-                // Student accounts require admin approval before being active
                 status: 'pending',
                 grade,
                 section,
@@ -245,43 +202,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 photo,
                 gender,
                 createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                isImported: isUpdate // Flag to help admin linking
+                updatedAt: new Date().toISOString()
             };
 
-            let postRes: Response;
+            const postRes = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser)
+            });
 
-            if (isUpdate && placeholder && placeholder.id) {
-                // Update the existing placeholder record instead of inserting a new one
-                const { isImported, ...payloadBase } = newUser as any;
-                const payload = { ...payloadBase, id: placeholder.id };
-                postRes = await fetch('/api/users', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            } else {
-                postRes = await fetch('/api/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newUser)
-                });
-            }
+            const data = await postRes.json().catch(() => ({}));
 
             if (postRes.ok) {
-                // Do NOT auto-login students - accounts require admin approval before access
                 return {
                     success: true,
-                    message: isUpdate ? 'Account synchronized! Your Student ID is shown below and is pending admin approval.' : 'Registration submitted. Your Student ID is shown below. Await admin approval to access the system.',
+                    message: 'Registration submitted. Await admin approval to access the system.',
                     studentId: finalStudentId
                 };
+            } else {
+                return { success: false, message: data.error || data.message || 'Registration failed server-side.' };
             }
-            if (!postRes.ok) {
-                const errData = await postRes.json().catch(() => ({}));
-                return { success: false, message: errData.error || errData.message || 'Registration failed server-side.' };
-            }
-            return { success: false, message: 'Registration failed server-side.' };
         } catch (e) {
+            console.error('Registration error:', e);
             return { success: false, message: 'Registration error.' };
         }
     };
@@ -296,14 +238,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         photo?: string
     ): Promise<{ success: boolean; message?: string; teacherId?: string }> => {
         try {
-            const res = await fetch('/api/users');
-            const users = res.ok ? await res.json() : [];
-
-            // Check duplicates by name
-            const existing = users.find((u: any) => (u.name || u.fullName || '').toLowerCase() === fullName.toLowerCase());
-            if (existing) {
-                return { success: false, message: 'A user with this name already exists' };
-            }
+            // We no longer fetch all users here. The backend will handle duplicate checks.
 
             const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
             const teacherId = `TE-${new Date().getFullYear()}-${randomPart}`;
