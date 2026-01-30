@@ -534,7 +534,8 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
         const resStatus = (existingResult?.status || '') as any;
         const isPublished = resStatus === 'published';
         const isPendingAdmin = resStatus === 'pending' || resStatus === 'pending_admin' || resStatus === 'subject-pending';
-        const allowEditSubmitted = settings?.allowTeacherEditAfterSubmission === true;
+        const isGrade12 = String(student.grade) === '12';
+        const allowEditSubmitted = settings?.allowTeacherEditAfterSubmission === true || isGrade12;
 
         // Subject-aware locking
         let isSubjectLocked = false;
@@ -554,7 +555,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
             (resStatus !== 'draft' && resStatus !== '') &&
             (isHomeroomView || isSubjectLocked);
 
-        return { sid, existingResult, resStatus, isPublished, isPendingAdmin, isLocked, isLocalEditing, allowEditSubmitted };
+        return { sid, existingResult, resStatus, isPublished, isPendingAdmin, isLocked, isLocalEditing, allowEditSubmitted, isGrade12 };
     };
 
     return (
@@ -571,7 +572,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        {!isHomeroomView && (settings?.allowTeacherEditAfterSubmission || classResults.some(r => r.status === 'draft')) && (
+                        {!isHomeroomView && (settings?.allowTeacherEditAfterSubmission || classResults.some(r => r.status === 'draft') || students.some(s => String(s.grade) === '12')) && (
                             <Button
                                 variant="outline"
                                 onClick={() => {
@@ -580,8 +581,8 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                     } else {
                                         const allEditableIds = students
                                             .filter(s => {
-                                                const { resStatus, allowEditSubmitted } = getRowInfo(s);
-                                                return resStatus === 'draft' || (resStatus === 'pending' && allowEditSubmitted);
+                                                const { resStatus, allowEditSubmitted, isGrade12 } = getRowInfo(s);
+                                                return resStatus === 'draft' || (resStatus === 'pending' && allowEditSubmitted) || isGrade12 || resStatus === '';
                                             })
                                             .map(s => String(s.id || s.student_id || s.studentId || ''));
 
@@ -589,7 +590,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                             setAlert({
                                                 open: true,
                                                 title: 'Permission Denied',
-                                                description: 'Admin has not granted permission to edit these results.',
+                                                description: 'Admin has not granted permission to edit these results or no editable rows found.',
                                                 variant: 'error'
                                             });
                                         } else {

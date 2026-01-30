@@ -34,7 +34,7 @@ export async function GET() {
     if (settings['assessmentTypes'] === undefined || settings['assessmentTypes'] === null) {
         settings['assessmentTypes'] = defaultAssessments;
     }
-    if (!settings['principalName']) settings['principalName'] = 'Principal';
+    if (!settings['principalName']) settings['principalName'] = 'Desalegn';
     if (!settings['homeroomName']) settings['homeroomName'] = 'Class Teacher';
     if (settings['letterheadUrl'] === undefined) settings['letterheadUrl'] = '';
 
