@@ -40,7 +40,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
     };
 
     const assessmentTypes = (settings?.assessmentTypes && settings.assessmentTypes.length > 0) ? settings.assessmentTypes : [] as AssessmentType[];
-    const isDynamic = assessmentTypes.length > 0;
+    const isDynamic = false; // Forced semester mode
 
     const [tableMarks, setTableMarks] = useState<{ [studentId: string]: { [key: string]: number } }>({});
     const { success, error: notifyError } = useToast();

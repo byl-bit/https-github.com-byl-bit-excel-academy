@@ -165,7 +165,7 @@ export default function StudentResultsPage() {
 
         if (result) {
             const hasAssessmentData = result.subjects.some((s: any) => s.assessments && Object.keys(s.assessments).length > 0);
-            const showBreakdown = (assessmentTypes || []).length > 0 && hasAssessmentData;
+            const showBreakdown = false; // Forced semester mode
 
             const assessments = showBreakdown ? (assessmentTypes || []) : [];
             let xPos = 90;
@@ -246,7 +246,7 @@ export default function StudentResultsPage() {
 
     // Check if we have breakdown data to decide whether to show detailed columns
     const hasAssessmentData = result?.subjects.some((s: any) => s.assessments && Object.keys(s.assessments).length > 0);
-    const showBreakdown = assessmentTypes.length > 0 && hasAssessmentData;
+    const showBreakdown = false; // Forced semester mode
 
     return (
         <div className="space-y-6 animate-fade-in-up">
