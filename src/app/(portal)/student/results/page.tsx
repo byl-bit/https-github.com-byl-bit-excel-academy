@@ -180,15 +180,17 @@ export default function StudentResultsPage() {
                 xPos += colWidth;
                 doc.text("GRADE", xPos, y + 2, { align: 'center' });
             } else {
-                doc.text("MARKS", 110, y + 2, { align: 'center' });
-                doc.text("GRADE", 150, y + 2, { align: 'center' });
+                doc.text("SEM 1", 90, y + 2, { align: 'center' });
+                doc.text("SEM 2", 130, y + 2, { align: 'center' });
+                doc.text("AVERAGE", 160, y + 2, { align: 'center' });
+                doc.text("GRADE", 190, y + 2, { align: 'center' });
             }
 
             y += 10;
             doc.setFont("helvetica", "normal");
             doc.setTextColor(0, 0, 0);
 
-            result.subjects.forEach((sub, index) => {
+            result.subjects.forEach((sub: any, index: number) => {
                 if (index % 2 === 0) {
                     doc.setFillColor(239, 246, 255); // Blue 50
                     doc.rect(15, y - 6, pageWidth - 30, 10, 'F');
@@ -207,9 +209,11 @@ export default function StudentResultsPage() {
                     const grade = calculateGrade(sub.marks);
                     doc.text(`${grade}`, x, y, { align: 'center' });
                 } else {
-                    doc.text(`${sub.marks.toString()}`, 110, y, { align: 'center' });
+                    doc.text(`${sub.sem1 !== undefined ? sub.sem1 : '-'}`, 90, y, { align: 'center' });
+                    doc.text(`${sub.sem2 !== undefined ? sub.sem2 : '-'}`, 130, y, { align: 'center' });
+                    doc.text(`${sub.marks.toString()}`, 160, y, { align: 'center' });
                     const grade = calculateGrade(sub.marks);
-                    doc.text(`${grade}`, 150, y, { align: 'center' });
+                    doc.text(`${grade}`, 190, y, { align: 'center' });
                 }
                 y += 10;
             });
@@ -368,13 +372,18 @@ export default function StudentResultsPage() {
                                     <thead className="bg-blue-50/50 text-blue-900">
                                         <tr>
                                             <th className="px-6 py-4 font-bold">Subject</th>
-                                            {showBreakdown && assessmentTypes.map((type: any) => (
+                                            {showBreakdown ? assessmentTypes.map((type: any) => (
                                                 <th key={type.id} className="px-4 py-4 font-bold text-center text-xs uppercase">
                                                     {type.label}
                                                     <span className="block text-[8px] opacity-60">({type.maxMarks})</span>
                                                 </th>
-                                            ))}
-                                            <th className="px-6 py-4 font-bold text-right">Total Marks</th>
+                                            )) : (
+                                                <>
+                                                    <th className="px-6 py-4 font-bold text-center text-xs uppercase">Sem 1</th>
+                                                    <th className="px-6 py-4 font-bold text-center text-xs uppercase">Sem 2</th>
+                                                </>
+                                            )}
+                                            <th className="px-6 py-4 font-bold text-right">{showBreakdown ? 'Total Marks' : 'Average'}</th>
                                             <th className="px-6 py-4 font-bold text-right">Grade</th>
                                             <th className="px-6 py-4 font-bold text-right hidden sm:table-cell">Status</th>
                                         </tr>
@@ -386,7 +395,7 @@ export default function StudentResultsPage() {
                                             return (
                                                 <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
                                                     <td className="px-6 py-4 font-medium text-blue-900">{sub.name}</td>
-                                                    {showBreakdown && assessmentTypes.map((type: any) => {
+                                                    {showBreakdown ? assessmentTypes.map((type: any) => {
                                                         const key = String(type.id);
                                                         const val = sub.assessments?.[key];
                                                         return (
@@ -394,8 +403,13 @@ export default function StudentResultsPage() {
                                                                 {val !== undefined && val !== null ? val : '-'}
                                                             </td>
                                                         );
-                                                    })}
-                                                    <td className="px-6 py-4 text-right font-bold text-blue-900">{sub.marks}</td>
+                                                    }) : (
+                                                        <>
+                                                            <td className="px-6 py-4 text-center font-bold text-blue-700">{sub.sem1 !== undefined ? sub.sem1 : '-'}</td>
+                                                            <td className="px-6 py-4 text-center font-bold text-blue-700">{sub.sem2 !== undefined ? sub.sem2 : '-'}</td>
+                                                        </>
+                                                    )}
+                                                    <td className="px-6 py-4 text-right font-black text-indigo-700">{sub.marks}</td>
                                                     <td className="px-6 py-4 text-right font-bold text-blue-600">
                                                         <span className={`inline-block w-8 text-center rounded ${['F'].includes(grade) ? 'text-red-400' : 'text-blue-600'}`}>
                                                             {grade}

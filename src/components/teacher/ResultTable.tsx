@@ -70,7 +70,8 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                     marksMap[studentId][`${sub.name}__${typeId}`] = sub.assessments?.[typeId] as number;
                                 });
                             } else {
-                                marksMap[studentId][sub.name] = sub.marks || 0;
+                                marksMap[studentId][`${sub.name}_sem1`] = sub.sem1 || 0;
+                                marksMap[studentId][`${sub.name}_sem2`] = sub.sem2 || 0;
                             }
                         });
                     }
@@ -95,7 +96,11 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                 });
                 return Math.round(subTotal * 10) / 10;
             } else {
-                return marks[sub] || 0;
+                const s1 = marks[`${sub}_sem1`] || 0;
+                const s2 = marks[`${sub}_sem2`] || 0;
+                // Average of two semesters
+                const sAvg = (s1 + s2) / 2;
+                return Math.round(sAvg * 10) / 10;
             }
         });
 
@@ -134,7 +139,10 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     // Individual subject marks also preserved at 1 decimal
                     return { name: s, assessments, marks: Math.round(subTotal * 10) / 10 };
                 } else {
-                    return { name: s, marks: marks[s] || 0 };
+                    const s1 = marks[`${s}_sem1`] || 0;
+                    const s2 = marks[`${s}_sem2`] || 0;
+                    const sAvg = Math.round(((s1 + s2) / 2) * 10) / 10;
+                    return { name: s, sem1: s1, sem2: s2, marks: sAvg };
                 }
             });
 
@@ -242,7 +250,10 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                         });
                         return { name: s, assessments, marks: Math.round(subTotal * 10) / 10 };
                     } else {
-                        return { name: s, marks: marks[s] || 0 };
+                        const s1 = marks[`${s}_sem1`] || 0;
+                        const s2 = marks[`${s}_sem2`] || 0;
+                        const sAvg = Math.round(((s1 + s2) / 2) * 10) / 10;
+                        return { name: s, sem1: s1, sem2: s2, marks: sAvg };
                     }
                 });
 
@@ -363,7 +374,10 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                             });
                             return { name: s, assessments, marks: Math.round(subTotal * 10) / 10 };
                         } else {
-                            return { name: s, marks: marks[s] || 0 };
+                            const s1 = marks[`${s}_sem1`] || 0;
+                            const s2 = marks[`${s}_sem2`] || 0;
+                            const sAvg = Math.round(((s1 + s2) / 2) * 10) / 10;
+                            return { name: s, sem1: s1, sem2: s2, marks: sAvg };
                         }
                     });
 
@@ -436,7 +450,7 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                     headers.push(`${sub}__${type.id}`);
                 });
             } else {
-                headers.push(sub);
+                headers.push(`${sub} Sem 1`, `${sub} Sem 2`, `${sub} Avg`);
             }
         });
         headers.push('Total', 'Average');
@@ -453,8 +467,10 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                         row.push(val !== undefined ? String(val) : '');
                     });
                 } else {
-                    const val = marks[sub];
-                    row.push(val !== undefined ? String(val) : '');
+                    const s1 = marks[`${sub}_sem1`];
+                    const s2 = marks[`${sub}_sem2`];
+                    const sAvg = s1 !== undefined && s2 !== undefined ? (s1 + s2) / 2 : undefined;
+                    row.push(s1 !== undefined ? String(s1) : '', s2 !== undefined ? String(s2) : '', sAvg !== undefined ? String(Math.round(sAvg * 10) / 10) : '');
                 }
             });
             row.push(String(total), String(average.toFixed(2)));
@@ -669,8 +685,13 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                                 </th>
                                             ))
                                         ) : (
-                                            <th key={subject} className="p-4 text-center font-black text-slate-700 text-xs border-r border-slate-100 last:border-0 uppercase tracking-tight">
-                                                {subject}
+                                            <th key={subject} className="p-4 text-center font-black text-slate-700 text-xs border-r border-slate-100 last:border-0 min-w-[200px]">
+                                                <div className="flex flex-col mb-2 text-sm uppercase tracking-wider">{subject}</div>
+                                                <div className="grid grid-cols-3 gap-1 w-full border-t pt-2">
+                                                    <span className="text-[10px] text-slate-500 uppercase">Sem 1</span>
+                                                    <span className="text-[10px] text-slate-500 uppercase">Sem 2</span>
+                                                    <span className="text-[10px] text-indigo-500 uppercase font-bold">Avg</span>
+                                                </div>
                                             </th>
                                         )
                                     ))}
@@ -737,25 +758,46 @@ export function ResultTable({ students, subjects, classResults, user, onRefresh,
                                                         );
                                                     });
                                                 } else {
-                                                    const val = marks[subject];
-                                                    const isFail = val !== undefined && val < 35;
+                                                    const s1 = marks[`${subject}_sem1`];
+                                                    const s2 = marks[`${subject}_sem2`];
+                                                    const sAvg = (s1 !== undefined && s2 !== undefined) ? ((s1 + s2) / 2) : 0;
+                                                    const hasBoth = s1 !== undefined && s2 !== undefined;
+                                                    const isFail = hasBoth && sAvg < 35;
+                                                    
                                                     return (
-                                                        <td key={subject} className="p-2 relative min-w-[100px] border-r border-slate-50 last:border-0 text-center">
-                                                            <Input
-                                                                type="number"
-                                                                inputMode="decimal"
-                                                                min="0"
-                                                                max="100"
-                                                                step="any"
-                                                                value={val ?? ''}
-                                                                onChange={(e) => handleMarkChange(sid, subject, e.target.value)}
-                                                                className={cn(
-                                                                    "w-20 mx-auto text-center h-9 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 rounded-lg font-bold transition-all text-sm",
-                                                                    isFail ? 'text-red-500 bg-red-50 hover:bg-red-50 focus:bg-red-50' : 'text-slate-700'
-                                                                )}
-                                                                placeholder="-"
-                                                                disabled={isLocked || isHomeroomView}
-                                                            />
+                                                        <td key={subject} className="p-2 relative min-w-[200px] border-r border-slate-50 last:border-0 text-center align-top">
+                                                            <div className="grid grid-cols-3 gap-1">
+                                                                <Input
+                                                                    type="number"
+                                                                    inputMode="decimal"
+                                                                    min="0"
+                                                                    max="100"
+                                                                    step="any"
+                                                                    value={s1 ?? ''}
+                                                                    onChange={(e) => handleMarkChange(sid, `${subject}_sem1`, e.target.value)}
+                                                                    className="w-full text-center h-9 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 rounded-lg font-bold transition-all text-sm text-slate-700"
+                                                                    placeholder="-"
+                                                                    disabled={isLocked || isHomeroomView}
+                                                                />
+                                                                <Input
+                                                                    type="number"
+                                                                    inputMode="decimal"
+                                                                    min="0"
+                                                                    max="100"
+                                                                    step="any"
+                                                                    value={s2 ?? ''}
+                                                                    onChange={(e) => handleMarkChange(sid, `${subject}_sem2`, e.target.value)}
+                                                                    className="w-full text-center h-9 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 rounded-lg font-bold transition-all text-sm text-slate-700"
+                                                                    placeholder="-"
+                                                                    disabled={isLocked || isHomeroomView}
+                                                                />
+                                                                <div className={cn(
+                                                                    "flex items-center justify-center h-9 rounded-lg font-black text-sm",
+                                                                    isFail ? "text-red-600 bg-red-50/50" : (hasBoth ? "text-indigo-600 bg-indigo-50/30" : "text-slate-300")
+                                                                )}>
+                                                                    {hasBoth ? sAvg.toFixed(1) : '-'}
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                     );
                                                 }

@@ -7,6 +7,9 @@ export interface Subject {
     submittedBy?: string;
     approvedBy?: string;
     approvedAt?: string;
+    sem1?: number;
+    sem2?: number;
+    semAverage?: number;
     grade?: string;
 }
 

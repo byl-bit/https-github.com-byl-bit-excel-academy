@@ -198,14 +198,18 @@ export function ResultsManager({
         let y = 65;
         doc.setFont("helvetica", "bold");
         doc.text("Subject", 20, y);
-        doc.text("Marks (/100)", 100, y);
+        doc.text("Sem 1", 70, y);
+        doc.text("Sem 2", 100, y);
+        doc.text("Average (/100)", 130, y);
         doc.line(20, y + 2, 190, y + 2);
 
         doc.setFont("helvetica", "normal");
         y += 10;
         (result.subjects || []).forEach(s => {
             doc.text(s.name, 20, y);
-            doc.text(String(s.marks || 0), 100, y);
+            doc.text(s.sem1 !== undefined ? String(s.sem1) : '-', 70, y);
+            doc.text(s.sem2 !== undefined ? String(s.sem2) : '-', 100, y);
+            doc.text(String(s.marks || 0), 130, y);
             y += 8;
         });
 
