@@ -757,21 +757,22 @@ export function ResultTable({
       isGrade12,
     };
   };
-
   return (
     <>
-      <Card className="border-none shadow-none bg-transparent animate-fade-in space-y-4">
-        <div className="glass-panel p-4 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center shadow-inner">
-              <FileSpreadsheet className="h-5 w-5 text-blue-600" />
+      <div className="space-y-6 animate-fade-in-up">
+
+        {/* Professional Toolbar */}
+        <div className="card-premium p-6 flex flex-col md:flex-row justify-between items-center gap-6 border-none ring-1 ring-slate-200/50 shadow-xl bg-white/60">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center shadow-inner ring-4 ring-blue-50/50 transition-transform hover:rotate-6">
+              <FileSpreadsheet className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">
-                Result Entry
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">
+                Academic Ledger
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                Drafts autosave every 2 seconds. Total calculates automatically.
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                Precision grading • Real-time synchronization
               </p>
             </div>
           </div>
@@ -871,36 +872,36 @@ export function ResultTable({
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl overflow-hidden shadow-sm">
+        <div className="card-premium rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50 border-none ring-1 ring-slate-200/50 bg-white/40 backdrop-blur-sm">
           <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-            <table className="w-full text-sm border-collapse min-w-[800px]">
+            <table className="w-full text-sm border-collapse min-w-[1000px]">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200">
-                  <th className="p-4 text-left font-black text-slate-700 sticky left-0 bg-slate-50 z-20 min-w-[100px] text-xs uppercase tracking-wider">
-                    Roll Number
+                <tr className="bg-slate-50/80 border-b border-slate-200 backdrop-blur-md">
+                  <th className="p-5 text-left font-black text-slate-500 sticky left-0 bg-slate-50/95 backdrop-blur-md z-30 min-w-[80px] text-[10px] uppercase tracking-[0.2em]">
+                    Roll
                   </th>
-                  <th className="p-4 text-left font-black text-slate-700 sticky left-[100px] bg-slate-50 z-20 min-w-[120px] text-xs uppercase tracking-wider shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">
-                    Student ID
+                  <th className="p-5 text-left font-black text-slate-500 sticky left-[80px] bg-slate-50/95 backdrop-blur-md z-30 min-w-[120px] text-[10px] uppercase tracking-[0.2em] border-r border-slate-200/50 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)]">
+                    Identity
                   </th>
-                  <th className="p-4 text-left font-black text-slate-700 sticky left-[220px] bg-slate-50 z-20 min-w-[180px] text-xs uppercase tracking-wider shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">
-                    Full Name
+                  <th className="p-5 text-left font-black text-slate-700 sticky left-[200px] bg-slate-50/95 backdrop-blur-md z-30 min-w-[200px] text-[10px] uppercase tracking-[0.2em] shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)]">
+                    Student Full Name
                   </th>
-                  <th className="p-4 text-center font-black text-slate-700 text-xs uppercase tracking-wider min-w-[80px]">
-                    Gender
+                  <th className="p-5 text-center font-black text-slate-500 text-[10px] uppercase tracking-[0.2em] min-w-[100px]">
+                    Sex
                   </th>
                   {subjects.map((subject) =>
                     isDynamic ? (
                       assessmentTypes.map((type: AssessmentType) => (
                         <th
                           key={`${subject}-${type.id}`}
-                          className="p-4 text-center font-black text-slate-700 text-xs border-r border-slate-100 last:border-0 min-w-[100px]"
+                          className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 last:border-0 min-w-[110px]"
                         >
-                          <div className="flex flex-col">
-                            <span className="uppercase tracking-tight text-slate-800">
+                          <div className="flex flex-col gap-1">
+                            <span className="uppercase tracking-widest text-slate-900">
                               {type.label}
                             </span>
-                            <span className="text-[10px] font-medium text-slate-400">
-                              ({type.weight}%)
+                            <span className="text-[9px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full inline-block mx-auto">
+                              Weight {type.weight}%
                             </span>
                           </div>
                         </th>
@@ -908,44 +909,44 @@ export function ResultTable({
                     ) : (
                       <th
                         key={subject}
-                        className="p-4 text-center font-black text-slate-700 text-xs border-r border-slate-100 last:border-0 min-w-[200px]"
+                        className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 last:border-0 min-w-[240px]"
                       >
-                        <div className="flex flex-col mb-2 text-sm uppercase tracking-wider">
+                        <div className="flex flex-col mb-3 text-xs uppercase tracking-[0.15em] text-blue-700 font-black">
                           {subject}
                         </div>
-                        <div className="grid grid-cols-3 gap-1 w-full border-t pt-2">
-                          <span className="text-[10px] text-slate-500 uppercase">
-                            Sem 1
+                        <div className="grid grid-cols-3 gap-2 w-full border-t border-slate-200 pt-3">
+                          <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
+                            SEM-1
                           </span>
-                          <span className="text-[10px] text-slate-500 uppercase">
-                            Sem 2
+                          <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
+                            SEM-2
                           </span>
-                          <span className="text-[10px] text-indigo-500 uppercase font-bold">
-                            Avg
+                          <span className="text-[9px] text-indigo-600 font-black uppercase tracking-widest bg-indigo-50/50 py-1 rounded-md">
+                            AVG
                           </span>
                         </div>
                       </th>
                     ),
                   )}
-                  <th className="p-4 text-center font-black text-slate-800 bg-slate-100/50 text-xs uppercase tracking-wider min-w-[100px]">
-                    Total
+                  <th className="p-5 text-center font-black text-slate-900 bg-slate-100/50 text-[10px] uppercase tracking-[0.2em] min-w-[110px]">
+                    Aggregate
                   </th>
                   {isHomeroomView && (
-                    <th className="p-4 text-center font-black text-indigo-900 bg-indigo-50/50 text-xs uppercase tracking-wider">
-                      Avg
+                    <th className="p-5 text-center font-black text-blue-900 bg-blue-50/50 text-[10px] uppercase tracking-[0.2em]">
+                      Acc %
                     </th>
                   )}
                   {isHomeroomView && (
-                    <th className="p-4 text-center font-black text-indigo-900 bg-indigo-50/50 text-xs uppercase tracking-wider">
+                    <th className="p-5 text-center font-black text-blue-900 bg-blue-50/50 text-[10px] uppercase tracking-[0.2em]">
                       Rank
                     </th>
                   )}
-                  <th className="p-4 text-right font-black text-slate-700 min-w-[140px] text-xs uppercase tracking-wider">
-                    Actions
+                  <th className="p-5 text-right font-black text-slate-500 min-w-[150px] text-[10px] uppercase tracking-[0.2em]">
+                    Operations
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 bg-white">
                 {[...students]
                   .sort((a, b) => {
                     const nameA = (a.name || a.fullName || "").toLowerCase();
@@ -973,21 +974,21 @@ export function ResultTable({
                     return (
                       <tr
                         key={sid}
-                        className="bg-white hover:bg-blue-50/30 transition-colors group"
+                        className="hover:bg-blue-50/20 transition-all duration-300 group/row border-b border-slate-50 last:border-0"
                       >
-                        <td className="p-4 font-bold text-slate-400 sticky left-0 bg-white group-hover:bg-blue-50/30 z-10">
+                        <td className="p-5 font-bold text-slate-400 sticky left-0 bg-white group-hover/row:bg-blue-50/30 z-20 text-xs tabular-nums transition-colors">
                           {student.rollNumber || index + 1}
                         </td>
-                        <td className="p-4 font-bold text-slate-600 text-xs sticky left-[100px] bg-white group-hover:bg-blue-50/30 z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">
-                          {student.studentId || student.student_id || "PENDING"}
+                        <td className="p-5 font-bold text-slate-500 text-[11px] sticky left-[80px] bg-white group-hover/row:bg-blue-50/30 z-20 transition-colors border-r border-slate-200/50 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)] tabular-nums uppercase">
+                          {student.studentId || student.student_id || "ID-TBD"}
                         </td>
-                        <td className="p-4 font-bold text-slate-800 text-sm sticky left-[220px] bg-white group-hover:bg-blue-50/30 z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)] truncate max-w-[180px]">
+                        <td className="p-5 font-black text-slate-800 text-sm sticky left-[200px] bg-white group-hover/row:bg-blue-50/30 z-20 transition-colors shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)] truncate max-w-[200px] uppercase tracking-tight">
                           {student.name || student.fullName}
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-5 text-center">
                           <span
                             className={cn(
-                              "text-[10px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider",
+                              "text-[9px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-widest",
                               normalizeGender(
                                 student.gender || (student as any).sex,
                               ) === "M"
@@ -1017,7 +1018,7 @@ export function ResultTable({
                                 return (
                                   <td
                                     key={`${subject}-${type.id}`}
-                                    className="p-2 border-r border-slate-50 last:border-0 text-center"
+                                    className="p-3 border-r border-slate-50 last:border-0 text-center"
                                   >
                                     <Input
                                       type="number"
@@ -1035,10 +1036,10 @@ export function ResultTable({
                                         )
                                       }
                                       className={cn(
-                                        "w-full text-center h-9 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 rounded-lg font-bold transition-all text-sm",
+                                        "w-full text-center h-10 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-8 focus:ring-blue-500/10 rounded-xl font-black transition-all text-sm tabular-nums",
                                         isFail
-                                          ? "text-red-500 bg-red-50 hover:bg-red-50 focus:bg-red-50"
-                                          : "text-slate-700",
+                                          ? "text-red-600 bg-red-50 hover:bg-red-100 focus:bg-red-50"
+                                          : "text-slate-800",
                                       )}
                                       placeholder="-"
                                       disabled={isLocked || isHomeroomView}
@@ -1061,9 +1062,9 @@ export function ResultTable({
                             return (
                               <td
                                 key={subject}
-                                className="p-2 relative min-w-[200px] border-r border-slate-50 last:border-0 text-center align-top"
+                                className="p-3 relative min-w-[240px] border-r border-slate-50 last:border-0 text-center align-top"
                               >
-                                <div className="grid grid-cols-3 gap-1">
+                                <div className="grid grid-cols-3 gap-2">
                                   <Input
                                     type="number"
                                     inputMode="decimal"
@@ -1078,7 +1079,7 @@ export function ResultTable({
                                         e.target.value,
                                       )
                                     }
-                                    className="w-full text-center h-9 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 rounded-lg font-bold transition-all text-sm text-slate-700"
+                                    className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-8 focus:ring-blue-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
                                     placeholder="-"
                                     disabled={isLocked || isHomeroomView}
                                   />
@@ -1096,18 +1097,18 @@ export function ResultTable({
                                         e.target.value,
                                       )
                                     }
-                                    className="w-full text-center h-9 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 rounded-lg font-bold transition-all text-sm text-slate-700"
+                                    className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-8 focus:ring-blue-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
                                     placeholder="-"
                                     disabled={isLocked || isHomeroomView}
                                   />
                                   <div
                                     className={cn(
-                                      "flex items-center justify-center h-9 rounded-lg font-black text-sm",
+                                      "flex items-center justify-center h-10 rounded-xl font-black text-xs tabular-nums ring-1 ring-inset",
                                       isFail
-                                        ? "text-red-600 bg-red-50/50"
+                                        ? "text-red-700 bg-red-50 ring-red-100"
                                         : hasBoth
-                                          ? "text-indigo-600 bg-indigo-50/30"
-                                          : "text-slate-300",
+                                          ? "text-blue-700 bg-blue-50/50 ring-blue-100"
+                                          : "text-slate-300 ring-slate-100",
                                     )}
                                   >
                                     {hasBoth ? sAvg.toFixed(1) : "-"}
@@ -1117,18 +1118,18 @@ export function ResultTable({
                             );
                           }
                         })}
-                        <td className="p-4 text-center">
-                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-slate-100/80 font-black text-slate-700 text-sm border border-slate-200">
+                        <td className="p-5 text-center">
+                          <span className="inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-slate-900 font-black text-white text-[11px] shadow-lg shadow-slate-200 tabular-nums">
                             {Number.isInteger(total) ? total : total.toFixed(1)}
                           </span>
                         </td>
                         {isHomeroomView && (
-                          <td className="p-4 text-center font-black text-indigo-600 bg-indigo-50/30">
+                          <td className="p-5 text-center font-black text-blue-700 bg-blue-50/30 tabular-nums text-sm">
                             {average.toFixed(1)}%
                           </td>
                         )}
                         {isHomeroomView && (
-                          <td className="p-4 text-center font-black text-indigo-600 bg-indigo-50/30">
+                          <td className="p-5 text-center font-black text-blue-700 bg-blue-50/30 tabular-nums text-sm">
                             {(() => {
                               const allAverages = students.map(
                                 (s) =>
@@ -1143,19 +1144,21 @@ export function ResultTable({
                             })()}
                           </td>
                         )}
-                        <td className="p-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="p-5 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-3">
                             {submitStatus[sid] === "saving" ? (
-                              <span className="text-slate-400 text-xs font-bold animate-pulse">
-                                Saving...
-                              </span>
+                              <div className="flex items-center gap-2 text-blue-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                                Syncing
+                              </div>
                             ) : submitStatus[sid] === "saved" ? (
-                              <span className="text-blue-600 text-xs font-bold flex items-center gap-1">
+                              <div className="h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner border border-emerald-100">
                                 <CheckCircle2 className="h-4 w-4" />
-                              </span>
+                              </div>
                             ) : isLocalEditing ? (
                               <Button
                                 size="sm"
+                                variant="premium"
                                 onClick={() =>
                                   handleSubmitRow(
                                     sid,
@@ -1164,47 +1167,44 @@ export function ResultTable({
                                       : "subject-pending",
                                   )
                                 }
-                                className={cn(
-                                  "h-8 px-3 font-bold shadow-sm rounded-lg text-xs",
-                                  "bg-blue-600 hover:bg-blue-700 text-white",
-                                )}
+                                className="h-9 px-5 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-500/20 rounded-xl"
                               >
-                                Save
+                                Commit
                               </Button>
                             ) : isPublished ? (
                               <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black uppercase px-2 py-1 bg-green-100 text-green-700 rounded-lg shadow-sm border border-green-200">
-                                  Published
+                                <span className="text-[9px] font-black uppercase px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg shadow-sm border border-emerald-100 tracking-[0.15em]">
+                                  Live Result
                                 </span>
                                 {allowEditSubmitted && (
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-7 w-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                                    className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all"
                                     onClick={() => toggleEditRow(sid)}
                                   >
-                                    <Edit className="h-3 w-3" />
+                                    <Edit className="h-4 w-4" />
                                   </Button>
                                 )}
                               </div>
                             ) : isPendingAdmin ? (
                               <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black uppercase px-2 py-1 bg-amber-100 text-amber-700 rounded-lg shadow-sm border border-amber-200">
-                                  Pending
+                                <span className="text-[9px] font-black uppercase px-3 py-1 bg-amber-50 text-amber-700 rounded-lg shadow-sm border border-amber-100 tracking-[0.15em]">
+                                  In Review
                                 </span>
                                 {allowEditSubmitted && (
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-7 w-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                                    className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all"
                                     onClick={() => toggleEditRow(sid)}
                                   >
-                                    <Edit className="h-3 w-3" />
+                                    <Edit className="h-4 w-4" />
                                   </Button>
                                 )}
                               </div>
                             ) : isDraftHomeroom ? (
-                              <span className="text-[10px] font-black uppercase px-2 py-1 bg-slate-100 text-slate-600 rounded-lg border border-slate-200">
+                              <span className="text-[9px] font-black uppercase px-3 py-1 bg-slate-100 text-slate-600 rounded-lg border border-slate-200 tracking-[0.15em]">
                                 Draft
                               </span>
                             ) : (
@@ -1218,12 +1218,9 @@ export function ResultTable({
                                       : "subject-pending",
                                   )
                                 }
-                                className={cn(
-                                  "h-8 px-3 font-bold shadow-sm rounded-lg text-xs",
-                                  "bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600",
-                                )}
+                                className="h-9 px-5 font-black text-[10px] uppercase tracking-widest text-slate-500 hover:text-blue-600 transition-colors rounded-xl border border-slate-100 hover:bg-white"
                               >
-                                Send
+                                Submit
                               </Button>
                             )}
                           </div>
@@ -1235,15 +1232,15 @@ export function ResultTable({
             </table>
           </div>
         </div>
-      </Card>
+      </div>
 
       <ConfirmDialog
         open={confirmSubmit.open}
         onClose={() => setConfirmSubmit({ ...confirmSubmit, open: false })}
         onConfirm={confirmFullSubmission}
-        title="Confirm Submission"
+        title="Institutional Submission"
         description={confirmSubmit.description}
-        confirmText="Submit"
+        confirmText="Confirm & Submit"
       />
 
       <AlertModal
@@ -1256,3 +1253,4 @@ export function ResultTable({
     </>
   );
 }
+

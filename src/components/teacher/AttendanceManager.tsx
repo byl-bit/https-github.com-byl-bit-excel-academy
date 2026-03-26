@@ -119,67 +119,66 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <Card className="bg-linear-to-br from-blue-50 to-white border-blue-100">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <div className="bg-blue-100 p-3 rounded-xl">
-              <CalendarCheck className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-xl font-black text-blue-950">
-                Daily Attendance
-              </h2>
-              <p className="text-blue-500 font-medium text-sm">
-                Manage records for Class {user.grade}-{user.section}
-              </p>
-            </div>
+    <div className="space-y-8 animate-fade-in-up pb-20">
+      <div className="card-premium p-6 flex flex-col md:flex-row justify-between items-center gap-6 border-none ring-1 ring-slate-200/50 shadow-xl bg-white/60 backdrop-blur-md">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center shadow-inner ring-4 ring-blue-50/50 transition-transform hover:rotate-6">
+            <CalendarCheck className="h-6 w-6 text-blue-600" />
           </div>
-
-          <div className="flex items-center gap-3 bg-white p-1.5 rounded-xl border border-blue-100 shadow-xs">
-            <div className="relative">
-              <input
-                type="date"
-                className="h-9 rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-1 text-sm text-blue-900 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                value={date ? date.toISOString().split("T")[0] : ""}
-                onChange={(e) =>
-                  setDate(
-                    e.target.value ? new Date(e.target.value) : new Date(),
-                  )
-                }
-              />
-            </div>
-
-            <Button
-              onClick={handleSave}
-              disabled={saving || loading}
-              className={cn(
-                "h-9 font-bold shadow-sm transition-all",
-                hasRecord
-                  ? "bg-blue-600 hover:bg-blue-700 text-white"
-                  : "bg-emerald-600 hover:bg-emerald-700 text-white",
-              )}
-            >
-              {saving ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              {hasRecord ? "Update Record" : "Save New Record"}
-            </Button>
+          <div>
+            <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">
+              Presence Ledger
+            </h2>
+            <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-0.5">
+              Grade {user.grade} - Section {user.section} • Digital Roster
+            </p>
           </div>
         </div>
-      </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-4">
-          <Card className="p-0 overflow-hidden">
-            <div className="p-4 bg-blue-50/50 border-b border-blue-100 flex items-center justify-between">
-              <h3 className="font-bold text-blue-900 flex items-center gap-2">
+        <div className="flex items-center gap-3 bg-white/40 p-1.5 rounded-2xl ring-1 ring-slate-200/50 shadow-sm">
+          <div className="relative">
+            <input
+              type="date"
+              className="h-10 rounded-xl border-none bg-white px-4 py-1 text-xs text-slate-900 font-black focus:outline-none focus:ring-4 focus:ring-blue-500/10 cursor-pointer shadow-xs uppercase tracking-wider"
+              value={date ? date.toISOString().split("T")[0] : ""}
+              onChange={(e) =>
+                setDate(
+                  e.target.value ? new Date(e.target.value) : new Date(),
+                )
+              }
+            />
+          </div>
+
+          <Button
+            onClick={handleSave}
+            disabled={saving || loading}
+            variant="premium"
+            className={cn(
+              "h-10 px-6 font-black text-[10px] uppercase tracking-widest shadow-lg transition-all rounded-xl",
+              hasRecord
+                ? "bg-blue-600 shadow-blue-500/20"
+                : "bg-emerald-600 shadow-emerald-500/20",
+            )}
+          >
+            {saving ? (
+              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-3 w-3" />
+            )}
+            {hasRecord ? "Sync Changes" : "Commit Roster"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="lg:col-span-3 space-y-4">
+          <div className="card-premium p-0 overflow-hidden border-none ring-1 ring-slate-200/50 bg-white/40 backdrop-blur-sm shadow-2xl shadow-slate-200/50">
+            <div className="p-5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between backdrop-blur-md">
+              <h3 className="font-black text-slate-800 text-xs uppercase tracking-[0.2em] flex items-center gap-2">
                 <Users className="h-4 w-4 text-blue-500" />
-                Student List
+                Active Enrollment
               </h3>
-              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-xs">
                 {date.toLocaleDateString(undefined, {
                   weekday: "long",
                   month: "short",
@@ -187,31 +186,38 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                 })}
               </span>
             </div>
-            <CardContent className="p-0">
+            <div className="p-0">
               {loading ? (
-                <div className="py-12 flex flex-col items-center justify-center text-blue-400 animate-pulse">
-                  <Loader2 className="h-8 w-8 mb-2 animate-spin text-blue-300" />
-                  <p className="text-sm font-medium">Loading roster...</p>
+                <div className="py-24 flex flex-col items-center justify-center text-slate-400 animate-pulse">
+                  <div className="relative">
+                    <Loader2 className="h-12 w-12 mb-4 animate-spin text-blue-500" />
+                    <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-blue-100/50" />
+                  </div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600/50">
+                    Hydrating Roster...
+                  </p>
                 </div>
               ) : (
-                <div className="divide-y divide-blue-50">
+                <div className="divide-y divide-slate-100">
                   {/* Header Row */}
-                  <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] font-black uppercase text-blue-400 tracking-wider bg-blue-50/30">
-                    <div className="col-span-1">Roll</div>
-                    <div className="col-span-2">ID</div>
-                    <div className="col-span-4">Student Name</div>
-                    <div className="col-span-2 text-center">Gender</div>
-                    <div className="col-span-3 text-right">Status</div>
+                  <div className="grid grid-cols-12 gap-4 px-6 py-4 text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] bg-slate-50/30">
+                    <div className="col-span-1">RN</div>
+                    <div className="col-span-2">Identity</div>
+                    <div className="col-span-4">Full Legal Name</div>
+                    <div className="col-span-2 text-center">Sex</div>
+                    <div className="col-span-3 text-right pr-4">Disposition</div>
                   </div>
 
                   {students.length === 0 ? (
-                    <div className="py-12 text-center text-blue-400">
-                      <p className="font-bold">
-                        No students found for this class.
+                    <div className="py-24 text-center text-slate-400">
+                      <div className="h-16 w-16 mx-auto mb-4 bg-slate-50 rounded-full flex items-center justify-center">
+                        <Users className="h-8 w-8 opacity-20" />
+                      </div>
+                      <p className="font-black uppercase tracking-widest text-xs">
+                        Zero Enrollment Records
                       </p>
-                      <p className="text-xs">
-                        Students must be active and correctly assigned to this
-                        Grade and Section.
+                      <p className="text-[10px] mt-2 font-bold max-w-xs mx-auto text-slate-400">
+                        Check with administration for Grade {user.grade} Sect {user.section} assignment status.
                       </p>
                     </div>
                   ) : (
@@ -240,40 +246,48 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                             key={sid}
                             onClick={() => toggleStatus(sid)}
                             className={cn(
-                              "grid grid-cols-12 gap-4 items-center px-4 py-3 cursor-pointer transition-all hover:bg-blue-50/50 group",
-                              !isPresent && "bg-rose-50/30 hover:bg-rose-50/50",
+                              "grid grid-cols-12 gap-4 items-center px-6 py-4 cursor-pointer transition-all duration-300 group hover:z-10",
+                              isPresent 
+                                ? "bg-white hover:bg-blue-50/30" 
+                                : "bg-red-50/20 hover:bg-red-50/40",
                             )}
                           >
-                            <div className="col-span-1 font-bold text-xs text-blue-600">
+                            <div className="col-span-1 font-black text-xs text-slate-400 group-hover:text-blue-600 transition-colors">
                               {student.rollNumber || "--"}
                             </div>
-                            <div className="col-span-2 font-mono text-[10px] text-blue-400 font-bold group-hover:text-blue-600 transition-colors">
-                              {student.studentId || student.student_id || "ID"}
+                            <div className="col-span-2 font-black text-[10px] text-slate-500 uppercase tabular-nums">
+                              {student.studentId || student.student_id || "PENDING"}
                             </div>
-                            <div className="col-span-4 font-bold text-sm text-blue-900 truncate">
+                            <div className="col-span-4 font-black text-sm text-slate-800 tracking-tight group-hover:translate-x-1 transition-transform truncate">
                               {student.fullName || student.name}
                             </div>
-                            <div className="col-span-2 text-center text-[10px] font-black text-slate-400">
-                              {normalizeGender(student.gender || student.sex) ||
-                                "-"}
+                            <div className="col-span-2 text-center">
+                              <span className={cn(
+                                "text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-widest shadow-xs",
+                                normalizeGender(student.gender || student.sex) === "M"
+                                  ? "bg-blue-50 text-blue-600 border-blue-100"
+                                  : "bg-pink-50 text-pink-600 border-pink-100"
+                              )}>
+                                {normalizeGender(student.gender || student.sex) || "-"}
+                              </span>
                             </div>
                             <div className="col-span-3 flex justify-end">
                               <div
                                 className={cn(
-                                  "px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1.5 transition-all w-24 justify-center shadow-xs border",
+                                  "px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 transition-all w-28 justify-center shadow-lg border",
                                   isPresent
-                                    ? "bg-emerald-100/50 text-emerald-700 border-emerald-200"
-                                    : "bg-rose-100/50 text-rose-700 border-rose-200",
+                                    ? "bg-emerald-600 text-white border-emerald-500 shadow-emerald-200 group-hover:scale-105"
+                                    : "bg-white text-rose-600 border-rose-100 shadow-slate-100 group-hover:scale-105",
                                 )}
                               >
                                 {isPresent ? (
                                   <>
-                                    <UserCheck className="h-3 w-3" />
+                                    <UserCheck className="h-4 w-4" />
                                     PRESENT
                                   </>
                                 ) : (
                                   <>
-                                    <UserX className="h-3 w-3" />
+                                    <UserX className="h-4 w-4" />
                                     ABSENT
                                   </>
                                 )}
@@ -285,65 +299,90 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                   )}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader className="p-4 pb-2">
-              <h3 className="text-lg font-black text-blue-900 flex items-center gap-2">
+          <div className="card-premium p-6 space-y-8 bg-white/40 ring-1 ring-slate-200/50 backdrop-blur-sm">
+            <div>
+              <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
                 <Info className="h-5 w-5 text-blue-600" />
-                Daily Summary
+                Ledger Summary
               </h3>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-2">
-              <div className="flex justify-between items-center p-4 bg-emerald-50 border border-emerald-100 text-emerald-900 rounded-xl shadow-xs">
-                <span className="font-bold flex items-center gap-2 text-sm">
-                  <div className="bg-white p-1 rounded-full">
-                    <Check className="h-3 w-3 text-emerald-600" />
-                  </div>
-                  Present
-                </span>
-                <span className="text-2xl font-black">{presentCount}</span>
-              </div>
-              <div className="flex justify-between items-center p-4 bg-rose-50 border border-rose-100 text-rose-900 rounded-xl shadow-xs">
-                <span className="font-bold flex items-center gap-2 text-sm">
-                  <div className="bg-white p-1 rounded-full">
-                    <X className="h-3 w-3 text-rose-600" />
-                  </div>
-                  Absent
-                </span>
-                <span className="text-2xl font-black">{absentCount}</span>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time presence tracking</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="group relative">
+                <div className="flex justify-between items-center p-5 bg-emerald-50 border border-emerald-100 text-emerald-900 rounded-2xl shadow-xs transition-transform hover:-translate-y-1">
+                  <span className="font-black flex items-center gap-3 text-xs uppercase tracking-widest">
+                    <div className="bg-white h-7 w-7 rounded-lg flex items-center justify-center shadow-inner">
+                      <Check className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    Expected
+                  </span>
+                  <span className="text-3xl font-black tabular-nums">{presentCount}</span>
+                </div>
               </div>
 
-              <div className="pt-4 border-t border-blue-100 mt-2">
-                <div className="flex justify-between text-sm items-end">
-                  <span className="text-blue-500 font-medium">
-                    Attendance Rate
+              <div className="group relative">
+                <div className="flex justify-between items-center p-5 bg-red-50 border border-red-100 text-red-900 rounded-2xl shadow-xs transition-transform hover:-translate-y-1">
+                  <span className="font-black flex items-center gap-3 text-xs uppercase tracking-widest">
+                    <div className="bg-white h-7 w-7 rounded-lg flex items-center justify-center shadow-inner">
+                      <X className="h-4 w-4 text-red-600" />
+                    </div>
+                    Exceptions
                   </span>
-                  <span
-                    className={`text-xl font-black ${presentCount === students.length ? "text-emerald-500" : "text-blue-600"}`}
-                  >
-                    {students.length > 0
-                      ? Math.round((presentCount / students.length) * 100)
-                      : 0}
-                    %
-                  </span>
+                  <span className="text-3xl font-black tabular-nums">{absentCount}</span>
                 </div>
-                <div className="w-full bg-blue-100 h-2 rounded-full mt-2 overflow-hidden">
+              </div>
+
+              <div className="pt-8 border-t border-slate-200/50 mt-4 space-y-4">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Compliance</p>
+                    <p className="text-4xl font-black text-slate-900 tabular-nums leading-none mt-1">
+                      {students.length > 0
+                        ? Math.round((presentCount / students.length) * 100)
+                        : 0}
+                      <span className="text-lg ml-0.5 text-slate-400">%</span>
+                    </p>
+                  </div>
+                  <div className={cn(
+                    "h-3 w-3 rounded-full animate-pulse",
+                    (presentCount / (students.length || 1)) > 0.9 ? "bg-emerald-500 shadow-[0_0_12px_rgba(34,197,94,0.4)]" : "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.4)]"
+                  )} />
+                </div>
+                <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden shadow-inner p-0.5">
                   <div
-                    className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                    className={cn(
+                      "h-full rounded-full transition-all duration-1000 ease-out shadow-sm",
+                      (presentCount / (students.length || 1)) > 0.9 ? "bg-emerald-500" : "bg-blue-600"
+                    )}
                     style={{
                       width: `${students.length > 0 ? (presentCount / students.length) * 100 : 0}%`,
                     }}
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            
+            <div className="p-5 bg-linear-to-br from-slate-900 to-slate-800 rounded-3xl text-white shadow-xl shadow-slate-200 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-blue-500/10 blur-2xl -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-1000" />
+              <div className="relative z-10">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Status Advisory</p>
+                <p className="text-xs font-bold leading-relaxed mt-2 italic text-slate-300">
+                  {absentCount === 0 
+                    ? "Full institutional presence confirmed. No anomalies detected."
+                    : `${absentCount} students require absence verification follow-up.`}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

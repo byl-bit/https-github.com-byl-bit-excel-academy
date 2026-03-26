@@ -58,50 +58,56 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
   ];
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-10 animate-fade-in-up">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {cards.map((card, idx) => (
           <div
             key={idx}
-            className="glass-panel p-6 relative group overflow-hidden transition-all duration-500 hover:shadow-xl hover:-translate-y-1 hover:bg-white"
+            className="card-premium p-6 relative group overflow-hidden border-none ring-1 ring-slate-200/50 hover:ring-blue-500/30 shadow-xs hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-1.5"
           >
-            <div className="absolute -right-6 -top-6 p-3 opacity-5 group-hover:opacity-10 transition-all transform group-hover:scale-110 duration-700">
-              <card.icon className="h-24 w-24" />
-            </div>
+            {/* Background blob */}
+            <div className={cn(
+              "absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-700",
+              idx === 0 ? "bg-blue-500" : idx === 1 ? "bg-amber-500" : idx === 2 ? "bg-emerald-500" : "bg-indigo-500"
+            )} />
 
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-8">
                 <div
-                  className={`${card.bg}/60 p-4 rounded-2xl shadow-inner group-hover:scale-110 transition-transform duration-500`}
-                >
-                  <card.icon className={`h-6 w-6 ${card.iconColor}`} />
-                </div>
-                <span
                   className={cn(
-                    "text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest shadow-xs",
-                    idx === 0
-                      ? "bg-blue-50 text-blue-600 border border-blue-100"
-                      : idx === 1
-                        ? "bg-amber-50 text-amber-600 border border-amber-100 animate-pulse"
-                        : idx === 2
-                          ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                          : "bg-indigo-50 text-indigo-600 border border-indigo-100",
+                    "p-4 rounded-2xl shadow-inner group-hover:scale-110 group-hover:rotate-6 transition-all duration-500",
+                    card.bg
                   )}
                 >
-                  System Active
-                </span>
+                  <card.icon className={cn("h-7 w-7", card.iconColor)} />
+                </div>
+                {idx === 1 && pendingCount > 0 && (
+                  <span className="flex h-3 w-3 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                  </span>
+                )}
               </div>
 
-              <div className="space-y-1">
-                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                  {card.title}
-                </h3>
-                <div className="text-4xl font-black tracking-tighter text-slate-800 group-hover:text-blue-600 transition-colors">
-                  {card.value}
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between">
+                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">
+                    {card.title}
+                  </h3>
                 </div>
-                <p className="text-[10px] font-bold text-slate-400 mt-2">
-                  {card.description}
-                </p>
+                <div className="flex items-center gap-3">
+                  <div className="text-4xl font-black tracking-tighter text-slate-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-slate-900 group-hover:to-blue-600 transition-all duration-300">
+                    {card.value}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 mt-3">
+                  <div className="h-1 w-8 bg-blue-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 w-2/3" />
+                  </div>
+                  <p className="text-[10px] font-semibold text-slate-400">
+                    {card.description}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -109,30 +115,30 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
       </div>
 
       <div className="grid gap-8 md:grid-cols-2">
-        <Card className="border-none shadow-sm bg-white/40 overflow-hidden group">
-          <CardHeader
-            title="Academic Performance"
-            description="Performance analytics"
-            icon={TrendingUp}
-          />
-          <div className="space-y-10 p-8 pt-2">
+        <div className="card-premium border-none p-8 space-y-8 bg-white/40 ring-1 ring-slate-200/50 group">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-black text-slate-800 tracking-tight">Academic Performance</h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Institutional Analytics</p>
+            </div>
+            <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-inner">
+              <TrendingUp className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors" />
+            </div>
+          </div>
+
+          <div className="grid gap-10">
             <div className="space-y-4">
               <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    Pass Success Rate
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pass Success Rate</p>
+                  <p className="text-5xl font-black tracking-tighter text-blue-600 tabular-nums">
+                    {stats.passRate?.toFixed(1)}<span className="text-xl ml-0.5">%</span>
                   </p>
-                  <span className="text-4xl font-black text-blue-600 group-hover:scale-105 transition-transform inline-block origin-left">
-                    {stats.passRate?.toFixed(1)}%
-                  </span>
-                </div>
-                <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
-              <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner p-1">
+              <div className="h-3 w-full bg-slate-100/50 rounded-full overflow-hidden shadow-inner flex p-0.5">
                 <div
-                  className="h-full bg-linear-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-1000 ease-out shadow-lg shadow-blue-500/20"
+                  className="h-full bg-linear-to-r from-blue-500 to-indigo-600 rounded-full animate-grow-x shadow-[0_0_15px_rgba(59,130,246,0.5)]"
                   style={{ width: `${stats.passRate}%` }}
                 />
               </div>
@@ -140,89 +146,68 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
 
             <div className="space-y-4">
               <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    Highest Average
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Distinction Average</p>
+                  <p className="text-5xl font-black tracking-tighter text-emerald-600 tabular-nums">
+                    {stats.topAverage?.toFixed(1)}<span className="text-xl ml-0.5">%</span>
                   </p>
-                  <span className="text-4xl font-black text-emerald-600 group-hover:scale-105 transition-transform inline-block origin-left">
-                    {stats.topAverage?.toFixed(1)}%
-                  </span>
-                </div>
-                <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <CheckCircle className="h-5 w-5 text-emerald-600" />
                 </div>
               </div>
-              <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner p-1">
+              <div className="h-3 w-full bg-slate-100/50 rounded-full overflow-hidden shadow-inner flex p-0.5">
                 <div
-                  className="h-full bg-linear-to-r from-emerald-400 to-teal-600 rounded-full transition-all duration-1000 ease-out shadow-lg shadow-emerald-500/20"
+                  className="h-full bg-linear-to-r from-emerald-400 to-teal-500 rounded-full animate-grow-x delay-200 shadow-[0_0_15px_rgba(34,197,94,0.5)]"
                   style={{ width: `${stats.topAverage}%` }}
                 />
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="border-none shadow-sm bg-white/40 overflow-hidden">
-          <CardHeader
-            title="System Health"
-            description="Real-time monitoring"
-            icon={Shield}
-          />
-          <div className="space-y-3 p-8 pt-2">
-            {[
-              {
-                label: "Database Core",
-                status: "Secure",
-                icon: CheckCircle,
-                color: "emerald",
-                glow: "rgba(34,197,94,0.6)",
-              },
-              {
-                label: "Computational Load",
-                status: "Optimal",
-                icon: TrendingUp,
-                color: "blue",
-                glow: "rgba(59,130,246,0.6)",
-              },
-              {
-                label: "Access Security",
-                status: "Enforced",
-                icon: Shield,
-                color: "indigo",
-                glow: "rgba(99,102,241,0.6)",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="flex justify-between items-center p-5 glass-panel bg-white/60 hover:bg-white transition-all duration-300 group border-transparent hover:border-white shadow-xs"
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`h-2.5 w-2.5 rounded-full bg-${item.color}-500 animate-pulse`}
-                    style={{ boxShadow: `0 0 10px ${item.glow}` }}
-                  />
-                  <span className="text-slate-700 font-black uppercase text-[11px] tracking-wider group-hover:text-slate-900 transition-colors">
-                    {item.label}
-                  </span>
-                </div>
-                <span
-                  className={`text-${item.color}-700 bg-${item.color}-50 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xs border border-${item.color}-100`}
-                >
-                  <item.icon className="h-3.5 w-3.5" /> {item.status}
-                </span>
-              </div>
-            ))}
-            <div className="mt-4 p-4 rounded-2xl bg-indigo-600 text-white shadow-xl shadow-indigo-100 relative overflow-hidden group">
-              <div className="absolute -right-4 -bottom-4 h-20 w-20 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">
-                Infrastructure Status
-              </p>
-              <p className="text-sm font-bold flex items-center gap-2">
-                <Shield className="h-4 w-4" /> All Systems Nominal - 100% Uptime
-              </p>
+        <div className="card-premium border-none p-8 space-y-8 bg-white/40 ring-1 ring-slate-200/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-black text-slate-800 tracking-tight">System Reliability</h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time Core Monitoring</p>
+            </div>
+            <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center shadow-inner">
+              <Shield className="h-6 w-6 text-indigo-600" />
             </div>
           </div>
-        </Card>
+
+          <div className="space-y-4">
+            {[
+              { label: "Data Integrity", status: "Verified", icon: CheckCircle, color: "emerald", glow: "rgba(34,197,94,0.4)" },
+              { label: "Neural Compute", status: "Optimal", icon: TrendingUp, color: "blue", glow: "rgba(59,130,246,0.4)" },
+              { label: "Network Security", status: "Enforced", icon: Shield, color: "indigo", glow: "rgba(99,102,241,0.4)" },
+            ].map((item, i) => (
+              <div key={i} className="flex justify-between items-center p-4 bg-white/60 border border-white rounded-2xl shadow-xs group hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
+                <div className="flex items-center gap-3">
+                  <div className={cn("h-2.5 w-2.5 rounded-full animate-pulse", `bg-${item.color}-500`)} style={{ boxShadow: `0 0 12px ${item.glow}` }} />
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">{item.label}</span>
+                </div>
+                <div className={cn("text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1.5 border", `bg-${item.color}-50 text-${item.color}-700 border-${item.color}-100`)}>
+                  <item.icon className="h-3 w-3" /> {item.status}
+                </div>
+              </div>
+            ))}
+
+            <div className="mt-6 p-6 rounded-3xl bg-linear-to-br from-indigo-600 to-blue-700 text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-1000" />
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70">Infrastructure</p>
+                  <p className="text-base font-bold flex items-center gap-2">
+                    <Shield className="h-5 w-5 fill-white/20" /> 100% System Uptime
+                  </p>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-[8px] font-black opacity-60 uppercase tracking-widest">Latency</span>
+                  <span className="text-xl font-black tabular-nums">14ms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

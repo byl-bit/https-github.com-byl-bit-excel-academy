@@ -188,94 +188,74 @@ export function TeacherOverview({
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-10 animate-fade-in-up">
       {/* Welcome Header */}
-      <div className="glass-panel overflow-hidden rounded-4xl shadow-sm relative group">
-        <div className="absolute inset-0 bg-linear-to-br from-indigo-600/5 via-transparent to-blue-600/5 opacity-50"></div>
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-400 blur-[100px] opacity-10 group-hover:opacity-20 transition-opacity"></div>
-        <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-400 blur-[100px] opacity-10 group-hover:opacity-20 transition-opacity"></div>
+      <div className="card-premium overflow-hidden border-none ring-1 ring-slate-200/50 shadow-2xl shadow-blue-500/5 relative group p-0">
+        <div className="absolute inset-0 bg-linear-to-br from-blue-600/5 via-transparent to-indigo-600/5"></div>
+        <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-blue-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
+        <div className="absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-indigo-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
 
-        <div className="relative z-10 p-8 sm:p-12 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-12">
-          <div className="text-center md:text-left space-y-4">
-            <div className="space-y-1">
-              <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-800">
-                Welcome, <span className="text-indigo-600">{user.name}</span>
+        <div className="relative z-10 p-10 sm:p-14 flex flex-col md:flex-row justify-between items-center gap-10 md:gap-16">
+          <div className="text-center md:text-left space-y-6 flex-1">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100/50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-2 shadow-xs ring-4 ring-blue-50/50">
+                <span className="flex h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse"></span> Terminal Active
+              </div>
+              <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
+                Welcome, <span className="text-gradient drop-shadow-sm">{user.name}</span>
               </h1>
-              <p className="text-slate-500 text-lg font-bold flex items-center justify-center md:justify-start gap-2">
-                <School className="h-5 w-5 text-indigo-500" />
+              <p className="text-slate-500 text-lg font-bold flex items-center justify-center md:justify-start gap-2.5 opacity-80 mt-4">
+                <div className="h-10 w-10 rounded-xl bg-white shadow-xs border border-slate-100 flex items-center justify-center">
+                  <School className="h-5 w-5 text-blue-500" />
+                </div>
                 {user.grade && user.section ? (
-                  <>
-                    Assigned Room: Grade {user.grade} - Section {user.section}
-                  </>
+                  <span className="text-slate-700">Homeroom: <span className="text-blue-600 font-extrabold">Grade {user.grade} • Section {user.section}</span></span>
                 ) : (
-                  <>Subject Faculty • No Homeroom Assigned</>
+                  <span className="italic">Subject Faculty • Specialized Instruction</span>
                 )}
               </p>
             </div>
-            <div className="flex flex-wrap justify-center md:justify-start gap-3">
-              <div className="glass-panel bg-white/40 px-5 py-2 rounded-2xl text-[11px] font-black uppercase tracking-widest border-white/50 flex items-center gap-3 text-slate-600 shadow-xs">
-                <LayoutDashboard className="h-4 w-4 text-indigo-500" />{" "}
-                Administrative Overview
-              </div>
-            </div>
           </div>
 
-          {user.grade === students[0]?.grade &&
-            user.section === students[0]?.section && (
+          <div className="shrink-0">
+            {user.grade === students[0]?.grade && user.section === students[0]?.section && (
               <Button
+                variant="premium"
                 onClick={generateBulkReports}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-100 font-black rounded-2xl h-14 px-8 transition-all hover:scale-105 active:scale-95 flex items-center gap-3"
+                className="h-16 px-10 rounded-2xl font-black text-base flex items-center gap-4 group/btn"
               >
-                <FileCheck className="h-5 w-5" />
-                <span>Download All Report Cards</span>
+                <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center group-hover/btn:scale-110 transition-transform">
+                  <FileCheck className="h-5 w-5 text-white" />
+                </div>
+                <span>Export Reports</span>
+                <ArrowRight className="h-5 w-5 opacity-50 group-hover/btn:translate-x-1 transition-all" />
               </Button>
             )}
+          </div>
         </div>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="glass-panel p-8 rounded-4xl shadow-sm flex items-center gap-6 group hover:bg-white transition-all duration-300">
-          <div className="h-16 w-16 rounded-2xl bg-blue-100 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
-            <Users className="h-8 w-8 text-blue-600" />
+        {[
+          { label: "Class Students", value: students.length, color: "blue", icon: Users },
+          { label: "Live Results", value: publishedCount, color: "emerald", icon: CheckCircle },
+          { label: "Pending Actions", value: pendingCount + draftCount, color: "amber", icon: Clock },
+        ].map((stat, i) => (
+          <div key={i} className="card-premium p-8 flex items-center gap-8 group hover:scale-[1.02] transition-all duration-300">
+            <div className={cn("h-20 w-20 rounded-3xl flex items-center justify-center group-hover:rotate-12 transition-all shadow-inner border border-slate-100", `bg-${stat.color}-50`)}>
+              <stat.icon className={cn("h-10 w-10", `text-${stat.color}-600`)} />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-5xl font-black text-slate-900 tracking-tighter tabular-nums">
+                {stat.value}
+              </p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                {stat.label}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-4xl font-black text-slate-800 tracking-tight">
-              {students.length}
-            </p>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
-              Class Students
-            </p>
-          </div>
-        </div>
-
-        <div className="glass-panel p-8 rounded-4xl shadow-sm flex items-center gap-6 group hover:bg-white transition-all duration-300">
-          <div className="h-16 w-16 rounded-2xl bg-emerald-100 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
-            <CheckCircle className="h-8 w-8 text-emerald-600" />
-          </div>
-          <div>
-            <p className="text-4xl font-black text-slate-800 tracking-tight">
-              {publishedCount}
-            </p>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
-              Live Results
-            </p>
-          </div>
-        </div>
-
-        <div className="glass-panel p-8 rounded-4xl shadow-sm flex items-center gap-6 group hover:bg-white transition-all duration-300">
-          <div className="h-16 w-16 rounded-2xl bg-amber-100 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
-            <Clock className="h-8 w-8 text-amber-600" />
-          </div>
-          <div>
-            <p className="text-4xl font-black text-slate-800 tracking-tight">
-              {pendingCount + draftCount}
-            </p>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
-              Pending Actions
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Insights & To-Do */}

@@ -2,82 +2,82 @@
 
 @layer base {
   :root {
-    /* Excel Academy Theme */
-    /* Primary: Navy Blue */
-    --primary: 222 65% 25%;
+    /* Excel Academy Premium Theme */
+    /* Primary: Royal Blue Sapphire */
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Light Gray/Blue */
-    --secondary: 222 20% 96%;
-    --secondary-foreground: 222 47% 20%;
+    /* Secondary: Soft Slate Blue */
+    --secondary: 215 25% 95%;
+    --secondary-foreground: 222 47% 15%;
 
-    /* Backgrounds: Pure White */
-    --background: 0 0% 100%;
-    --foreground: 222 47% 15%;
+    /* Backgrounds: Ultra Clean White */
+    --background: 210 40% 98.5%;
+    --foreground: 222 47% 11%;
 
-    /* Surface Cards: Pure white */
+    /* Surface Cards: Pure crystalline white */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 15%;
+    --card-foreground: 222 47% 11%;
 
-    /* Feedback Colors */
-    --success: 160 84% 39%;
+    /* Feedback Colors - Vibrant & Professional */
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 45 93% 47%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    /* Destructive/Accent: Crimson Red (from Logo) */
-    --destructive: 348 83% 47%;
+    /* Destructive/Accent: Vivid Crimson */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* UI Elements */
-    --muted: 222 20% 96%;
-    --muted-foreground: 215 25% 45%;
+    --muted: 215 25% 93%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 222 20% 96%;
-    --accent-foreground: 222 47% 20%;
+    --accent: 210 40% 96% / 0.8;
+    --accent-foreground: 222 47% 11%;
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 222 65% 25%;
+    --ring: 221 83% 53%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 15%;
+    --popover-foreground: 222 47% 11%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
   }
 
   .dark {
-    /* Dark Mode - Deep Navy Theme */
-    --background: 222 47% 10%;
+    /* Deep Night Sapphire */
+    --background: 222 47% 4%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 12%;
+    --card: 222 47% 6%;
     --card-foreground: 210 40% 98%;
 
-    --primary: 222 65% 45%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 32% 17%;
+    --secondary: 217 32% 12%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 32% 17%;
+    --muted: 217 32% 12%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 32% 17%;
+    --accent: 217 32% 12% / 0.8;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 348 62% 40%;
+    --destructive: 0 84% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 222 65% 45%;
+    --border: 217 32% 15%;
+    --input: 217 32% 15%;
+    --ring: 217 91% 60%;
   }
 
   /* Reset & Base Styles */
   * {
-    @apply border-border;
+    @apply border-border outline-ring/30;
   }
 
   html {
@@ -95,6 +95,8 @@
     width: 100%;
     overflow-x: hidden;
     position: relative;
+    background-image: radial-gradient(at 0% 0%, hsla(221, 83%, 53%, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(262, 83%, 53%, 0.03) 0px, transparent 50%);
   }
 }
 
@@ -118,6 +120,7 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+  --radius-xl: 1.5rem;
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -133,25 +136,53 @@
     @apply bg-white border border-input focus:ring-2 focus:ring-primary/50 transition-all rounded-lg outline-none;
   }
 
-  .glass {
-    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-xl;
+  /* Premium Utilities */
+  .card-premium {
+    @apply bg-white border border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 rounded-3xl;
   }
 
-  .glass-panel {
-    @apply bg-white/50 backdrop-blur-md border border-white/50 shadow-sm;
+  .glass-premium {
+    @apply bg-white/60 backdrop-blur-xl border border-white/40 shadow-2xl;
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-600;
   }
 
   /* Animations */
   @keyframes fade-in-up {
     0% {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(15px);
     }
-
     100% {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  @keyframes grow-x {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  .animate-grow-x {
+    animation: grow-x 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes fade-in {
