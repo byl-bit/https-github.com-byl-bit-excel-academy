@@ -337,12 +337,13 @@ export function TeacherDirectory({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-9 w-9 bg-slate-50 text-slate-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-xs border border-slate-100"
+                          className="h-10 w-10 bg-slate-50 text-slate-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-xs border border-slate-100 active:scale-90"
                           onClick={() => setViewingTeacher(teacher)}
                           title="View Full Profile"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
+
 
                         <Button
                           variant="ghost"
