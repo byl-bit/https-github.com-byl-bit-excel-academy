@@ -19,7 +19,10 @@ import {
   Download,
   Upload,
   Users,
+  Eye,
 } from "lucide-react";
+import { StudentProfileDialog } from "@/components/StudentProfileDialog";
+
 import { PaginationControls } from "@/components/PaginationControls";
 import {
   Dialog,
@@ -89,6 +92,8 @@ export function StudentDirectory({
     variant: "success" | "error" | "info";
   }>({ open: false, title: "", description: "", variant: "info" });
   const [isResetting, setIsResetting] = useState(false);
+  const [viewingStudent, setViewingStudent] = useState<any>(null);
+
 
   // Map canonical 'M'/'F' to display-friendly labels
   const displayGender = (g: any) => {
@@ -699,6 +704,16 @@ export function StudentDirectory({
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-9 w-9 text-slate-600 hover:bg-slate-100/50 rounded-xl"
+                          onClick={() => setViewingStudent(student)}
+                          title="View Profile"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+
+                          variant="ghost"
+                          size="icon"
                           className="h-9 w-9 text-blue-600 hover:bg-blue-100/50 rounded-xl"
                           onClick={() => handleEditClick(student)}
                           title="Edit Record"
@@ -773,7 +788,15 @@ export function StudentDirectory({
           </div>
         )}
       </div>
+
+      <StudentProfileDialog 
+        student={viewingStudent} 
+        isOpen={!!viewingStudent} 
+        onClose={() => setViewingStudent(null)} 
+      />
+
       {/* Edit Modal */}
+
       <Dialog
         open={!!editingStudent}
         onOpenChange={() => setEditingStudent(null)}

@@ -17,7 +17,10 @@ import {
   Lock,
   Download,
   Upload,
+  Eye,
 } from "lucide-react";
+import { TeacherProfileDialog } from "@/components/TeacherProfileDialog";
+
 import { PaginationControls } from "@/components/PaginationControls";
 import {
   Dialog,
@@ -49,6 +52,8 @@ export function TeacherDirectory({
     fullName: "",
     password: "",
   });
+  const [viewingTeacher, setViewingTeacher] = useState<any>(null);
+
 
   const filtered = teachers
     .filter(
@@ -332,6 +337,16 @@ export function TeacherDirectory({
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-9 w-9 text-slate-600 hover:bg-slate-100/50 rounded-xl"
+                          onClick={() => setViewingTeacher(teacher)}
+                          title="View Profile"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+
+                          size="icon"
                           className="h-9 w-9 text-indigo-600 hover:bg-indigo-100/50 rounded-xl"
                           title="Assign Home Room"
                           onClick={() => handleRoomClick(teacher)}
@@ -390,7 +405,15 @@ export function TeacherDirectory({
           </div>
         )}
       </div>
+
+      <TeacherProfileDialog 
+        teacher={viewingTeacher} 
+        isOpen={!!viewingTeacher} 
+        onClose={() => setViewingTeacher(null)} 
+      />
+
       {/* Edit Modal */}
+
       <Dialog
         open={!!editingTeacher}
         onOpenChange={() => setEditingTeacher(null)}

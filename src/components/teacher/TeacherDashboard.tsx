@@ -14,7 +14,10 @@ import {
   ArrowRight,
   School,
   Search,
+  Eye,
 } from "lucide-react";
+import { StudentProfileDialog } from "@/components/StudentProfileDialog";
+
 import { useToast } from "@/contexts/ToastContext";
 import { CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -55,6 +58,8 @@ export function TeacherOverview({
 }: TeacherOverviewProps) {
   const { success, error: notifyError } = useToast();
   const [search, setSearch] = useState("");
+  const [viewingStudent, setViewingStudent] = useState<any>(null);
+
   const publishedCount = classResults.filter(
     (r) => r.status === "published",
   ).length;
@@ -490,10 +495,22 @@ export function TeacherOverview({
                               <p className="font-black text-slate-800 group-hover:text-indigo-700 transition-colors leading-tight uppercase tracking-tight">
                                 {result.studentName ?? "Student"}
                               </p>
-                              <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
-                                ID: {result.studentId}
-                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                  ID: {result.studentId}
+                                </p>
+                                <button 
+                                  onClick={() => {
+                                    const studentObj = students.find(s => String(s.studentId || s.id) === String(result.studentId));
+                                    setViewingStudent(studentObj || result);
+                                  }}
+                                  className="text-[9px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest bg-blue-50 px-1.5 py-0.5 rounded transition-colors"
+                                >
+                                  View profile
+                                </button>
+                              </div>
                             </div>
+
                           </div>
                         </td>
                         <td className="p-5 text-center">
@@ -582,6 +599,13 @@ export function TeacherOverview({
           )}
         </div>
       </div>
+
+      <StudentProfileDialog 
+        student={viewingStudent} 
+        isOpen={!!viewingStudent} 
+        onClose={() => setViewingStudent(null)} 
+      />
     </div>
+
   );
 }

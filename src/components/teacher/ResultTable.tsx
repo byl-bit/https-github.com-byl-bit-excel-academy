@@ -15,7 +15,10 @@ import {
   Clock,
   Users,
   Edit,
+  Eye,
 } from "lucide-react";
+import { StudentProfileDialog } from "@/components/StudentProfileDialog";
+
 import { useToast } from "@/contexts/ToastContext";
 import { excelSum, excelAverage } from "@/lib/utils/excelCalculations";
 import type {
@@ -99,6 +102,8 @@ export function ResultTable({
     description: string;
     variant: "success" | "error" | "info";
   }>({ open: false, title: "", description: "", variant: "info" });
+  const [viewingStudent, setViewingStudent] = useState<any>(null);
+
 
   // Load existing results into table format
   useEffect(() => {
@@ -983,8 +988,17 @@ export function ResultTable({
                           {student.studentId || student.student_id || "ID-TBD"}
                         </td>
                         <td className="p-5 font-black text-slate-800 text-sm sticky left-[200px] bg-white group-hover/row:bg-blue-50/30 z-20 transition-colors shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)] truncate max-w-[200px] uppercase tracking-tight">
-                          {student.name || student.fullName}
+                          <div className="flex flex-col">
+                            <span>{student.name || student.fullName}</span>
+                            <button 
+                              onClick={() => setViewingStudent(student)}
+                              className="text-[8px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest bg-blue-50 px-1 py-0.5 rounded transition-colors w-max mt-1"
+                            >
+                              View profile
+                            </button>
+                          </div>
                         </td>
+
                         <td className="p-5 text-center">
                           <span
                             className={cn(
@@ -1250,7 +1264,14 @@ export function ResultTable({
         description={alert.description}
         variant={alert.variant}
       />
+
+      <StudentProfileDialog 
+        student={viewingStudent} 
+        isOpen={!!viewingStudent} 
+        onClose={() => setViewingStudent(null)} 
+      />
     </>
+
   );
 }
 

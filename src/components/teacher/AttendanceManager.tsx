@@ -14,7 +14,10 @@ import {
   CalendarCheck,
   Info,
   Users,
+  Eye,
 } from "lucide-react";
+import { StudentProfileDialog } from "@/components/StudentProfileDialog";
+
 import { cn, normalizeGender } from "@/lib/utils";
 import { CardContent } from "@/components/ui/card";
 
@@ -29,6 +32,8 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
   const [saving, setSaving] = useState(false);
   const [attendance, setAttendance] = useState<string[]>([]); // Array of PRESENT student IDs
   const [hasRecord, setHasRecord] = useState(false); // If record already exists for this day
+  const [viewingStudent, setViewingStudent] = useState<any>(null);
+
 
   // Fetch attendance for selected date
   useEffect(() => {
@@ -258,9 +263,21 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                             <div className="col-span-2 font-black text-[10px] text-slate-500 uppercase tabular-nums">
                               {student.studentId || student.student_id || "PENDING"}
                             </div>
-                            <div className="col-span-4 font-black text-sm text-slate-800 tracking-tight group-hover:translate-x-1 transition-transform truncate">
-                              {student.fullName || student.name}
+                            <div className="col-span-4 flex flex-col group-hover:translate-x-1 transition-transform">
+                              <span className="font-black text-sm text-slate-800 tracking-tight truncate">
+                                {student.fullName || student.name}
+                              </span>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setViewingStudent(student);
+                                }}
+                                className="text-[8px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest bg-blue-50 px-1 py-0.5 rounded transition-colors w-max mt-0.5"
+                              >
+                                View profile
+                              </button>
                             </div>
+
                             <div className="col-span-2 text-center">
                               <span className={cn(
                                 "text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-widest shadow-xs",
@@ -382,7 +399,14 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
           </div>
         </div>
       </div>
+
+      <StudentProfileDialog 
+        student={viewingStudent} 
+        isOpen={!!viewingStudent} 
+        onClose={() => setViewingStudent(null)} 
+      />
     </div>
+
   );
 }
 
