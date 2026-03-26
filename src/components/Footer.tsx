@@ -175,11 +175,8 @@ export function Footer() {
         <div className="pt-10 border-t border-slate-800/50 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-slate-500 text-sm text-center md:text-left">
             <p>&copy; {currentYear} Excel Academy WDD. All rights reserved.</p>
-            <p className="mt-1 flex items-center justify-center md:justify-start gap-1">
-              Developed with <span className="text-red-500">❤️</span> by
-              <span className="font-black text-slate-300 ml-1">B.Y.L</span>
-            </p>
           </div>
+
 
           <div className="flex items-center gap-8">
             <Link

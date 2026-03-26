@@ -438,7 +438,8 @@ export function ResultsManager({
                 const principalName =
                   settings && settings.principalName
                     ? String(settings.principalName)
-                    : "Principal";
+                    : "Desalegn";
+
                 import("@/lib/utils/export").then((mod) =>
                   mod.generateAppreciationLetter(r, principalName),
                 );

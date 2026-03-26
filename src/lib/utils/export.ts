@@ -232,8 +232,9 @@ export const printResults = (
 
 export const generateAppreciationLetter = async (
   result: PublishedResult,
-  principalName: string = "Principal",
+  principalName: string = "Desalegn",
 ) => {
+
   const jsPDF = (await import("jspdf")).default;
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -304,7 +305,8 @@ export const generateAppreciationLetter = async (
   doc.setFont("helvetica", "bold");
   doc.text(principalName, 30, y);
   doc.setFont("helvetica", "normal");
-  doc.text("Principal", 30, y + 7);
+  doc.text("School Director", 30, y + 7);
+
   doc.text("Excel Academy Secondary School", 30, y + 14);
 
   // Footer

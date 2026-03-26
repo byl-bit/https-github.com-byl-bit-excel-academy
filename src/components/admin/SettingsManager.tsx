@@ -594,7 +594,8 @@ export function SettingsManager({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label>Principal Name</Label>
+              <Label>Director Name</Label>
+
               <Input
                 value={settings?.principalName || ""}
                 onChange={(e) =>

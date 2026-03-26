@@ -207,8 +207,9 @@ export default function AboutPage() {
                   alt="Founder"
                 />
               </div>
-              <span className="font-bold text-slate-900">Dr. Samuel K.</span>
-              <span className="text-sm text-slate-500">Executive Director</span>
+              <span className="font-black text-slate-900">Desalegn</span>
+              <span className="text-sm text-slate-500">School Director</span>
+
             </div>
           </div>
         </div>

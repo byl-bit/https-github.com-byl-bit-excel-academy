@@ -383,7 +383,8 @@ export default function StudentResultsPage() {
                     doc.text("__________________", width / 4, 180, {
                       align: "center",
                     });
-                    doc.text("Principal", width / 4, 190, { align: "center" });
+                    doc.text("School Director", width / 4, 190, { align: "center" });
+
 
                     doc.text("__________________", (width / 4) * 3, 180, {
                       align: "center",

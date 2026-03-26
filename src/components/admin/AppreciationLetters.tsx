@@ -174,9 +174,10 @@ export function AppreciationLetters({
 
     doc.setFontSize(12);
     doc.text(`Date: ${today}`, margin + 20, 220);
-    doc.text("Principal's Signature", pageWidth - margin - 20, 220, {
+    doc.text("Director's Signature", pageWidth - margin - 20, 220, {
       align: "right",
     });
+
 
     // Signature Line
     doc.line(pageWidth - margin - 70, 210, pageWidth - margin - 10, 210);
@@ -304,9 +305,10 @@ export function AppreciationLetters({
         });
         doc.setFontSize(12);
         doc.text(`Date: ${today}`, margin + 20, 220);
-        doc.text("Principal's Signature", pageWidth - margin - 20, 220, {
+        doc.text("Director's Signature", pageWidth - margin - 20, 220, {
           align: "right",
         });
+
         doc.line(pageWidth - margin - 70, 210, pageWidth - margin - 10, 210);
 
         doc.setFont("helvetica", "italic");
