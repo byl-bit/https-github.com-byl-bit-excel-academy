@@ -1,6 +1,6 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { LucideIcon } from 'lucide-react';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -18,8 +18,9 @@ export function Card({
     <div
       className={cn(
         "glass-panel rounded-2xl p-6 transition-all duration-300",
-        hoverEffect && "hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1 hover:bg-white/80",
-        className
+        hoverEffect &&
+          "hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1 hover:bg-white/80",
+        className,
       )}
       {...props}
     >
@@ -36,7 +37,13 @@ interface CardHeaderProps {
   children?: React.ReactNode;
 }
 
-export function CardHeader({ title, description, icon: Icon, className, children }: CardHeaderProps) {
+export function CardHeader({
+  title,
+  description,
+  icon: Icon,
+  className,
+  children,
+}: CardHeaderProps) {
   return (
     <div className={cn("mb-6 flex items-center justify-between", className)}>
       <div className="flex items-center gap-4">
@@ -46,8 +53,14 @@ export function CardHeader({ title, description, icon: Icon, className, children
           </div>
         )}
         <div>
-          <h3 className="text-xl font-black text-slate-800 leading-tight tracking-tight">{title}</h3>
-          {description && <p className="text-xs font-bold text-slate-400 mt-0.5 uppercase tracking-wide">{description}</p>}
+          <h3 className="text-xl font-black text-slate-800 leading-tight tracking-tight">
+            {title}
+          </h3>
+          {description && (
+            <p className="text-xs font-bold text-slate-400 mt-0.5 uppercase tracking-wide">
+              {description}
+            </p>
+          )}
         </div>
       </div>
       {children && <div>{children}</div>}

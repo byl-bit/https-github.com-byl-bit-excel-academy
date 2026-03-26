@@ -1,63 +1,69 @@
 // Utility functions for exporting data
 
-export const exportToExcel = async (data: Array<Record<string, unknown>>, filename: string, sheetName: string = 'Sheet1') => {
-    const xlsx = await import('xlsx');
-    const utils = xlsx.utils as {
-        json_to_sheet: (d: Array<Record<string, unknown>>) => unknown;
-        book_new: () => unknown;
-        book_append_sheet: (wb: unknown, ws: unknown, name: string) => void;
-    };
-    const ws = utils.json_to_sheet(data);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, sheetName);
-    // writeFile is typed on the runtime module; cast to a narrow runtime shape to call
-    (xlsx as unknown as { writeFile: (wb: unknown, filename: string) => void }).writeFile(wb, filename);
+export const exportToExcel = async (
+  data: Array<Record<string, unknown>>,
+  filename: string,
+  sheetName: string = "Sheet1",
+) => {
+  const xlsx = await import("xlsx");
+  const utils = xlsx.utils as {
+    json_to_sheet: (d: Array<Record<string, unknown>>) => unknown;
+    book_new: () => unknown;
+    book_append_sheet: (wb: unknown, ws: unknown, name: string) => void;
+  };
+  const ws = utils.json_to_sheet(data);
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, ws, sheetName);
+  // writeFile is typed on the runtime module; cast to a narrow runtime shape to call
+  (
+    xlsx as unknown as { writeFile: (wb: unknown, filename: string) => void }
+  ).writeFile(wb, filename);
 };
 
 export const copyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // Fallback for older browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.select();
     try {
-        await navigator.clipboard.writeText(text);
-        return true;
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      return true;
     } catch {
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.opacity = '0';
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            return true;
-        } catch {
-            document.body.removeChild(textArea);
-            return false;
-        }
+      document.body.removeChild(textArea);
+      return false;
     }
+  }
 };
 
-export const printElement = (elementId: string, title: string = 'Document') => {
-    const element = document.getElementById(elementId);
-    if (!element) {
-        alert('Element not found for printing.');
-        return;
-    }
+export const printElement = (elementId: string, title: string = "Document") => {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    alert("Element not found for printing.");
+    return;
+  }
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-        alert('Please allow popups to print.');
-        return;
-    }
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    alert("Please allow popups to print.");
+    return;
+  }
 
-    // Clone the element to avoid modifying the original
-    const clone = element.cloneNode(true) as HTMLElement;
+  // Clone the element to avoid modifying the original
+  const clone = element.cloneNode(true) as HTMLElement;
 
-    // Remove no-print elements
-    const noPrintElements = clone.querySelectorAll('.no-print');
-    noPrintElements.forEach(el => el.remove());
+  // Remove no-print elements
+  const noPrintElements = clone.querySelectorAll(".no-print");
+  noPrintElements.forEach((el) => el.remove());
 
-    printWindow.document.write(`
+  printWindow.document.write(`
         <!DOCTYPE html>
         <html>
             <head>
@@ -130,42 +136,50 @@ export const printElement = (elementId: string, title: string = 'Document') => {
             </body>
         </html>
     `);
-    printWindow.document.close();
+  printWindow.document.close();
 
-    // Wait for content to load before printing
-    setTimeout(() => {
-        printWindow.print();
-    }, 250);
+  // Wait for content to load before printing
+  setTimeout(() => {
+    printWindow.print();
+  }, 250);
 };
 
 const calculateGrade = (marks: number) => {
-    if (marks >= 90) return 'A+';
-    if (marks >= 80) return 'A';
-    if (marks >= 70) return 'B+';
-    if (marks >= 60) return 'B';
-    if (marks >= 50) return 'C+';
-    if (marks >= 40) return 'C';
-    return 'F';
+  if (marks >= 90) return "A+";
+  if (marks >= 80) return "A";
+  if (marks >= 70) return "B+";
+  if (marks >= 60) return "B";
+  if (marks >= 50) return "C+";
+  if (marks >= 40) return "C";
+  return "F";
 };
 
-import type { PendingResult, PublishedResult, Subject } from '@/lib/types';
+import type { PendingResult, PublishedResult, Subject } from "@/lib/types";
 
-export const printResults = (result: PendingResult | PublishedResult, studentName: string) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-        alert('Please allow popups to print.');
-        return;
-    }
+export const printResults = (
+  result: PendingResult | PublishedResult,
+  studentName: string,
+) => {
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    alert("Please allow popups to print.");
+    return;
+  }
 
-    const subjectsHtml = result.subjects?.map((sub: Subject) => `
+  const subjectsHtml =
+    result.subjects
+      ?.map(
+        (sub: Subject) => `
         <tr>
             <td>${sub.name}</td>
             <td style="text-align: center;">${sub.marks}</td>
             <td style="text-align: center;">${(sub as any).grade || calculateGrade(Number(sub.marks || 0))}</td>
         </tr>
-    `).join('') || '';
+    `,
+      )
+      .join("") || "";
 
-    printWindow.document.write(`
+  printWindow.document.write(`
         <!DOCTYPE html>
         <html>
             <head>
@@ -212,86 +226,95 @@ export const printResults = (result: PendingResult | PublishedResult, studentNam
             </body>
         </html>
     `);
-    printWindow.document.close();
-    setTimeout(() => printWindow.print(), 250);
+  printWindow.document.close();
+  setTimeout(() => printWindow.print(), 250);
 };
 
-export const generateAppreciationLetter = async (result: PublishedResult, principalName: string = 'Principal') => {
-    const jsPDF = (await import('jspdf')).default;
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
+export const generateAppreciationLetter = async (
+  result: PublishedResult,
+  principalName: string = "Principal",
+) => {
+  const jsPDF = (await import("jspdf")).default;
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
 
-    // Border
-    doc.setDrawColor(30, 64, 175);
-    doc.setLineWidth(1);
-    doc.rect(10, 10, pageWidth - 20, pageHeight - 20);
-    doc.setLineWidth(0.2);
-    doc.rect(12, 12, pageWidth - 24, pageHeight - 24);
+  // Border
+  doc.setDrawColor(30, 64, 175);
+  doc.setLineWidth(1);
+  doc.rect(10, 10, pageWidth - 20, pageHeight - 20);
+  doc.setLineWidth(0.2);
+  doc.rect(12, 12, pageWidth - 24, pageHeight - 24);
 
-    // Header
-    doc.setTextColor(30, 64, 175);
-    doc.setFontSize(28);
-    doc.setFont("helvetica", "bold");
-    doc.text("EXCEL ACADEMY", pageWidth / 2, 40, { align: 'center' });
+  // Header
+  doc.setTextColor(30, 64, 175);
+  doc.setFontSize(28);
+  doc.setFont("helvetica", "bold");
+  doc.text("EXCEL ACADEMY", pageWidth / 2, 40, { align: "center" });
 
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "italic");
-    doc.text("A Legacy of Excellence and Innovation", pageWidth / 2, 48, { align: 'center' });
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "italic");
+  doc.text("A Legacy of Excellence and Innovation", pageWidth / 2, 48, {
+    align: "center",
+  });
 
-    doc.setDrawColor(30, 64, 175);
-    doc.line(40, 55, pageWidth - 40, 55);
+  doc.setDrawColor(30, 64, 175);
+  doc.line(40, 55, pageWidth - 40, 55);
 
-    // Title
-    doc.setFontSize(22);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(15, 23, 42);
-    doc.text("LETTER OF APPRECIATION", pageWidth / 2, 75, { align: 'center' });
+  // Title
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text("LETTER OF APPRECIATION", pageWidth / 2, 75, { align: "center" });
 
-    // Date
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 30, 90, { align: 'right' });
+  // Date
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 30, 90, {
+    align: "right",
+  });
 
-    // Content
-    doc.setFontSize(14);
-    const content = [
-        `Dear ${result.studentName},`,
-        "",
-        "On behalf of the administration and faculty of Excel Academy, I am delighted to extend our warmest congratulations to you for your outstanding academic performance during this term.",
-        "",
-        `Your remarkable average of ${(result.average ?? 0).toFixed(1)}% is a testament to your hard work, dedication, and intellectual curiosity. It is students like you who set the standard for excellence in our school community.`,
-        "",
-        "We are proud of your achievements and look forward to your continued success. Continue to strive for greatness and remain as dedicated as you are today.",
-        "",
-        "Sincerely,",
-    ];
+  // Content
+  doc.setFontSize(14);
+  const content = [
+    `Dear ${result.studentName},`,
+    "",
+    "On behalf of the administration and faculty of Excel Academy, I am delighted to extend our warmest congratulations to you for your outstanding academic performance during this term.",
+    "",
+    `Your remarkable average of ${(result.average ?? 0).toFixed(1)}% is a testament to your hard work, dedication, and intellectual curiosity. It is students like you who set the standard for excellence in our school community.`,
+    "",
+    "We are proud of your achievements and look forward to your continued success. Continue to strive for greatness and remain as dedicated as you are today.",
+    "",
+    "Sincerely,",
+  ];
 
-    let y = 110;
-    content.forEach(line => {
-        if (line === "") {
-            y += 8;
-        } else {
-            const splitLines = doc.splitTextToSize(line, pageWidth - 60);
-            doc.text(splitLines, 30, y);
-            y += (splitLines.length * 8);
-        }
-    });
+  let y = 110;
+  content.forEach((line) => {
+    if (line === "") {
+      y += 8;
+    } else {
+      const splitLines = doc.splitTextToSize(line, pageWidth - 60);
+      doc.text(splitLines, 30, y);
+      y += splitLines.length * 8;
+    }
+  });
 
-    // Signature
-    y += 20;
-    doc.setFont("helvetica", "bold");
-    doc.text(principalName, 30, y);
-    doc.setFont("helvetica", "normal");
-    doc.text("Principal", 30, y + 7);
-    doc.text("Excel Academy Secondary School", 30, y + 14);
+  // Signature
+  y += 20;
+  doc.setFont("helvetica", "bold");
+  doc.text(principalName, 30, y);
+  doc.setFont("helvetica", "normal");
+  doc.text("Principal", 30, y + 7);
+  doc.text("Excel Academy Secondary School", 30, y + 14);
 
-    // Footer
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text("Ad Astra Per Aspera", pageWidth / 2, pageHeight - 15, { align: 'center' });
+  // Footer
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text("Ad Astra Per Aspera", pageWidth / 2, pageHeight - 15, {
+    align: "center",
+  });
 
-    doc.save(`Appreciation_Letter_${result.studentId}.pdf`);
+  doc.save(`Appreciation_Letter_${result.studentId}.pdf`);
 };
 
 /**
@@ -306,122 +329,140 @@ export const generateAppreciationLetter = async (result: PublishedResult, princi
  * @param filename Name of the file (without extension)
  * @param headers Optional headers array. If not provided and data is array of objects, keys will be used
  */
-export const exportToCSV = (data: Array<Record<string, unknown>> | unknown[][], filename: string, headers?: string[]) => {
-    try {
-        let csvContent = '';
+export const exportToCSV = (
+  data: Array<Record<string, unknown>> | unknown[][],
+  filename: string,
+  headers?: string[],
+) => {
+  try {
+    let csvContent = "";
 
-        // Handle array of arrays
-        if (Array.isArray(data[0]) && !Array.isArray(data[0]) && typeof (data[0] as unknown[])[0] !== 'object') {
-            // This case is unlikely given the current use, but kept for robustness
-            if (headers) {
-                csvContent = headers.join(',') + '\r\n';
-            }
-            csvContent += (data as unknown[][]).map((row: unknown[]) =>
-                row.map((cell: unknown) => escapeCSV(cell)).join(',')
-            ).join('\r\n');
-        } else if (Array.isArray(data[0])) {
-            // Array of arrays properly
-            if (headers) {
-                csvContent = headers.map(h => escapeCSV(h)).join(',') + '\r\n';
-            }
-            csvContent += (data as unknown[][]).map((row: unknown[]) =>
-                row.map((cell: unknown) => escapeCSV(cell)).join(',')
-            ).join('\r\n');
-        } else {
-            // Handle array of objects
-            const keys = headers || Object.keys(data[0] || {});
-            csvContent = keys.map(k => escapeCSV(k)).join(',') + '\r\n';
+    // Handle array of arrays
+    if (
+      Array.isArray(data[0]) &&
+      !Array.isArray(data[0]) &&
+      typeof (data[0] as unknown[])[0] !== "object"
+    ) {
+      // This case is unlikely given the current use, but kept for robustness
+      if (headers) {
+        csvContent = headers.join(",") + "\r\n";
+      }
+      csvContent += (data as unknown[][])
+        .map((row: unknown[]) =>
+          row.map((cell: unknown) => escapeCSV(cell)).join(","),
+        )
+        .join("\r\n");
+    } else if (Array.isArray(data[0])) {
+      // Array of arrays properly
+      if (headers) {
+        csvContent = headers.map((h) => escapeCSV(h)).join(",") + "\r\n";
+      }
+      csvContent += (data as unknown[][])
+        .map((row: unknown[]) =>
+          row.map((cell: unknown) => escapeCSV(cell)).join(","),
+        )
+        .join("\r\n");
+    } else {
+      // Handle array of objects
+      const keys = headers || Object.keys(data[0] || {});
+      csvContent = keys.map((k) => escapeCSV(k)).join(",") + "\r\n";
 
-            csvContent += (data as Array<Record<string, unknown>>).map(row =>
-                keys.map(key => escapeCSV(row[key])).join(',')
-            ).join('\r\n');
-        }
-
-        // Add UTF-8 BOM for Excel
-        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-
-        link.setAttribute('href', url);
-        link.setAttribute('download', `${filename}.csv`);
-        link.setAttribute('target', '_self');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error('Error exporting to CSV:', error);
-        throw new Error('Failed to export CSV file');
+      csvContent += (data as Array<Record<string, unknown>>)
+        .map((row) => keys.map((key) => escapeCSV(row[key])).join(","))
+        .join("\r\n");
     }
+
+    // Add UTF-8 BOM for Excel
+    const blob = new Blob(["\uFEFF" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${filename}.csv`);
+    link.setAttribute("target", "_self");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error exporting to CSV:", error);
+    throw new Error("Failed to export CSV file");
+  }
 };
 
 /**
  * Robust CSV parser that handles quoted values and escaped quotes
  */
 export const parseCSV = (text: string): string[][] => {
-    const rows: string[][] = [];
-    let currentRow: string[] = [];
-    let currentCell = '';
-    let inQuotes = false;
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = "";
+  let inQuotes = false;
 
-    // Normalize line endings
-    const content = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  // Normalize line endings
+  const content = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-    for (let i = 0; i < content.length; i++) {
-        const char = content[i];
-        const nextChar = content[i + 1];
+  for (let i = 0; i < content.length; i++) {
+    const char = content[i];
+    const nextChar = content[i + 1];
 
-        if (inQuotes) {
-            if (char === '"' && nextChar === '"') {
-                currentCell += '"';
-                i++; // Skip next quote
-            } else if (char === '"') {
-                inQuotes = false;
-            } else {
-                currentCell += char;
-            }
-        } else {
-            if (char === '"') {
-                inQuotes = true;
-            } else if (char === ',') {
-                currentRow.push(currentCell.trim());
-                currentCell = '';
-            } else if (char === '\n') {
-                currentRow.push(currentCell.trim());
-                rows.push(currentRow);
-                currentRow = [];
-                currentCell = '';
-            } else {
-                currentCell += char;
-            }
-        }
-    }
-
-    // Add last cell/row if needed
-    if (currentCell || currentRow.length > 0) {
+    if (inQuotes) {
+      if (char === '"' && nextChar === '"') {
+        currentCell += '"';
+        i++; // Skip next quote
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        currentCell += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ",") {
+        currentRow.push(currentCell.trim());
+        currentCell = "";
+      } else if (char === "\n") {
         currentRow.push(currentCell.trim());
         rows.push(currentRow);
+        currentRow = [];
+        currentCell = "";
+      } else {
+        currentCell += char;
+      }
     }
+  }
 
-    return rows.filter(row => row.some(cell => cell.length > 0));
+  // Add last cell/row if needed
+  if (currentCell || currentRow.length > 0) {
+    currentRow.push(currentCell.trim());
+    rows.push(currentRow);
+  }
+
+  return rows.filter((row) => row.some((cell) => cell.length > 0));
 };
 
 const escapeCSV = (val: unknown): string => {
-    const cellValue = String(val ?? '');
-    if (cellValue.includes(',') || cellValue.includes('"') || cellValue.includes('\n') || cellValue.includes('\r')) {
-        return `"${cellValue.replace(/"/g, '""')}"`;
-    }
-    return cellValue;
+  const cellValue = String(val ?? "");
+  if (
+    cellValue.includes(",") ||
+    cellValue.includes('"') ||
+    cellValue.includes("\n") ||
+    cellValue.includes("\r")
+  ) {
+    return `"${cellValue.replace(/"/g, '""')}"`;
+  }
+  return cellValue;
 };
 
 export const parseExcel = async (file: File): Promise<string[][]> => {
-    const xlsx = await import('xlsx');
-    const buffer = await file.arrayBuffer();
-    const wb = xlsx.read(buffer, { type: 'array' });
-    const wsName = wb.SheetNames[0];
-    const ws = wb.Sheets[wsName];
-    const data = xlsx.utils.sheet_to_json(ws, { header: 1 }) as string[][];
-    return data.map(row => row.map(cell => String(cell ?? '')));
+  const xlsx = await import("xlsx");
+  const buffer = await file.arrayBuffer();
+  const wb = xlsx.read(buffer, { type: "array" });
+  const wsName = wb.SheetNames[0];
+  const ws = wb.Sheets[wsName];
+  const data = xlsx.utils.sheet_to_json(ws, { header: 1 }) as string[][];
+  return data.map((row) => row.map((cell) => String(cell ?? "")));
 };
-
