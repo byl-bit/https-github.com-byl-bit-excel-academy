@@ -504,10 +504,12 @@ export function TeacherOverview({
                                     const studentObj = students.find(s => String(s.studentId || s.id) === String(result.studentId));
                                     setViewingStudent(studentObj || result);
                                   }}
-                                  className="text-[9px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest bg-blue-50 px-1.5 py-0.5 rounded transition-colors"
+                                  className="group/view inline-flex items-center gap-1 text-[8px] font-black text-indigo-600 hover:text-white uppercase tracking-widest bg-indigo-50 hover:bg-indigo-600 px-2 py-1 rounded-lg transition-all border border-indigo-100/50 shadow-xs active:scale-95"
                                 >
-                                  View profile
+                                  <Eye className="h-3 w-3" />
+                                  Details
                                 </button>
+
                               </div>
                             </div>
 

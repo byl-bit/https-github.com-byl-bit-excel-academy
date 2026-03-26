@@ -988,16 +988,18 @@ export function ResultTable({
                           {student.studentId || student.student_id || "ID-TBD"}
                         </td>
                         <td className="p-5 font-black text-slate-800 text-sm sticky left-[200px] bg-white group-hover/row:bg-blue-50/30 z-20 transition-colors shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)] truncate max-w-[200px] uppercase tracking-tight">
-                          <div className="flex flex-col">
-                            <span>{student.name || student.fullName}</span>
+                          <div className="flex flex-col group/name">
+                            <span className="truncate">{student.name || student.fullName}</span>
                             <button 
                               onClick={() => setViewingStudent(student)}
-                              className="text-[8px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest bg-blue-50 px-1 py-0.5 rounded transition-colors w-max mt-1"
+                              className="inline-flex items-center gap-1.5 text-[8px] font-black text-blue-500 hover:text-white uppercase tracking-widest bg-blue-50 hover:bg-blue-600 px-2 py-1 rounded-lg transition-all w-max mt-1.5 border border-blue-100/50 shadow-xs active:scale-95"
                             >
+                              <Eye className="h-3 w-3" />
                               View profile
                             </button>
                           </div>
                         </td>
+
 
                         <td className="p-5 text-center">
                           <span
