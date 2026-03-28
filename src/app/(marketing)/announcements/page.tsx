@@ -116,7 +116,7 @@ export default function AnnouncementsPage() {
   }, [announcements, searchQuery, filterType]);
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24">
+    <div className="min-h-screen bg-white pb-24">
       {/* Header Section */}
       <section className="relative pt-24 pb-32 bg-slate-950 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -148,26 +148,26 @@ export default function AnnouncementsPage() {
       {/* Content Section */}
       <div className="container px-6 mx-auto -mt-16">
         {/* Search & Filter Bar */}
-        <div className="bg-white rounded-4xl p-4 shadow-xl shadow-slate-900/5 mb-12 flex flex-col md:flex-row gap-4 items-center animate-in zoom-in duration-700">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl md:rounded-3xl p-3 md:p-4 shadow-2xl shadow-slate-900/5 mb-10 flex flex-col md:flex-row gap-3 items-center animate-in zoom-in duration-700">
+          <div className="relative flex-1 w-full group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-400 group-focus-within:text-cyan-500 transition-colors" />
             <Input
               placeholder="Search updates..."
-              className="h-14 pl-12 rounded-2xl border-none bg-slate-50 focus:ring-2 focus:ring-cyan-500"
+              className="h-12 md:h-14 pl-11 md:pl-12 rounded-xl md:rounded-2xl border-none bg-slate-100/50 focus:bg-white focus:ring-2 focus:ring-cyan-500/20 transition-all font-medium text-slate-700"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex flex-wrap gap-2 w-full md:w-auto pb-2 md:pb-0">
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
             {["all", "academic", "event", "admin"].map((type) => (
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`px-6 h-12 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all flex items-center justify-center
+                className={`px-4 md:px-6 h-10 md:h-12 rounded-xl md:rounded-2xl text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-all flex items-center justify-center border-2
                                     ${
                                       filterType === type
-                                        ? "bg-cyan-600 text-white shadow-xl shadow-cyan-500/20"
-                                        : "bg-slate-50 text-slate-500 hover:bg-slate-100 border border-transparent hover:border-slate-200"
+                                        ? "bg-cyan-600 border-cyan-600 text-white shadow-lg shadow-cyan-500/30 scale-105"
+                                        : "bg-white border-slate-100 text-slate-500 hover:border-cyan-500/30 hover:text-cyan-600"
                                     }`}
               >
                 {type}
@@ -227,9 +227,9 @@ export default function AnnouncementsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
-                    <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
-                    Verified Post
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-50 border border-cyan-100 text-[10px] font-black uppercase tracking-widest text-cyan-700 shadow-sm shadow-cyan-500/5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-cyan-600 animate-pulse" />
+                    Verified Institution Post
                   </div>
                 </div>
                 <CardTitle className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight group-hover:text-cyan-600 transition-colors">
@@ -298,9 +298,9 @@ export default function AnnouncementsPage() {
 
                   <Button
                     variant="ghost"
-                    className="text-cyan-600 font-black hover:bg-cyan-50 rounded-xl group/btn"
+                    className="text-cyan-600 font-black hover:bg-cyan-50 rounded-xl px-6 py-6 group/btn transition-all hover:scale-105"
                   >
-                    Share{" "}
+                    Share Update
                     <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
                 </div>

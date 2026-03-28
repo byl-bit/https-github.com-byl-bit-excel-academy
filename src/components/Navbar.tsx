@@ -162,9 +162,9 @@ export function Navbar() {
                     className={cn("h-4 w-4", isSyncing && "animate-spin")}
                   />
                 </Button>
-                <div className="flex items-center gap-3 text-sm bg-muted px-4 py-2 rounded-full border border-border">
-                  <User className="h-4 w-4 text-primary" />
-                  <span className="font-bold text-primary line-clamp-1">
+                <div className="flex items-center gap-3 text-sm bg-cyan-50/50 px-4 py-2 rounded-full border border-cyan-100 shadow-sm">
+                  <User className="h-4 w-4 text-cyan-600" />
+                  <span className="font-bold text-cyan-900 line-clamp-1">
                     {user.fullName || user.name}
                   </span>
                 </div>
@@ -215,7 +215,7 @@ export function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white border-b shadow-xl animate-in slide-in-from-top-2 duration-200 z-50">
+        <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-2xl border-b border-cyan-100 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-300 z-50">
           <div className="flex flex-col p-4 gap-4">
             <Link
               href="/"
@@ -297,18 +297,18 @@ export function Navbar() {
                 >
                   Announcements
                 </Link>
-                <div className="border-t pt-4 mt-2">
+                <div className="border-t border-slate-100 pt-4 mt-2">
                   <Button
                     asChild
-                    variant="outline"
-                    className="w-full justify-start h-12"
+                    variant="ghost"
+                    className="w-full justify-start h-12 text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Link href="/auth/login">Login</Link>
                   </Button>
                   <Button
                     asChild
-                    className="w-full justify-start h-12 bg-primary mt-2"
+                    className="w-full justify-start h-12 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl mt-3 shadow-lg shadow-cyan-500/20"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Link href="/admissions/apply">Apply Now</Link>
