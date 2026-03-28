@@ -92,17 +92,17 @@ export function Navbar() {
               Excel Academy
             </span>
           </Link>
-          <div className="hidden md:flex gap-8 text-sm font-semibold text-slate-600">
+          <div className="hidden md:flex gap-8 text-sm font-bold text-slate-800">
             <Link
               href="/"
-              className="hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary"
+              className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
             >
               Home
             </Link>
             {isAuthenticated && user?.role === "admin" && (
               <Link
                 href="/admin"
-                className="hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary"
+                className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
               >
                 Admin Dashboard
               </Link>
@@ -110,7 +110,7 @@ export function Navbar() {
             {isAuthenticated && user?.role === "student" && (
               <Link
                 href="/student"
-                className="hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary"
+                className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
               >
                 Student Portal
               </Link>
@@ -118,26 +118,26 @@ export function Navbar() {
             {isAuthenticated && user?.role === "teacher" && (
               <Link
                 href="/teacher"
-                className="font-bold text-primary border-2 border-primary px-4 py-1.5 rounded-full hover:bg-primary hover:text-white transition-all shadow-sm"
+                className="font-black text-cyan-600 border-2 border-cyan-600 px-4 py-1.5 rounded-full hover:bg-cyan-600 hover:text-white transition-all shadow-sm"
               >
                 Teacher Portal
               </Link>
             )}
             <Link
               href="/about"
-              className="hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary"
+              className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
             >
               About Us
             </Link>
             <Link
               href="/academics"
-              className="hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary"
+              className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
             >
               Academics
             </Link>
             <Link
               href="/announcements"
-              className="hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary"
+              className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
             >
               Announcements
             </Link>
@@ -182,17 +182,17 @@ export function Navbar() {
           ) : (
             <div className="hidden sm:flex items-center gap-3">
               <Button
-                variant="ghost"
+                variant="outline"
                 asChild
-                className="text-slate-600 hover:text-primary font-bold hover:bg-muted"
+                className="border-cyan-200 text-cyan-700 hover:bg-cyan-50 font-black px-6 rounded-full transition-all"
               >
                 <Link href="/auth/login">Login</Link>
               </Button>
               <Button
                 asChild
-                className="bg-primary hover:bg-primary/90 text-white font-bold rounded-full px-5 shadow-sm hover:shadow-md transition-all"
+                className="bg-cyan-600 hover:bg-cyan-700 text-white font-black rounded-full px-6 shadow-lg shadow-cyan-500/20 transition-all hover:scale-105"
               >
-                <Link href="/admissions/apply">Get Started</Link>
+                <Link href="/admissions/apply">Apply Now</Link>
               </Button>
             </div>
           )}
