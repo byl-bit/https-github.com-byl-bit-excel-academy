@@ -92,8 +92,8 @@ export default function LoginPage() {
               className="w-full h-full object-contain"
             />
           </div>
-          <h2 className="text-xl lg:text-2xl font-bold mt-4 lg:mt-6 text-center">
-            Welcome Back!
+          <h2 className="text-xl lg:text-2xl font-bold mt-4 lg:mt-6 text-center text-white">
+            Portal Login
           </h2>
           <p className="text-muted-foreground text-center mt-2 text-sm lg:text-base">
             {role === "admin"
@@ -108,7 +108,7 @@ export default function LoginPage() {
         <Card className="w-full bg-background/80 backdrop-blur-lg border-2 shadow-xl overflow-hidden glass-panel border-none">
           <CardHeader className="space-y-1 bg-muted/30 pb-4 sm:pb-6 border-b px-4 sm:px-6 pt-4 sm:pt-6">
             <CardTitle className="text-xl sm:text-2xl font-black text-center uppercase tracking-tighter">
-              Excel Academy Login
+              Portal Login
             </CardTitle>
             <CardDescription className="text-center font-medium text-xs sm:text-sm">
               {role === "admin"
