@@ -153,18 +153,22 @@ export function SettingsManager({
     label: "",
     weight: 30,
     maxMarks: 100,
+    grade: "all",
+    semester: "1",
   });
 
   const handleAddAssessment = () => {
     const currentTypes = settings?.assessmentTypes || [];
     const newType = {
-      id: assessmentForm.label.toLowerCase().replace(/\s+/g, "-"),
+      id: `${assessmentForm.grade}-${assessmentForm.semester}-${assessmentForm.label.toLowerCase().replace(/\s+/g, "-")}`,
       label: assessmentForm.label,
       weight: assessmentForm.weight,
       maxMarks: assessmentForm.maxMarks,
+      grade: assessmentForm.grade,
+      semester: assessmentForm.semester,
     };
     onUpdateSettings("assessmentTypes", [...currentTypes, newType]);
-    setAssessmentForm({ label: "", weight: 30, maxMarks: 100 });
+    setAssessmentForm({ ...assessmentForm, label: "", weight: 30, maxMarks: 100 });
   };
 
   const handleDeleteAssessment = (index: number) => {
@@ -275,7 +279,34 @@ export function SettingsManager({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2 items-end">
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <div className="flex-1 space-y-1">
+                <Label className="text-xs">Class/Grade</Label>
+                <select
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={assessmentForm.grade}
+                  onChange={(e) => setAssessmentForm({ ...assessmentForm, grade: e.target.value })}
+                >
+                  <option value="all">All Grades</option>
+                  {[...Array(12)].map((_, i) => (
+                    <option key={i + 1} value={String(i + 1)}>Grade {i + 1}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1 space-y-1">
+                <Label className="text-xs">Semester</Label>
+                <select
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={assessmentForm.semester}
+                  onChange={(e) => setAssessmentForm({ ...assessmentForm, semester: e.target.value })}
+                >
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-2 items-end">
             <div className="flex-1 space-y-1">
               <Label className="text-xs">Label</Label>
               <Input
@@ -321,6 +352,7 @@ export function SettingsManager({
             >
               Add
             </Button>
+            </div>
           </div>
 
           <div className="space-y-2 pt-2">
@@ -373,6 +405,14 @@ export function SettingsManager({
                       placeholder="Max"
                     />
                     <span className="text-xs text-muted-foreground">max</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5 ml-2">
+                    <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-medium">
+                      Grade: {type.grade === "all" ? "All" : type.grade}
+                    </span>
+                    <span className="text-[10px] bg-cyan-50 px-1.5 py-0.5 rounded text-cyan-600 font-medium">
+                      Sem: {type.semester}
+                    </span>
                   </div>
                 </div>
                 <Button

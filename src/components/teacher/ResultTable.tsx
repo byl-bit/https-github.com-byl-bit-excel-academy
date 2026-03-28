@@ -75,11 +75,19 @@ export function ResultTable({
     });
   };
 
-  const assessmentTypes =
-    settings?.assessmentTypes && settings.assessmentTypes.length > 0
-      ? settings.assessmentTypes
-      : ([] as AssessmentType[]);
-  const isDynamic = false; // Forced semester mode
+  const [activeSemester, setActiveSemester] = useState<"1" | "2" | "average">("1");
+
+  const currentGrade = String(students[0]?.grade || user?.grade || "all");
+
+  const gradeAssessmentTypes = (settings?.assessmentTypes || []).filter(
+    (type: AssessmentType) => !type.grade || type.grade === "all" || String(type.grade) === currentGrade
+  );
+
+  const activeAssessmentTypes = gradeAssessmentTypes.filter(
+    (type: AssessmentType) => type.semester === activeSemester
+  );
+
+  const isDynamic = gradeAssessmentTypes.length > 0;
 
   const [tableMarks, setTableMarks] = useState<{
     [studentId: string]: { [key: string]: number };
@@ -161,7 +169,7 @@ export function ResultTable({
     const subjectMarks = subjects.map((sub) => {
       if (isDynamic) {
         let subTotal = 0;
-        assessmentTypes.forEach((type: AssessmentType) => {
+        gradeAssessmentTypes.forEach((type: AssessmentType) => {
           const val = marks[`${sub}__${type.id}`];
           if (val !== undefined && typeof val === "number") {
             subTotal +=
@@ -212,7 +220,7 @@ export function ResultTable({
         if (isDynamic) {
           const assessments: Record<string, number> = {};
           let subTotal = 0;
-          assessmentTypes.forEach((type: AssessmentType) => {
+          gradeAssessmentTypes.forEach((type: AssessmentType) => {
             const val = marks[`${s}__${type.id}`];
             if (val !== undefined && typeof val === "number") {
               assessments[type.id] = val;
@@ -340,7 +348,7 @@ export function ResultTable({
           if (isDynamic) {
             const assessments: Record<string, number> = {};
             let subTotal = 0;
-            assessmentTypes.forEach((type: AssessmentType) => {
+            gradeAssessmentTypes.forEach((type: AssessmentType) => {
               const val = marks[`${s}__${type.id}`];
               if (val !== undefined && typeof val === "number") {
                 assessments[type.id] = val;
@@ -486,7 +494,7 @@ export function ResultTable({
             if (isDynamic) {
               const assessments: Record<string, number> = {};
               let subTotal = 0;
-              assessmentTypes.forEach((type: AssessmentType) => {
+              gradeAssessmentTypes.forEach((type: AssessmentType) => {
                 const val = marks[`${s}__${type.id}`];
                 if (val !== undefined && typeof val === "number") {
                   assessments[type.id] = val;
@@ -579,7 +587,7 @@ export function ResultTable({
     const headers = ["StudentID", "RollNumber", "FullName"];
     subjects.forEach((sub) => {
       if (isDynamic) {
-        assessmentTypes.forEach((type: AssessmentType) => {
+        gradeAssessmentTypes.forEach((type: AssessmentType) => {
           headers.push(`${sub}__${type.id}`);
         });
       } else {
@@ -601,7 +609,7 @@ export function ResultTable({
       ];
       subjects.forEach((sub) => {
         if (isDynamic) {
-          assessmentTypes.forEach((type: AssessmentType) => {
+          gradeAssessmentTypes.forEach((type: AssessmentType) => {
             const val = marks[`${sub}__${type.id}`];
             row.push(val !== undefined ? String(val) : "");
           });
@@ -782,6 +790,16 @@ export function ResultTable({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <select
+              title="Active Semester"
+              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
+              value={activeSemester}
+              onChange={(e) => setActiveSemester(e.target.value as any)}
+            >
+              <option value="1">1st Semester</option>
+              <option value="2">2nd Semester</option>
+              <option value="average">Annual Average</option>
+            </select>
             {!isHomeroomView &&
               (settings?.allowTeacherEditAfterSubmission ||
                 classResults.some((r) => r.status === "draft") ||
@@ -895,15 +913,25 @@ export function ResultTable({
                   <th className="p-5 text-center font-black text-slate-500 text-[10px] uppercase tracking-[0.2em] min-w-[100px]">
                     Sex
                   </th>
-                  {subjects.map((subject) =>
-                    isDynamic ? (
-                      assessmentTypes.map((type: AssessmentType) => (
+                  {subjects.map((subject) => {
+                    if (isDynamic && activeSemester !== "average") {
+                      if (activeAssessmentTypes.length === 0) {
+                        return (
+                          <th key={subject} className="p-5 text-center font-black text-slate-400 text-[10px] border-r border-slate-200/50 last:border-0 min-w-[150px]">
+                            {subject} - No assessments setup
+                          </th>
+                        );
+                      }
+                      return activeAssessmentTypes.map((type: AssessmentType) => (
                         <th
                           key={`${subject}-${type.id}`}
                           className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 last:border-0 min-w-[110px]"
                         >
                           <div className="flex flex-col gap-1">
-                            <span className="uppercase tracking-widest text-slate-900">
+                            <span className="uppercase tracking-widest text-slate-900 truncate" title={subject}>
+                              {subject}
+                            </span>
+                            <span className="uppercase tracking-widest text-slate-600">
                               {type.label}
                             </span>
                             <span className="text-[9px] font-bold text-cyan-500 bg-cyan-50 px-2 py-0.5 rounded-full inline-block mx-auto">
@@ -911,29 +939,37 @@ export function ResultTable({
                             </span>
                           </div>
                         </th>
-                      ))
-                    ) : (
-                      <th
-                        key={subject}
-                        className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 last:border-0 min-w-[240px]"
-                      >
-                        <div className="flex flex-col mb-3 text-xs uppercase tracking-[0.15em] text-cyan-700 font-black">
-                          {subject}
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 w-full border-t border-slate-200 pt-3">
-                          <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
-                            SEM-1
-                          </span>
-                          <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
-                            SEM-2
-                          </span>
-                          <span className="text-[9px] text-cyan-600 font-black uppercase tracking-widest bg-cyan-50/50 py-1 rounded-md">
-                            AVG
-                          </span>
-                        </div>
-                      </th>
-                    ),
-                  )}
+                      ));
+                    } else {
+                      return (
+                        <th
+                          key={subject}
+                          className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 last:border-0 min-w-[240px]"
+                        >
+                          <div className="flex flex-col mb-3 text-xs uppercase tracking-[0.15em] text-cyan-700 font-black truncate" title={subject}>
+                            {subject}
+                          </div>
+                          <div className={`grid ${activeSemester === "average" ? "grid-cols-3" : "grid-cols-1"} gap-2 w-full border-t border-slate-200 pt-3`}>
+                            {(activeSemester === "1" || activeSemester === "average") && (
+                              <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
+                                SEM-1
+                              </span>
+                            )}
+                            {(activeSemester === "2" || activeSemester === "average") && (
+                              <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
+                                SEM-2
+                              </span>
+                            )}
+                            {activeSemester === "average" && (
+                              <span className="text-[9px] text-cyan-600 font-black uppercase tracking-widest bg-cyan-50/50 py-1 rounded-md">
+                                AVG
+                              </span>
+                            )}
+                          </div>
+                        </th>
+                      );
+                    }
+                  })}
                   <th className="p-5 text-center font-black text-slate-900 bg-slate-100/50 text-[10px] uppercase tracking-[0.2em] min-w-[110px]">
                     Aggregate
                   </th>
@@ -1031,8 +1067,11 @@ export function ResultTable({
                         </td>
 
                         {subjects.map((subject) => {
-                          if (isDynamic) {
-                            return assessmentTypes.map(
+                          if (isDynamic && activeSemester !== "average") {
+                            if (activeAssessmentTypes.length === 0) {
+                              return <td key={subject} className="p-3 border-r border-slate-50 last:border-0 text-center">-</td>;
+                            }
+                            return activeAssessmentTypes.map(
                               (type: AssessmentType) => {
                                 const val = marks[`${subject}__${type.id}`];
                                 const isFail =
@@ -1078,65 +1117,81 @@ export function ResultTable({
                             const sAvg =
                               s1 !== undefined && s2 !== undefined
                                 ? (s1 + s2) / 2
-                                : 0;
-                            const hasBoth =
-                              s1 !== undefined && s2 !== undefined;
+                                : (s1 !== undefined ? s1 : (s2 !== undefined ? s2 : 0));
+                            const hasBoth = s1 !== undefined && s2 !== undefined;
                             const isFail = hasBoth && sAvg < 35;
+
+                            let subTotalValue = 0;
+                            if (isDynamic && activeSemester === "average") {
+                                // SubTotal calculation when dynamic in average view
+                                gradeAssessmentTypes.forEach((type: AssessmentType) => {
+                                  const val = marks[`${subject}__${type.id}`];
+                                  if (val !== undefined && typeof val === "number") {
+                                    subTotalValue += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                                  }
+                                });
+                            }
 
                             return (
                               <td
                                 key={subject}
-                                className="p-3 relative min-w-[240px] border-r border-slate-50 last:border-0 text-center align-top"
+                                className="p-3 relative border-r border-slate-50 last:border-0 text-center align-top"
                               >
-                                <div className="grid grid-cols-3 gap-2">
-                                  <Input
-                                    type="number"
-                                    inputMode="decimal"
-                                    min="0"
-                                    max="100"
-                                    step="any"
-                                    value={s1 ?? ""}
-                                    onChange={(e) =>
-                                      handleMarkChange(
-                                        sid,
-                                        `${subject}_sem1`,
-                                        e.target.value,
-                                      )
-                                    }
-                                    className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
-                                    placeholder="-"
-                                    disabled={isLocked || isHomeroomView}
-                                  />
-                                  <Input
-                                    type="number"
-                                    inputMode="decimal"
-                                    min="0"
-                                    max="100"
-                                    step="any"
-                                    value={s2 ?? ""}
-                                    onChange={(e) =>
-                                      handleMarkChange(
-                                        sid,
-                                        `${subject}_sem2`,
-                                        e.target.value,
-                                      )
-                                    }
-                                    className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
-                                    placeholder="-"
-                                    disabled={isLocked || isHomeroomView}
-                                  />
-                                  <div
-                                    className={cn(
-                                      "flex items-center justify-center h-10 rounded-xl font-black text-xs tabular-nums ring-1 ring-inset",
-                                      isFail
-                                        ? "text-red-700 bg-red-50 ring-red-100"
-                                        : hasBoth
-                                          ? "text-cyan-700 bg-cyan-50/50 ring-cyan-100"
-                                          : "text-slate-300 ring-slate-100",
-                                    )}
-                                  >
-                                    {hasBoth ? sAvg.toFixed(1) : "-"}
-                                  </div>
+                                <div className={`grid ${activeSemester === "average" ? "grid-cols-3" : "grid-cols-1"} gap-2`}>
+                                  {(activeSemester === "1" || activeSemester === "average") && (
+                                    <Input
+                                      type="number"
+                                      inputMode="decimal"
+                                      min="0"
+                                      max="100"
+                                      step="any"
+                                      value={s1 ?? ""}
+                                      onChange={(e) =>
+                                        handleMarkChange(
+                                          sid,
+                                          `${subject}_sem1`,
+                                          e.target.value,
+                                        )
+                                      }
+                                      className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
+                                      placeholder="-"
+                                      disabled={isLocked || isHomeroomView || isDynamic}
+                                    />
+                                  )}
+                                  {(activeSemester === "2" || activeSemester === "average") && (
+                                    <Input
+                                      type="number"
+                                      inputMode="decimal"
+                                      min="0"
+                                      max="100"
+                                      step="any"
+                                      value={s2 ?? ""}
+                                      onChange={(e) =>
+                                        handleMarkChange(
+                                          sid,
+                                          `${subject}_sem2`,
+                                          e.target.value,
+                                        )
+                                      }
+                                      className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
+                                      placeholder="-"
+                                      disabled={isLocked || isHomeroomView || isDynamic}
+                                    />
+                                  )}
+                                  {activeSemester === "average" && (
+                                    <div
+                                      className={cn(
+                                        "flex items-center justify-center h-10 rounded-xl font-black text-xs tabular-nums ring-1 ring-inset",
+                                        isDynamic ? "bg-cyan-50 text-cyan-700 ring-cyan-100" : (isFail
+                                          ? "text-red-700 bg-red-50 ring-red-100"
+                                          : hasBoth
+                                            ? "text-cyan-700 bg-cyan-50/50 ring-cyan-100"
+                                            : "text-slate-300 ring-slate-100"),
+                                      )}
+                                    >
+                                      {isDynamic ? subTotalValue.toFixed(1) : (hasBoth ? sAvg.toFixed(1) : "-")}
+                                    </div>
+                                  )}
                                 </div>
                               </td>
                             );

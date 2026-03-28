@@ -18,6 +18,8 @@ export interface AssessmentType {
   maxMarks?: number | string;
   weight?: number | string;
   label?: string;
+  grade?: string;
+  semester?: string;
 }
 
 export interface PendingResult {
