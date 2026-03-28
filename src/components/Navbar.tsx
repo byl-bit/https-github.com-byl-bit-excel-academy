@@ -73,7 +73,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-white/30 backdrop-blur-lg shadow-none transition-all duration-300 dark:border-gray-700 dark:bg-gray-800/30 dark:backdrop-blur-lg">
+    <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-white/80 backdrop-blur-xl shadow-sm transition-all duration-300 dark:border-gray-700 dark:bg-slate-900/80">
       <div className="container flex h-16 sm:h-20 items-center justify-between">
         <div className="flex items-center gap-4 sm:gap-8">
           <Link

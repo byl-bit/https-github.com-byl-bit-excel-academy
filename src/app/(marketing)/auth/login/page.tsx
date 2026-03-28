@@ -70,7 +70,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container mx-auto flex items-start sm:items-center justify-center min-h-[calc(100vh-4rem)] px-3 sm:px-4 py-8 sm:py-6 md:py-8">
+    <div className="relative min-h-screen flex items-center justify-center p-4">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/images/school_banner.jpg" 
+          alt="Excel Academy Campus" 
+          className="w-full h-full object-cover blur-[3px]"
+        />
+        <div className="absolute inset-0 bg-slate-950/60" />
+      </div>
+
+      <div className="container relative z-10 mx-auto flex items-start sm:items-center justify-center px-3 sm:px-4 py-8 sm:py-6 md:py-8">
       <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl w-full items-center">
         {/* Illustration Side */}
         <div className="hidden md:flex flex-col items-center justify-center p-6 lg:p-8">
@@ -320,5 +331,6 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
-  );
+  </div>
+);
 }

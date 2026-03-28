@@ -158,12 +158,12 @@ export default function AnnouncementsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+          <div className="flex flex-wrap gap-2 w-full md:w-auto pb-2 md:pb-0">
             {["all", "academic", "event", "admin"].map((type) => (
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`px-6 h-14 rounded-2xl text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all flex items-center justify-center shrink-0
+                className={`px-6 h-12 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all flex items-center justify-center
                                     ${
                                       filterType === type
                                         ? "bg-cyan-600 text-white shadow-xl shadow-cyan-500/20"
