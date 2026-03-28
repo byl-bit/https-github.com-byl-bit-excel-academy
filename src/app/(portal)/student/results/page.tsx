@@ -138,7 +138,7 @@ export default function StudentResultsPage() {
     // Simple Logo Placeholder if needed, omitted logic for brevity/consistency
     doc.setFillColor(255, 255, 255);
     doc.circle(30, 20, 12, "F");
-    doc.setTextColor(30, 64, 175);
+    doc.setTextColor(8, 145, 178); // Cyan-600
     doc.setFontSize(8);
     doc.text("LOGO", 30, 21, { align: "center" });
 
@@ -263,7 +263,7 @@ export default function StudentResultsPage() {
     doc.text(`${result.average.toFixed(2)}%`, 105, summaryY);
     doc.setTextColor(0, 0, 0);
     doc.text("Result:", 140, summaryY);
-    doc.setTextColor(30, 64, 175); // Blue
+    doc.setTextColor(8, 145, 178); // Cyan-600
     doc.text(`${result.promotedOrDetained}`, 160, summaryY);
     doc.setTextColor(0, 0, 0);
 
@@ -272,7 +272,7 @@ export default function StudentResultsPage() {
 
   if (loading)
     return (
-      <div className="text-center py-12 text-blue-600">Loading results...</div>
+      <div className="text-center py-12 text-cyan-600">Loading results...</div>
     );
 
   // Check if we have breakdown data to decide whether to show detailed columns
@@ -283,17 +283,17 @@ export default function StudentResultsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <Card className="bg-white border-blue-100 shadow-sm">
+      <Card className="bg-white border-cyan-100 shadow-sm">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-2">
           <div className="flex items-center gap-4">
-            <div className="bg-blue-50 p-3 rounded-xl hidden sm:block">
-              <FileText className="h-6 w-6 text-blue-600" />
+            <div className="bg-cyan-50 p-3 rounded-xl hidden sm:block">
+              <FileText className="h-6 w-6 text-cyan-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-blue-900">
+              <h2 className="text-2xl font-bold tracking-tight text-slate-900">
                 Academic Results
               </h2>
-              <p className="text-sm text-blue-500">
+              <p className="text-sm text-cyan-600">
                 View your exam performance and download report cards.
               </p>
             </div>
@@ -304,7 +304,7 @@ export default function StudentResultsPage() {
               {reportCardEnabled ? (
                 <Button
                   onClick={downloadPDF}
-                  className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 border-none font-bold"
+                  className="shrink-0 bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg shadow-cyan-200 border-none font-bold"
                 >
                   <Download className="mr-2 h-4 w-4" /> Download Report
                 </Button>
@@ -413,10 +413,10 @@ export default function StudentResultsPage() {
           </div>
         </Card>
       ) : result ? (
-        <Card className="border-t-4 border-t-blue-500">
+        <Card className="border-t-4 border-t-cyan-500">
           <CardHeader title="Annual Report Card" icon={Award} className="pb-6">
             <span
-              className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide bg-blue-100 text-blue-700 border border-blue-200`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide bg-cyan-100 text-cyan-700 border border-cyan-200`}
             >
               {result.promotedOrDetained}
             </span>
@@ -425,37 +425,37 @@ export default function StudentResultsPage() {
           <div className="grid gap-6">
             {/* Highlights */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div className="p-4 rounded-xl bg-white border-blue-100 shadow-sm">
-                <p className="text-xs font-bold uppercase text-blue-400 mb-1">
+              <div className="p-4 rounded-xl bg-white border-cyan-100 shadow-sm">
+                <p className="text-xs font-bold uppercase text-slate-400 mb-1">
                   Total Score
                 </p>
-                <p className="text-3xl font-black text-blue-900">
+                <p className="text-3xl font-black text-slate-800">
                   {result.total}
                 </p>
               </div>
-              <div className="p-4 rounded-xl bg-white border-blue-100 shadow-sm">
-                <p className="text-xs font-bold uppercase text-blue-400 mb-1">
+              <div className="p-4 rounded-xl bg-white border-cyan-100 shadow-sm">
+                <p className="text-xs font-bold uppercase text-cyan-400 mb-1">
                   Average
                 </p>
-                <p className="text-3xl font-black text-blue-600">
+                <p className="text-3xl font-black text-cyan-600">
                   {result.average.toFixed(1)}
-                  <span className="text-lg text-blue-400 ml-1">%</span>
+                  <span className="text-lg text-cyan-400 ml-1">%</span>
                 </p>
               </div>
-              <div className="p-4 rounded-xl bg-white border-blue-100 shadow-sm">
-                <p className="text-xs font-bold uppercase text-indigo-400 mb-1">
+              <div className="p-4 rounded-xl bg-white border-cyan-100 shadow-sm">
+                <p className="text-xs font-bold uppercase text-teal-400 mb-1">
                   Class Rank
                 </p>
-                <p className="text-3xl font-black text-indigo-900">
+                <p className="text-3xl font-black text-teal-900">
                   #{result.rank}
                 </p>
               </div>
             </div>
 
             {/* Table */}
-            <div className="rounded-xl overflow-x-auto border border-blue-100 shadow-sm scrollbar-thin">
+            <div className="rounded-xl overflow-x-auto border border-cyan-100 shadow-sm scrollbar-thin">
               <table className="w-full text-sm text-left min-w-[600px] sm:min-w-full">
-                <thead className="bg-blue-50/50 text-blue-900">
+                <thead className="bg-cyan-50/50 text-slate-900">
                   <tr>
                     <th className="px-6 py-4 font-bold">Subject</th>
                     {showBreakdown ? (
@@ -489,16 +489,16 @@ export default function StudentResultsPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-blue-100 bg-white/50">
+                <tbody className="divide-y divide-cyan-100 bg-white/50">
                   {result.subjects.map((sub: any, idx) => {
                     const grade = calculateGrade(sub.marks);
                     const passed = sub.marks >= 35;
                     return (
                       <tr
                         key={idx}
-                        className="hover:bg-blue-50/30 transition-colors"
+                        className="hover:bg-cyan-50/30 transition-colors"
                       >
-                        <td className="px-6 py-4 font-medium text-blue-900">
+                        <td className="px-6 py-4 font-medium text-slate-800">
                           {sub.name}
                         </td>
                         {showBreakdown ? (
@@ -521,27 +521,27 @@ export default function StudentResultsPage() {
                           })
                         ) : (
                           <>
-                            <td className="px-6 py-4 text-center font-bold text-blue-700">
+                            <td className="px-6 py-4 text-center font-bold text-cyan-700">
                               {sub.sem1 !== undefined ? sub.sem1 : "-"}
                             </td>
-                            <td className="px-6 py-4 text-center font-bold text-blue-700">
+                            <td className="px-6 py-4 text-center font-bold text-cyan-700">
                               {sub.sem2 !== undefined ? sub.sem2 : "-"}
                             </td>
                           </>
                         )}
-                        <td className="px-6 py-4 text-right font-black text-indigo-700">
+                        <td className="px-6 py-4 text-right font-black text-teal-700">
                           {sub.marks}
                         </td>
-                        <td className="px-6 py-4 text-right font-bold text-blue-600">
+                        <td className="px-6 py-4 text-right font-bold text-cyan-600">
                           <span
-                            className={`inline-block w-8 text-center rounded ${["F"].includes(grade) ? "text-red-400" : "text-blue-600"}`}
+                            className={`inline-block w-8 text-center rounded ${["F"].includes(grade) ? "text-red-400" : "text-cyan-600"}`}
                           >
                             {grade}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right hidden sm:table-cell">
                           {passed ? (
-                            <span className="text-blue-600/80 text-xs font-bold bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
+                            <span className="text-cyan-600/80 text-xs font-bold bg-cyan-50 px-2 py-1 rounded-full border border-cyan-100">
                               PASS
                             </span>
                           ) : (
@@ -558,11 +558,11 @@ export default function StudentResultsPage() {
             </div>
 
             {/* Remarks */}
-            <div className="flex items-center gap-3 text-sm text-blue-900 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-              <span className="font-bold text-blue-700 uppercase text-xs tracking-wider">
+            <div className="flex items-center gap-3 text-sm text-slate-800 bg-cyan-50/50 p-4 rounded-xl border border-cyan-100">
+              <span className="font-black text-cyan-700 uppercase text-xs tracking-wider">
                 Remarks
               </span>
-              <div className="h-4 w-px bg-blue-200"></div>
+              <div className="h-4 w-px bg-cyan-200"></div>
               <span>{result.conduct}</span>
             </div>
           </div>

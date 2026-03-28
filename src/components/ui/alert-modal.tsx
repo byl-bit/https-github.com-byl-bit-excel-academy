@@ -40,7 +40,7 @@ export function AlertModal({
       ? "text-green-500"
       : variant === "error"
         ? "text-red-500"
-        : "text-blue-500";
+        : "text-cyan-500";
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

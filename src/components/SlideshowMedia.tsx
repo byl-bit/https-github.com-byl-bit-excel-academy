@@ -32,7 +32,7 @@ export const SlideshowMedia = ({ media, title }: SlideshowMediaProps) => {
   const currentMedia = media[currentIndex];
 
   return (
-    <div className="relative group overflow-hidden rounded-xl border border-blue-100 bg-slate-50 aspect-video w-full shadow-sm hover:shadow-md transition-shadow">
+    <div className="relative group overflow-hidden rounded-xl border border-cyan-100 bg-slate-50 aspect-video w-full shadow-sm hover:shadow-md transition-shadow">
       {currentMedia.type === "image" ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -60,7 +60,7 @@ export const SlideshowMedia = ({ media, title }: SlideshowMediaProps) => {
                 onClick={() => setCurrentIndex(i)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   i === currentIndex
-                    ? "w-6 bg-blue-600"
+                    ? "w-6 bg-cyan-600"
                     : "w-1.5 bg-white/60 hover:bg-white"
                 }`}
                 aria-label={`Go to slide ${i + 1}`}

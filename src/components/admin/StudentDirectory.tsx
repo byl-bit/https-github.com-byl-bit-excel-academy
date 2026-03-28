@@ -497,8 +497,8 @@ export function StudentDirectory({
     <div className="space-y-6 animate-fade-in">
       <div className="glass-panel p-4 md:p-6 rounded-2xl shadow-sm space-y-4 md:space-y-0 md:flex md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-blue-100 flex items-center justify-center shadow-inner">
-            <Users className="h-6 w-6 text-blue-600" />
+          <div className="h-12 w-12 rounded-xl bg-cyan-100 flex items-center justify-center shadow-inner">
+            <Users className="h-6 w-6 text-cyan-600" />
           </div>
           <div>
             <h3 className="text-xl font-black text-slate-800 tracking-tight">
@@ -512,10 +512,10 @@ export function StudentDirectory({
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-cyan-500 transition-colors" />
             <Input
               placeholder="Find student..."
-              className="pl-10 h-10 w-full md:w-64 bg-white/50 border-slate-200 focus:ring-2 focus:ring-blue-100 rounded-xl font-medium transition-all"
+              className="pl-10 h-10 w-full md:w-64 bg-white/50 border-slate-200 focus:ring-2 focus:ring-cyan-100 rounded-xl font-medium transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -523,7 +523,7 @@ export function StudentDirectory({
 
           <div className="flex gap-2 w-full md:w-auto">
             <select
-              className="flex-1 md:flex-none h-10 rounded-xl border border-slate-200 bg-white/50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+              className="flex-1 md:flex-none h-10 rounded-xl border border-slate-200 bg-white/50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
               value={filterGrade}
               onChange={(e) => setFilterGrade(e.target.value)}
             >
@@ -535,7 +535,7 @@ export function StudentDirectory({
               ))}
             </select>
             <select
-              className="flex-1 md:flex-none h-10 rounded-xl border border-slate-200 bg-white/50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+              className="flex-1 md:flex-none h-10 rounded-xl border border-slate-200 bg-white/50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
               value={filterSection}
               onChange={(e) => setFilterSection(e.target.value)}
             >
@@ -547,7 +547,7 @@ export function StudentDirectory({
               ))}
             </select>
             <select
-              className="flex-1 md:flex-none h-10 rounded-xl border border-slate-200 bg-white/50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+              className="flex-1 md:flex-none h-10 rounded-xl border border-slate-200 bg-white/50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
               value={filterGender}
               onChange={(e) => setFilterGender(e.target.value)}
             >
@@ -578,7 +578,7 @@ export function StudentDirectory({
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full gap-2 h-10 rounded-xl bg-blue-50 border-blue-100 text-blue-700 hover:bg-blue-100 font-bold"
+                className="w-full gap-2 h-10 rounded-xl bg-cyan-50 border-cyan-100 text-cyan-700 hover:bg-cyan-100 font-bold"
                 onClick={() =>
                   document.getElementById("student-csv-import")?.click()
                 }
@@ -625,7 +625,7 @@ export function StudentDirectory({
                 .map((student) => (
                   <tr
                     key={student.studentId || student.id}
-                    className="hover:bg-blue-50/30 transition-colors group"
+                    className="hover:bg-cyan-50/30 transition-colors group"
                   >
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-4">
@@ -643,7 +643,7 @@ export function StudentDirectory({
                           )}
                         </div>
                         <div className="space-y-0.5">
-                          <p className="font-black text-slate-800 group-hover:text-blue-700 transition-colors leading-tight">
+                          <p className="font-black text-slate-800 group-hover:text-cyan-700 transition-colors leading-tight">
                             {student.firstName} {student.middleName}{" "}
                             {student.lastName}
                           </p>
@@ -678,7 +678,7 @@ export function StudentDirectory({
                           <span
                             className={`text-[10px] font-black px-2.5 py-1 rounded-full border shadow-sm ${
                               genderNorm === "M"
-                                ? "bg-blue-50 text-blue-600 border-blue-100"
+                                ? "bg-cyan-50 text-cyan-600 border-cyan-100"
                                 : genderNorm === "F"
                                   ? "bg-pink-50 text-pink-600 border-pink-100"
                                   : "bg-slate-50 text-slate-600 border-slate-100"
@@ -691,7 +691,7 @@ export function StudentDirectory({
                     </td>
                     <td className="py-4 px-4 text-center">
                       <div className="flex flex-col items-center gap-1">
-                        <span className="font-black text-blue-600 text-[11px] uppercase">
+                        <span className="font-black text-cyan-600 text-[11px] uppercase">
                           Grade {student.grade}
                         </span>
                         <span className="font-black px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[9px] uppercase tracking-tighter">
@@ -704,7 +704,7 @@ export function StudentDirectory({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-10 w-10 bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-xs border border-slate-100 active:scale-90"
+                          className="h-10 w-10 bg-slate-50 text-slate-600 hover:bg-cyan-600 hover:text-white rounded-xl transition-all shadow-xs border border-slate-100 active:scale-90"
                           onClick={() => setViewingStudent(student)}
                           title="View Full Profile"
                         >
@@ -713,10 +713,9 @@ export function StudentDirectory({
 
 
                         <Button
-
                           variant="ghost"
                           size="icon"
-                          className="h-9 w-9 text-blue-600 hover:bg-blue-100/50 rounded-xl"
+                          className="h-9 w-9 text-cyan-600 hover:bg-cyan-100/50 rounded-xl"
                           onClick={() => handleEditClick(student)}
                           title="Edit Record"
                         >
@@ -725,7 +724,7 @@ export function StudentDirectory({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-9 w-9 text-indigo-600 hover:bg-indigo-100/50 rounded-xl"
+                          className="h-9 w-9 text-teal-600 hover:bg-teal-100/50 rounded-xl"
                           onClick={() => handleExportStudentResults(student)}
                           title="Export Performance"
                         >

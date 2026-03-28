@@ -40,7 +40,7 @@ export function ResultFilters({
     <div className="glass-panel p-6 rounded-3xl bg-white shadow-sm border border-slate-100 space-y-6">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-blue-600" />
+          <Filter className="h-4 w-4 text-cyan-600" />
           <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">
             Active Filters
           </h3>
@@ -61,7 +61,7 @@ export function ResultFilters({
             Grade Level
           </Label>
           <select
-            className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all hover:bg-white"
+            className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-cyan-100 outline-none cursor-pointer transition-all hover:bg-white"
             value={filterGrade}
             onChange={(e) => setFilterGrade(e.target.value)}
           >
@@ -79,7 +79,7 @@ export function ResultFilters({
             Section
           </Label>
           <select
-            className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all hover:bg-white"
+            className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-cyan-100 outline-none cursor-pointer transition-all hover:bg-white"
             value={filterSection}
             onChange={(e) => setFilterSection(e.target.value)}
           >
@@ -97,7 +97,7 @@ export function ResultFilters({
             Gender
           </Label>
           <select
-            className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all hover:bg-white"
+            className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-cyan-100 outline-none cursor-pointer transition-all hover:bg-white"
             value={filterGender}
             onChange={(e) => setFilterGender(e.target.value)}
           >
@@ -112,7 +112,7 @@ export function ResultFilters({
             Outcome
           </Label>
           <select
-            className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer transition-all hover:bg-white"
+            className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-cyan-100 outline-none cursor-pointer transition-all hover:bg-white"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -130,7 +130,7 @@ export function ResultFilters({
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
             <Input
               placeholder="Name, ID, Roll..."
-              className="pl-11 h-11 rounded-2xl border-slate-200 bg-slate-50/50 focus:ring-2 focus:ring-blue-100 font-bold text-sm transition-all hover:bg-white"
+              className="pl-11 h-11 rounded-2xl border-slate-200 bg-slate-50/50 focus:ring-2 focus:ring-cyan-100 font-bold text-sm transition-all hover:bg-white"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />

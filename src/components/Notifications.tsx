@@ -42,7 +42,7 @@ export function Notifications({
           <Bell className="h-5 w-5 text-slate-700" />
           Notifications
           {unreadCount > 0 && (
-            <span className="ml-2 px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded-full">
+            <span className="ml-2 px-2 py-0.5 text-[10px] font-bold bg-cyan-100 text-cyan-700 rounded-full">
               {unreadCount} new
             </span>
           )}
@@ -52,7 +52,7 @@ export function Notifications({
             <Button
               variant="outline"
               size="sm"
-              className="h-8 text-[10px] font-black uppercase tracking-widest border-blue-100 text-blue-600 hover:bg-blue-50"
+              className="h-8 text-[10px] font-black uppercase tracking-widest border-cyan-100 text-cyan-600 hover:bg-cyan-50"
               onClick={onMarkAllRead}
             >
               Read All
@@ -94,7 +94,7 @@ export function Notifications({
                   <div className="text-xs text-slate-600 mt-1">
                     {notif.details}
                   </div>
-                  <div className="text-[10px] uppercase tracking-wider text-blue-600 mt-1 font-bold">
+                  <div className="text-[10px] uppercase tracking-wider text-cyan-600 mt-1 font-bold">
                     {notif.user_name}
                   </div>
                 </div>

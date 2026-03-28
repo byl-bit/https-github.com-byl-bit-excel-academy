@@ -78,13 +78,13 @@ function ToastItem({
   const icons = {
     success: <CheckCircle2 className="h-5 w-5 text-green-500" />,
     error: <AlertCircle className="h-5 w-5 text-red-500" />,
-    info: <Info className="h-5 w-5 text-blue-500" />,
+    info: <Info className="h-5 w-5 text-cyan-500" />,
   };
 
   const bgColors = {
     success: "bg-green-50 border-green-100 shadow-green-100/50",
     error: "bg-red-50 border-red-100 shadow-red-100/50",
-    info: "bg-blue-50 border-blue-100 shadow-blue-100/50",
+    info: "bg-cyan-50 border-cyan-100 shadow-cyan-100/50",
   };
 
   return (

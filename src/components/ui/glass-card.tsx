@@ -19,7 +19,7 @@ export function Card({
       className={cn(
         "glass-panel rounded-2xl p-6 transition-all duration-300",
         hoverEffect &&
-          "hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1 hover:bg-white/80",
+          "hover:shadow-lg hover:shadow-cyan-500/5 hover:-translate-y-1 hover:bg-white/80",
         className,
       )}
       {...props}
@@ -48,8 +48,8 @@ export function CardHeader({
     <div className={cn("mb-6 flex items-center justify-between", className)}>
       <div className="flex items-center gap-4">
         {Icon && (
-          <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center shadow-inner">
-            <Icon className="h-5 w-5 text-blue-600" />
+          <div className="h-10 w-10 rounded-xl bg-cyan-100 flex items-center justify-center shadow-inner">
+            <Icon className="h-5 w-5 text-cyan-600" />
           </div>
         )}
         <div>

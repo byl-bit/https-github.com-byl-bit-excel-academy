@@ -125,11 +125,11 @@ export function SubjectAllocations({
   const getSubjectColor = (subject: string) => {
     const colors = [
       "bg-rose-50 text-rose-700 border-rose-200",
-      "bg-blue-50 text-blue-700 border-blue-200",
+      "bg-cyan-50 text-cyan-700 border-cyan-200",
       "bg-emerald-50 text-emerald-700 border-emerald-200",
       "bg-violet-50 text-violet-700 border-violet-200",
       "bg-amber-50 text-amber-700 border-amber-200",
-      "bg-cyan-50 text-cyan-700 border-cyan-200",
+      "bg-teal-50 text-teal-700 border-teal-200",
     ];
     let hash = 0;
     for (let i = 0; i < subject.length; i++)
@@ -142,7 +142,7 @@ export function SubjectAllocations({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2">
-            <LayoutGrid className="h-6 w-6 text-indigo-600" />
+            <LayoutGrid className="h-6 w-6 text-cyan-600" />
             Subject Matrix
           </h3>
           <p className="text-slate-500 font-medium">
@@ -154,14 +154,14 @@ export function SubjectAllocations({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               placeholder="Search by teacher, subject..."
-              className="pl-9 bg-white border-slate-200 focus:border-indigo-500 rounded-xl"
+              className="pl-9 bg-white border-slate-200 focus:border-cyan-500 rounded-xl"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 rounded-xl transition-all hover:scale-105">
+              <Button className="gap-2 bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-lg shadow-cyan-200 rounded-xl transition-all hover:scale-105">
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Assign Subject</span>
                 <span className="sm:hidden">Add</span>
@@ -170,8 +170,8 @@ export function SubjectAllocations({
             <DialogContent className="sm:max-w-md rounded-2xl">
               <DialogHeader>
                 <DialogTitle className="text-xl font-black text-slate-900 flex items-center gap-2">
-                  <div className="bg-indigo-100 p-2 rounded-lg">
-                    <BookOpen className="h-5 w-5 text-indigo-600" />
+                  <div className="bg-cyan-100 p-2 rounded-lg">
+                    <BookOpen className="h-5 w-5 text-cyan-600" />
                   </div>
                   New Assignment
                 </DialogTitle>
@@ -285,7 +285,7 @@ export function SubjectAllocations({
                 <Button
                   onClick={handleAllocate}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-100"
+                  className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl shadow-lg shadow-cyan-100"
                 >
                   {loading ? "Assigning..." : "Confirm Assignment"}
                 </Button>
@@ -351,7 +351,7 @@ export function SubjectAllocations({
                     >
                       <TableCell className="pl-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black shadow-md shadow-indigo-100">
+                          <div className="h-10 w-10 rounded-full bg-linear-to-br from-cyan-500 to-teal-500 flex items-center justify-center text-white font-black shadow-md shadow-cyan-100">
                             {(
                               teacher?.name?.[0] ||
                               allocTeacherName?.[0] ||

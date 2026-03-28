@@ -111,10 +111,10 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
       <div className="space-y-4 py-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="animate-pulse flex gap-4">
-            <div className="h-10 w-10 bg-blue-50 rounded-full shrink-0" />
+            <div className="h-10 w-10 bg-cyan-50 rounded-full shrink-0" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-blue-50 rounded w-1/4" />
-              <div className="h-3 bg-blue-50 rounded w-3/4" />
+              <div className="h-4 bg-cyan-50 rounded w-1/4" />
+              <div className="h-3 bg-cyan-50 rounded w-3/4" />
             </div>
           </div>
         ))}
@@ -141,15 +141,15 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
             <span
               className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
                 ann.type === "academic"
-                  ? "border-blue-100 text-blue-600 bg-blue-50/50"
+                  ? "border-cyan-100 text-cyan-600 bg-cyan-50/50"
                   : ann.type === "event"
-                    ? "border-sky-100 text-sky-600 bg-sky-50/50"
-                    : "border-blue-100 text-blue-500 bg-blue-50/30"
+                    ? "border-teal-100 text-teal-600 bg-teal-50/50"
+                    : "border-cyan-100 text-cyan-500 bg-cyan-50/30"
               }`}
             >
               {ann.type}
             </span>
-            <span className="text-[10px] font-medium text-blue-400 shrink-0 flex items-center gap-1 group-hover:text-blue-500 transition-colors">
+            <span className="text-[10px] font-medium text-cyan-400 shrink-0 flex items-center gap-1 group-hover:text-cyan-500 transition-colors">
               <Calendar className="h-3 w-3" />
               {new Date(ann.date).toLocaleDateString("en-US", {
                 month: "short",
@@ -160,10 +160,10 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
           </div>
           <div className="flex items-start gap-3">
             <div className="flex-1">
-              <h4 className="font-bold text-blue-900 group-hover:text-blue-600 transition-colors mb-1 line-clamp-1">
+              <h4 className="font-bold text-slate-800 group-hover:text-cyan-600 transition-colors mb-1 line-clamp-1">
                 {ann.title}
               </h4>
-              <div className="text-sm text-blue-500 leading-relaxed mb-3">
+              <div className="text-sm text-slate-600 leading-relaxed mb-3">
                 <FormattedText text={ann.body} />
               </div>
 
@@ -174,13 +174,13 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
               )}
 
               {ann.type === "event" && (
-                <div className="flex items-center gap-4 mt-2 pt-2 border-t border-blue-50">
+                <div className="flex items-center gap-4 mt-2 pt-2 border-t border-cyan-50">
                   <button
                     onClick={() => handleVote(ann.id, "like")}
-                    className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${likes[String(ann.id)]?.myVote === "like" ? "text-blue-600" : "text-slate-400 hover:text-blue-500"}`}
+                    className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${likes[String(ann.id)]?.myVote === "like" ? "text-cyan-600" : "text-slate-400 hover:text-cyan-500"}`}
                   >
                     <ThumbsUp
-                      className={`h-4 w-4 ${likes[String(ann.id)]?.myVote === "like" ? "fill-blue-600" : ""}`}
+                      className={`h-4 w-4 ${likes[String(ann.id)]?.myVote === "like" ? "fill-cyan-600" : ""}`}
                     />
                     <span>{likes[String(ann.id)]?.likes ?? 0}</span>
                   </button>

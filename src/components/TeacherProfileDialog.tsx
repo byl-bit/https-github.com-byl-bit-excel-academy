@@ -108,8 +108,8 @@ export function TeacherProfileDialog({ teacher, isOpen, onClose }: TeacherProfil
             </div>
             
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-6">
-              <InfoItem label="Home Room" value={teacher.grade && teacher.section ? `Grade ${teacher.grade} - ${teacher.section}` : "Subject Teacher"} icon={Award} color="blue" />
-              <InfoItem label="Access Role" value={teacher.role || "FACULTY"} icon={Briefcase} color="blue" />
+              <InfoItem label="Home Room" value={teacher.grade && teacher.section ? `Grade ${teacher.grade} - ${teacher.section}` : "Subject Teacher"} icon={Award} color="cyan" />
+              <InfoItem label="Access Role" value={teacher.role || "FACULTY"} icon={Briefcase} color="cyan" />
             </div>
           </section>
         </div>
@@ -128,7 +128,7 @@ export function TeacherProfileDialog({ teacher, isOpen, onClose }: TeacherProfil
   );
 }
 
-function InfoItem({ label, value, icon: Icon, color = "indigo", isCompact = false, isPrimary = false }: { label: string; value: string; icon?: any; color?: "blue" | "indigo"; isCompact?: boolean; isPrimary?: boolean }) {
+function InfoItem({ label, value, icon: Icon, color = "teal", isCompact = false, isPrimary = false }: { label: string; value: string; icon?: any; color?: "cyan" | "teal"; isCompact?: boolean; isPrimary?: boolean }) {
   return (
     <div className={cn("group space-y-1.5 sm:space-y-2", isPrimary && "xs:col-span-2")}>
       <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">
@@ -137,11 +137,11 @@ function InfoItem({ label, value, icon: Icon, color = "indigo", isCompact = fals
       <div className={cn(
         "flex items-center gap-3 p-3 sm:p-3.5 rounded-2xl border transition-all duration-300",
         "bg-white/80 group-hover:bg-white group-hover:shadow-lg group-hover:shadow-slate-100",
-        color === "indigo" ? "border-slate-100/80 group-hover:border-indigo-100" : "border-slate-100/80 group-hover:border-blue-100"
+        color === "teal" ? "border-slate-100/80 group-hover:border-teal-100" : "border-slate-100/80 group-hover:border-cyan-100"
       )}>
         <div className={cn(
           "shrink-0 h-7 w-7 sm:h-8 sm:w-8 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110",
-          color === "indigo" ? "bg-indigo-50 text-indigo-500" : "bg-blue-50 text-blue-500"
+          color === "teal" ? "bg-teal-50 text-teal-500" : "bg-cyan-50 text-cyan-500"
         )}>
           {Icon && <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
         </div>

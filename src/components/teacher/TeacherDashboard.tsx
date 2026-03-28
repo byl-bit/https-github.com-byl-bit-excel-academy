@@ -278,7 +278,7 @@ export function TeacherOverview({
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
                     Class Pass Rate
                   </p>
-                  <span className="text-3xl font-black text-indigo-600">
+                  <span className="text-3xl font-black text-cyan-600">
                     {students.length > 0
                       ? (
                           (classResults.filter((r) => r.result === "PASS")
@@ -310,7 +310,7 @@ export function TeacherOverview({
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
                     Process Completion
                   </p>
-                  <span className="text-3xl font-black text-blue-600">
+                  <span className="text-3xl font-black text-cyan-600">
                     {students.length > 0
                       ? ((publishedCount / students.length) * 100).toFixed(0)
                       : 0}
@@ -368,9 +368,9 @@ export function TeacherOverview({
                   </div>
                 )}
                 {draftCount > 0 && (
-                  <div className="flex items-center gap-4 bg-white/80 p-5 rounded-2xl border border-indigo-50 shadow-xs group hover:bg-white transition-colors">
-                    <div className="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center">
-                      <AlertCircle className="h-6 w-6 text-indigo-500" />
+                  <div className="flex items-center gap-4 bg-white/80 p-5 rounded-2xl border border-teal-50 shadow-xs group hover:bg-white transition-colors">
+                    <div className="h-12 w-12 rounded-xl bg-teal-50 flex items-center justify-center">
+                      <AlertCircle className="h-6 w-6 text-teal-500" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-black text-slate-800 uppercase tracking-tight">
@@ -380,7 +380,7 @@ export function TeacherOverview({
                         Input processing required
                       </p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" />
+                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-teal-500 group-hover:translate-x-1 transition-all" />
                   </div>
                 )}
                 {isHomeRoom && draftCount > 0 && (
@@ -427,7 +427,7 @@ export function TeacherOverview({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               placeholder="Search student or ID..."
-              className="pl-10 h-10 rounded-xl bg-white/50 border-slate-200 focus:ring-indigo-500 font-bold text-sm"
+              className="pl-10 h-10 rounded-xl bg-white/50 border-slate-200 focus:ring-cyan-500 font-bold text-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -484,15 +484,15 @@ export function TeacherOverview({
                     .map((result, idx) => (
                       <tr
                         key={result.id ?? idx}
-                        className="hover:bg-indigo-50/30 transition-all duration-300 group"
+                        className="hover:bg-cyan-50/30 transition-all duration-300 group"
                       >
                         <td className="p-5">
                           <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-all">
+                            <div className="h-12 w-12 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-400 group-hover:bg-cyan-100 group-hover:text-cyan-600 transition-all">
                               {(result.studentName ?? "").charAt(0)}
                             </div>
                             <div>
-                              <p className="font-black text-slate-800 group-hover:text-indigo-700 transition-colors leading-tight uppercase tracking-tight">
+                              <p className="font-black text-slate-800 group-hover:text-cyan-700 transition-colors leading-tight uppercase tracking-tight">
                                 {result.studentName ?? "Student"}
                               </p>
                               <div className="flex items-center gap-2 mt-1">
@@ -504,7 +504,7 @@ export function TeacherOverview({
                                     const studentObj = students.find(s => String(s.studentId || s.id) === String(result.studentId));
                                     setViewingStudent(studentObj || result);
                                   }}
-                                  className="group/view inline-flex items-center gap-1 text-[8px] font-black text-indigo-600 hover:text-white uppercase tracking-widest bg-indigo-50 hover:bg-indigo-600 px-2 py-1 rounded-lg transition-all border border-indigo-100/50 shadow-xs active:scale-95"
+                                  className="group/view inline-flex items-center gap-1 text-[8px] font-black text-cyan-600 hover:text-white uppercase tracking-widest bg-cyan-50 hover:bg-cyan-600 px-2 py-1 rounded-lg transition-all border border-cyan-100/50 shadow-xs active:scale-95"
                                 >
                                   <Eye className="h-3 w-3" />
                                   Details
@@ -558,7 +558,7 @@ export function TeacherOverview({
                                 <span className="text-[8px] font-black text-slate-400 uppercase truncate w-10 text-center">
                                   {sub.name}
                                 </span>
-                                <span className="text-[11px] font-black text-indigo-600">
+                                <span className="text-[11px] font-black text-cyan-600">
                                   {sub.marks}
                                 </span>
                               </div>

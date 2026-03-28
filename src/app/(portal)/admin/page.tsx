@@ -751,7 +751,7 @@ export default function AdminPage() {
           doc.addPage();
 
           // Re-using Report Card Design from ResultsManager
-          doc.setFillColor(30, 64, 175);
+          doc.setFillColor(8, 145, 178); // Cyan-600
           doc.rect(0, 0, pageWidth, 25, "F");
           doc.setTextColor(255, 255, 255);
           doc.setFontSize(18);
@@ -1020,8 +1020,8 @@ export default function AdminPage() {
                     className={cn(
                       "flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-black transition-all group/item",
                       isActive
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                        : "text-slate-600 hover:bg-blue-50/50 hover:text-blue-700",
+                        ? "border-cyan-500 bg-cyan-50/50 text-cyan-600 ring-2 ring-cyan-500/20"
+                        : "border-transparent text-slate-500 hover:text-cyan-600 hover:bg-slate-50",
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -1029,20 +1029,20 @@ export default function AdminPage() {
                         className={cn(
                           "h-8 w-8 rounded-lg flex items-center justify-center transition-colors",
                           isActive
-                            ? "bg-white/20"
-                            : "bg-slate-50 group-hover/item:bg-blue-100",
+                            ? "bg-cyan-100"
+                            : "bg-slate-50 group-hover/item:bg-cyan-100",
                         )}
                       >
                         <tab.icon
                           className={cn(
                             "h-4 w-4",
                             isActive
-                              ? "text-white"
-                              : "text-slate-500 group-hover/item:text-blue-600",
+                              ? "text-cyan-600"
+                              : "text-slate-400 group-hover/item:text-cyan-500",
                           )}
                         />
                       </div>
-                      <span className="uppercase tracking-tight underline-offset-4 decoration-2 group-hover/item:underline decoration-blue-200/50">
+                      <span className="uppercase tracking-tight underline-offset-4 decoration-2 group-hover/item:underline decoration-cyan-200/50">
                         {tab.label}
                       </span>
                     </div>
@@ -1051,8 +1051,8 @@ export default function AdminPage() {
                         className={cn(
                           "px-2 py-1 rounded-lg text-[10px] font-black tracking-widest border",
                           isActive
-                            ? "bg-white/20 text-white border-white/30"
-                            : "bg-blue-100/50 text-blue-700 border-blue-200/50",
+                            ? "bg-cyan-600 text-white border-cyan-700"
+                            : "bg-cyan-100/50 text-cyan-700 border-cyan-200/50",
                         )}
                       >
                         {tab.badge}

@@ -205,7 +205,7 @@ export function SettingsManager({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5 text-blue-600" />
+            <Plus className="h-5 w-5 text-cyan-600" />
             Curriculum Subjects
           </CardTitle>
           <CardDescription>
@@ -403,7 +403,7 @@ export function SettingsManager({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Download className="h-5 w-5 text-indigo-600" />
+            <Download className="h-5 w-5 text-cyan-600" />
             Student Features
           </CardTitle>
           <CardDescription>

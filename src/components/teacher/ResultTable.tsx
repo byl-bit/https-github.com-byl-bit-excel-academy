@@ -1060,7 +1060,7 @@ export function ResultTable({
                                         )
                                       }
                                       className={cn(
-                                        "w-full text-center h-10 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-8 focus:ring-blue-500/10 rounded-xl font-black transition-all text-sm tabular-nums",
+                                        "w-full text-center h-10 bg-transparent hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-sm tabular-nums",
                                         isFail
                                           ? "text-red-600 bg-red-50 hover:bg-red-100 focus:bg-red-50"
                                           : "text-slate-800",
@@ -1103,7 +1103,7 @@ export function ResultTable({
                                         e.target.value,
                                       )
                                     }
-                                    className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-8 focus:ring-blue-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
+                                    className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
                                     placeholder="-"
                                     disabled={isLocked || isHomeroomView}
                                   />
@@ -1121,7 +1121,7 @@ export function ResultTable({
                                         e.target.value,
                                       )
                                     }
-                                    className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-8 focus:ring-blue-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
+                                    className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
                                     placeholder="-"
                                     disabled={isLocked || isHomeroomView}
                                   />
@@ -1131,7 +1131,7 @@ export function ResultTable({
                                       isFail
                                         ? "text-red-700 bg-red-50 ring-red-100"
                                         : hasBoth
-                                          ? "text-blue-700 bg-blue-50/50 ring-blue-100"
+                                          ? "text-cyan-700 bg-cyan-50/50 ring-cyan-100"
                                           : "text-slate-300 ring-slate-100",
                                     )}
                                   >
@@ -1148,12 +1148,12 @@ export function ResultTable({
                           </span>
                         </td>
                         {isHomeroomView && (
-                          <td className="p-5 text-center font-black text-blue-700 bg-blue-50/30 tabular-nums text-sm">
+                          <td className="p-5 text-center font-black text-cyan-700 bg-cyan-50/30 tabular-nums text-sm">
                             {average.toFixed(1)}%
                           </td>
                         )}
                         {isHomeroomView && (
-                          <td className="p-5 text-center font-black text-blue-700 bg-blue-50/30 tabular-nums text-sm">
+                          <td className="p-5 text-center font-black text-cyan-700 bg-cyan-50/30 tabular-nums text-sm">
                             {(() => {
                               const allAverages = students.map(
                                 (s) =>
@@ -1171,7 +1171,7 @@ export function ResultTable({
                         <td className="p-5 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-3">
                             {submitStatus[sid] === "saving" ? (
-                              <div className="flex items-center gap-2 text-blue-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                              <div className="flex items-center gap-2 text-cyan-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
                                 <Loader2 className="h-3 w-3 animate-spin" />
                                 Syncing
                               </div>
@@ -1191,7 +1191,7 @@ export function ResultTable({
                                       : "subject-pending",
                                   )
                                 }
-                                className="h-9 px-5 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-500/20 rounded-xl"
+                                className="h-9 px-5 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-cyan-500/20 rounded-xl"
                               >
                                 Commit
                               </Button>
@@ -1204,7 +1204,7 @@ export function ResultTable({
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all"
+                                    className="h-8 w-8 text-slate-400 hover:text-cyan-600 hover:bg-white rounded-xl transition-all"
                                     onClick={() => toggleEditRow(sid)}
                                   >
                                     <Edit className="h-4 w-4" />
@@ -1220,7 +1220,7 @@ export function ResultTable({
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all"
+                                    className="h-8 w-8 text-slate-400 hover:text-cyan-600 hover:bg-white rounded-xl transition-all"
                                     onClick={() => toggleEditRow(sid)}
                                   >
                                     <Edit className="h-4 w-4" />
@@ -1242,7 +1242,7 @@ export function ResultTable({
                                       : "subject-pending",
                                   )
                                 }
-                                className="h-9 px-5 font-black text-[10px] uppercase tracking-widest text-slate-500 hover:text-blue-600 transition-colors rounded-xl border border-slate-100 hover:bg-white"
+                                className="h-9 px-5 font-black text-[10px] uppercase tracking-widest text-slate-500 hover:text-cyan-600 transition-colors rounded-xl border border-slate-100 hover:bg-white"
                               >
                                 Submit
                               </Button>

@@ -354,7 +354,7 @@ export function AnnouncementManager({
                       className="cursor-pointer"
                     />
                     {uploading && (
-                      <p className="text-[10px] text-blue-500 animate-pulse">
+                      <p className="text-[10px] text-cyan-500 animate-pulse">
                         Uploading files...
                       </p>
                     )}
@@ -364,7 +364,7 @@ export function AnnouncementManager({
                       {formData.media.map((m, idx) => (
                         <div
                           key={idx}
-                          className="relative aspect-square border-2 border-slate-100 rounded-lg overflow-hidden bg-slate-50 group hover:border-blue-200 transition-all text-left"
+                          className="relative aspect-square border-2 border-slate-100 rounded-lg overflow-hidden bg-slate-50 group hover:border-cyan-200 transition-all text-left"
                         >
                           {m.type === "image" ? (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -421,15 +421,15 @@ export function AnnouncementManager({
                     className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold 
                                         ${
                                           item.type === "academic"
-                                            ? "bg-blue-100 text-blue-800"
+                                            ? "bg-cyan-100 text-cyan-800"
                                             : item.type === "event"
-                                              ? "bg-purple-100 text-purple-800"
+                                              ? "bg-teal-100 text-teal-800"
                                               : "bg-gray-100 text-gray-800"
                                         }`}
                   >
                     {item.type}
                   </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold bg-cyan-50 text-cyan-700 border border-cyan-100">
                     {item.audience || "all"}
                   </span>
                 </div>

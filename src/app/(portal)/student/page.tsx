@@ -242,8 +242,8 @@ export default function StudentDashboard() {
         {/* Engagement Card */}
         <div className="card-premium p-8 h-full bg-white/40 ring-1 ring-slate-200/50 flex flex-col space-y-8">
           <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center shadow-inner">
-              <Calendar className="h-5 w-5 text-indigo-600" />
+            <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center shadow-inner">
+              <Calendar className="h-5 w-5 text-teal-600" />
             </div>
             <div>
               <h2 className="text-xl font-black text-slate-800 tracking-tight">Engagement</h2>
@@ -253,7 +253,7 @@ export default function StudentDashboard() {
 
           <div className="flex flex-col items-center justify-center flex-1">
             <div className="relative group">
-              <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full group-hover:bg-blue-500/20 transition-all duration-700"></div>
+              <div className="absolute inset-0 bg-cyan-500/10 blur-3xl rounded-full group-hover:bg-cyan-500/20 transition-all duration-700"></div>
               <svg className="w-48 h-48 transform -rotate-90 relative z-10 transition-transform duration-1000 group-hover:rotate-0">
                 <circle
                   cx="96"

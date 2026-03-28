@@ -65,12 +65,12 @@ export default function Home() {
                 src={img}
                 alt={`Campus Background ${idx + 1}`}
                 fill
-                className="object-cover"
+                className="object-cover blur-[2px]"
                 priority={idx === 0}
               />
             </div>
           ))}
-          <div className="absolute inset-0 z-20 bg-linear-to-b from-slate-950/50 via-cyan-950/10 to-slate-950/60" />
+          <div className="absolute inset-0 z-20 bg-linear-to-b from-slate-950/40 via-cyan-950/5 to-slate-950/50" />
 
           {/* Animated Orbs */}
           <div
@@ -84,12 +84,12 @@ export default function Home() {
         </div>
 
         <div className="container relative z-10 px-6 py-24 flex flex-col items-center justify-center text-center">
-          {/* Glassmorphism Content Wrapper */}
-          <div className="relative p-10 md:p-16 rounded-3xl bg-black/40 backdrop-blur-md border border-white/20 shadow-2xl overflow-hidden animate-fade-in-up w-full max-w-5xl group">
-            <div className="absolute inset-0 bg-linear-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+          {/* Content Wrapper (Glass Effect Removed) */}
+          <div className="relative p-10 md:p-16 rounded-3xl animate-fade-in-up w-full max-w-5xl group">
+            <div className="absolute inset-0 bg-linear-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
             
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-cyan-900/30 backdrop-blur-xl border border-cyan-400/30 text-sm font-semibold text-cyan-50 mb-8 shadow-[0_0_20px_rgba(6,182,212,0.15)] animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-cyan-900/40 border border-cyan-400/30 text-sm font-semibold text-cyan-50 mb-8 shadow-[0_0_20px_rgba(6,182,212,0.1)] animate-fade-in-up">
               <Sparkles className="w-4 h-4 text-cyan-300" />
               <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-200 to-teal-200">
                 Admissions Open for {academicYear || "2026-2027"}
@@ -97,7 +97,7 @@ export default function Home() {
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-8 animate-fade-in-up delay-100 drop-shadow-lg">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-8 animate-fade-in-up delay-100 drop-shadow-2xl">
               <span className="block text-white mb-2">Shape Your</span>
               <span className="block text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-teal-200 to-cyan-500 animate-pulse" style={{animationDuration: '3s'}}>
                 Brilliant Future
@@ -105,7 +105,7 @@ export default function Home() {
             </h1>
 
             {/* Subtitle */}
-            <p className="max-w-2xl mx-auto text-xl sm:text-2xl text-cyan-50 mb-12 leading-relaxed font-light animate-fade-in-up delay-200 drop-shadow-md">
+            <p className="max-w-2xl mx-auto text-xl sm:text-2xl text-cyan-50 mb-12 leading-relaxed font-light animate-fade-in-up delay-200 drop-shadow-xl">
               Join Ethiopia's leading educational institution where excellence meets innovation.
               <span className="block mt-4 font-semibold text-cyan-200 text-lg">
                 25 years of academic excellence. 100% pass rate.

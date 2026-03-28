@@ -57,10 +57,10 @@ export default function StudentLayout({
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-linear-to-br from-blue-50 to-indigo-50">
+      <div className="flex h-screen items-center justify-center bg-linear-to-br from-cyan-50 to-teal-50">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-full border-4 border-blue-600 border-t-transparent animate-spin" />
-          <p className="text-blue-600 font-bold tracking-widest text-sm uppercase">
+          <div className="h-12 w-12 rounded-full border-4 border-cyan-600 border-t-transparent animate-spin" />
+          <p className="text-cyan-600 font-bold tracking-widest text-sm uppercase">
             Loading Portal...
           </p>
         </div>
@@ -91,10 +91,10 @@ export default function StudentLayout({
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold text-xs transition-all shadow-sm ring-1 ring-blue-100/50 whitespace-nowrap shrink-0",
+                "flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold text-xs transition-all shadow-sm ring-1 ring-cyan-100/50 whitespace-nowrap shrink-0",
                 isActive
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-200 ring-blue-600"
-                  : "bg-blue-50/50 text-blue-700 hover:bg-blue-100 hover:text-blue-800",
+                  ? "bg-cyan-600 text-white shadow-lg shadow-cyan-200 ring-cyan-600"
+                  : "bg-cyan-50/50 text-cyan-700 hover:bg-cyan-100 hover:text-cyan-800",
               )}
             >
               <item.icon className="h-3.5 w-3.5" />

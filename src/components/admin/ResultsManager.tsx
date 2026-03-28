@@ -308,7 +308,7 @@ export function ResultsManager({
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <Award className="h-10 w-10 text-indigo-600" />
+            <Award className="h-10 w-10 text-cyan-600" />
             Academic Results Center
           </h1>
           <p className="text-slate-500 font-bold text-sm uppercase tracking-widest mt-2 ml-1">
@@ -333,13 +333,13 @@ export function ResultsManager({
           />
           <Button
             variant="outline"
-            className="h-12 border-indigo-200 bg-indigo-50/50 text-indigo-700 shadow-sm hover:bg-indigo-100 font-black rounded-2xl px-6 gap-2"
+            className="h-12 border-cyan-200 bg-cyan-50/50 text-cyan-700 shadow-sm hover:bg-cyan-100 font-black rounded-2xl px-6 gap-2"
             onClick={() => document.getElementById("results-import")?.click()}
           >
             <Upload className="h-4 w-4" /> IMPORT CSV
           </Button>
           <Button
-            className="h-12 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100 font-black rounded-2xl px-8 gap-2"
+            className="h-12 bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg shadow-cyan-100 font-black rounded-2xl px-8 gap-2"
             onClick={handleExportXLSX}
           >
             <Download className="h-4 w-4" /> EXPORT PERFORMANCE
@@ -357,7 +357,7 @@ export function ResultsManager({
           className={cn(
             "px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
             view === "directory"
-              ? "bg-white text-indigo-600 shadow-sm"
+              ? "bg-white text-cyan-600 shadow-sm"
               : "text-slate-500 hover:text-slate-800",
           )}
         >
@@ -368,7 +368,7 @@ export function ResultsManager({
           className={cn(
             "px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
             view === "manual"
-              ? "bg-white text-indigo-600 shadow-sm"
+              ? "bg-white text-cyan-600 shadow-sm"
               : "text-slate-500 hover:text-slate-800",
           )}
         >
@@ -379,7 +379,7 @@ export function ResultsManager({
           className={cn(
             "px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
             view === "subject"
-              ? "bg-white text-indigo-600 shadow-sm"
+              ? "bg-white text-cyan-600 shadow-sm"
               : "text-slate-500 hover:text-slate-800",
           )}
         >
@@ -469,7 +469,7 @@ export function ResultsManager({
                 Analysis Subject
               </label>
               <select
-                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
+                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-cyan-100 transition-all hover:bg-white"
                 value={selectedSubject}
                 onChange={(e) => setSelectedSubject(e.target.value)}
               >
@@ -486,7 +486,7 @@ export function ResultsManager({
                 Focus Grade
               </label>
               <select
-                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
+                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-cyan-100 transition-all hover:bg-white"
                 value={filterGrade}
                 onChange={(e) => setFilterGrade(e.target.value)}
               >
@@ -503,7 +503,7 @@ export function ResultsManager({
                 Section
               </label>
               <select
-                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
+                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-cyan-100 transition-all hover:bg-white"
                 value={filterSection}
                 onChange={(e) => setFilterSection(e.target.value)}
               >
@@ -520,7 +520,7 @@ export function ResultsManager({
                 Gender
               </label>
               <select
-                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 transition-all hover:bg-white"
+                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-black text-slate-800 outline-none focus:ring-2 focus:ring-cyan-100 transition-all hover:bg-white"
                 value={filterGender}
                 onChange={(e) => setFilterGender(e.target.value)}
               >

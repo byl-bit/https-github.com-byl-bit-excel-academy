@@ -265,7 +265,7 @@ export function LibraryManager({
           </div>
           <div className="flex items-end">
             <Button
-              className="w-full bg-blue-600 hover:bg-blue-700 font-bold"
+              className="w-full bg-cyan-600 hover:bg-cyan-700 font-bold"
               onClick={handleAdd}
             >
               Add to Library
@@ -286,8 +286,8 @@ export function LibraryManager({
               className="relative group overflow-hidden border-slate-200"
             >
               <CardHeader className="pb-2">
-                <div className="bg-blue-50 w-fit p-2 rounded-lg mb-2">
-                  <BookOpen className="h-5 w-5 text-blue-600" />
+                <div className="bg-cyan-50 w-fit p-2 rounded-lg mb-2">
+                  <BookOpen className="h-5 w-5 text-cyan-600" />
                 </div>
                 <CardTitle className="text-base line-clamp-1">
                   {book.title}
@@ -307,7 +307,7 @@ export function LibraryManager({
                         href={book.downloadUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 font-bold hover:underline flex items-center gap-1"
+                        className="text-cyan-600 font-bold hover:underline flex items-center gap-1"
                       >
                         <BookOpen className="h-3 w-3" /> View PDF
                       </a>

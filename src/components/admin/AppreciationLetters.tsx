@@ -93,7 +93,7 @@ export function AppreciationLetters({
 
     // --- Border ---
     doc.setLineWidth(1);
-    doc.setDrawColor(20, 30, 90); // Dark Blue border
+    doc.setDrawColor(0, 100, 100); // Cyan/Teal border
     doc.rect(margin, margin, pageWidth - margin * 2, pageHeight - margin * 2);
 
     // Inner decorative border
@@ -110,7 +110,7 @@ export function AppreciationLetters({
     // You would typically add an image here: doc.addImage(...)
     doc.setFont("helvetica", "bold");
     doc.setFontSize(32);
-    doc.setTextColor(20, 30, 90);
+    doc.setTextColor(0, 80, 80);
     doc.text("EXCEL ACADEMY", pageWidth / 2, 50, { align: "center" });
 
     doc.setFontSize(14);
@@ -136,12 +136,12 @@ export function AppreciationLetters({
     // --- Student Name ---
     doc.setFont("times", "bolditalic");
     doc.setFontSize(36);
-    doc.setTextColor(20, 30, 90);
+    doc.setTextColor(0, 80, 80);
     const name = result.studentName || "Student Name";
     doc.text(name, pageWidth / 2, 130, { align: "center" });
 
     // --- Line under name ---
-    doc.setDrawColor(20, 30, 90);
+    doc.setDrawColor(0, 100, 100);
     doc.setLineWidth(0.5);
     const nameWidth = doc.getTextWidth(name);
     doc.line(
@@ -231,7 +231,7 @@ export function AppreciationLetters({
         const margin = 20;
 
         doc.setLineWidth(1);
-        doc.setDrawColor(20, 30, 90);
+        doc.setDrawColor(0, 100, 100);
         doc.rect(
           margin,
           margin,
@@ -249,7 +249,7 @@ export function AppreciationLetters({
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(32);
-        doc.setTextColor(20, 30, 90);
+        doc.setTextColor(0, 80, 80);
         doc.text("EXCEL ACADEMY", pageWidth / 2, 50, { align: "center" });
 
         doc.setFontSize(14);
@@ -276,7 +276,7 @@ export function AppreciationLetters({
 
         doc.setFont("times", "bolditalic");
         doc.setFontSize(36);
-        doc.setTextColor(20, 30, 90);
+        doc.setTextColor(0, 80, 80);
         const name = result.studentName || "Student Name";
         doc.text(name, pageWidth / 2, 130, { align: "center" });
 
@@ -335,7 +335,7 @@ export function AppreciationLetters({
   };
 
   return (
-    <Card className="border-none shadow-none bg-blue-50/50">
+    <Card className="border-none shadow-none bg-cyan-50/50">
       <CardHeader
         title="Appreciation Letters"
         description="Generate PDF certificates for top performing students."
@@ -427,7 +427,7 @@ export function AppreciationLetters({
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <FileCheck className="h-4 w-4 text-blue-500" />
+              <FileCheck className="h-4 w-4 text-cyan-500" />
               <span className="font-bold text-slate-700 text-sm">
                 {eligibleResults.length} Eligible Students
               </span>
@@ -435,7 +435,7 @@ export function AppreciationLetters({
             <Button
               onClick={handleBulkDownload}
               disabled={loading || eligibleResults.length === 0}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-8"
+              className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs h-8"
             >
               {loading ? (
                 <Loader2 className="h-3 w-3 animate-spin mr-2" />
@@ -468,7 +468,7 @@ export function AppreciationLetters({
                   {eligibleResults.map((result, idx) => (
                     <tr
                       key={idx}
-                      className="hover:bg-blue-50/50 transition-colors"
+                      className="hover:bg-cyan-50/50 transition-colors"
                     >
                       <td className="px-4 py-3 font-bold text-slate-700">
                         {result.rollNumber || result.roll_number || "--"}
@@ -495,7 +495,7 @@ export function AppreciationLetters({
                           variant="ghost"
                           size="sm"
                           onClick={() => generatePDF(result)}
-                          className="h-8 w-8 p-0 text-slate-400 hover:text-blue-600"
+                          className="h-8 w-8 p-0 text-slate-400 hover:text-cyan-600"
                           title="Download Single Certificate"
                         >
                           <Download className="h-4 w-4" />

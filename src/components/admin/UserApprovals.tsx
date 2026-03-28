@@ -80,8 +80,8 @@ export function UserApprovals({
   });
 
   const renderEmptyState = (message: string) => (
-    <div className="text-center py-12 text-blue-400 bg-white rounded-xl border border-dashed border-blue-100 flex flex-col items-center gap-2">
-      <CheckCircle className="h-8 w-8 text-blue-200" />
+    <div className="text-center py-12 text-cyan-400 bg-white rounded-xl border border-dashed border-cyan-100 flex flex-col items-center gap-2">
+      <CheckCircle className="h-8 w-8 text-cyan-200" />
       <span className="font-medium">{message}</span>
     </div>
   );
@@ -91,8 +91,8 @@ export function UserApprovals({
       {/* 1. Admission Applications Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-3 px-1">
-          <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center shadow-inner">
-            <FileText className="h-5 w-5 text-blue-600" />
+          <div className="h-10 w-10 rounded-xl bg-cyan-100 flex items-center justify-center shadow-inner">
+            <FileText className="h-5 w-5 text-cyan-600" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -131,15 +131,15 @@ export function UserApprovals({
                       className="p-4 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-300 hover:bg-white group"
                     >
                       <div className="flex items-center gap-4 self-start md:self-center">
-                        <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                        <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-cyan-50 group-hover:text-cyan-600 transition-colors">
                           {(app.studentName || app.familyFullName)?.[0] || "A"}
                         </div>
                         <div className="space-y-1">
-                          <h4 className="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors">
+                          <h4 className="font-bold text-slate-800 text-sm group-hover:text-cyan-700 transition-colors">
                             {app.studentName || app.familyFullName}
                           </h4>
                           <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-black uppercase tracking-wider">
-                            <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                            <span className="text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-100">
                               Grade {app.grade}
                             </span>
                             <span className="text-slate-400 py-0.5 flex items-center gap-1">
@@ -155,7 +155,7 @@ export function UserApprovals({
                         <Button
                           size="sm"
                           onClick={() => onAcceptAdmission(app)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-100 font-bold rounded-xl h-9 px-4 transition-transform hover:scale-105 active:scale-95"
+                          className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg shadow-cyan-100 font-bold rounded-xl h-9 px-4 transition-transform hover:scale-105 active:scale-95"
                         >
                           Approve & Enroll
                         </Button>
@@ -290,8 +290,8 @@ export function UserApprovals({
       {/* Teachers */}
       <div className="space-y-4">
         <div className="flex items-center gap-3 px-1">
-          <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center shadow-inner">
-            <ShieldAlert className="h-5 w-5 text-indigo-600" />
+          <div className="h-10 w-10 rounded-xl bg-teal-100 flex items-center justify-center shadow-inner">
+            <ShieldAlert className="h-5 w-5 text-teal-600" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -330,15 +330,15 @@ export function UserApprovals({
                       className="p-4 flex items-center justify-between transition-all duration-300 hover:bg-white group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
                           {(user.fullName || user.name)?.[0] || "T"}
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-800 text-sm group-hover:text-indigo-700 transition-colors uppercase tracking-tight">
+                          <h4 className="font-bold text-slate-800 text-sm group-hover:text-teal-700 transition-colors uppercase tracking-tight">
                             {user.fullName || user.name}
                           </h4>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] font-mono font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                            <span className="text-[10px] font-mono font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-100">
                               {user.teacherId}
                             </span>
                             <span className="text-[10px] text-slate-400 font-bold uppercase">
@@ -351,7 +351,7 @@ export function UserApprovals({
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                          className="h-8 w-8 text-teal-600 hover:bg-teal-50 rounded-lg"
                           onClick={() => onApprove(user.id)}
                           title="Verify"
                         >
@@ -404,7 +404,7 @@ export function UserApprovals({
           <Button
             variant="ghost"
             size="sm"
-            className="text-indigo-600 font-black text-[10px] uppercase tracking-widest hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition-all"
+            className="text-cyan-600 font-black text-[10px] uppercase tracking-widest hover:bg-cyan-50 hover:text-cyan-700 rounded-xl transition-all"
             onClick={() => onTabChange?.("results")}
           >
             Detailed Manager <ArrowRight className="ml-2 h-3 w-3" />
@@ -446,7 +446,7 @@ export function UserApprovals({
                             {res.studentName}
                           </h4>
                           <div className="flex items-center gap-3">
-                            <span className="text-[10px] text-blue-500 font-mono font-bold bg-blue-50/50 px-2 py-0.5 rounded border border-blue-100/50">
+                            <span className="text-[10px] text-cyan-500 font-mono font-bold bg-cyan-50/50 px-2 py-0.5 rounded border border-cyan-100/50">
                               {res.studentId}
                             </span>
                             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tight">
@@ -465,7 +465,7 @@ export function UserApprovals({
                                   key={s.name}
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 text-[9px] font-black uppercase px-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all"
+                                  className="h-6 text-[9px] font-black uppercase px-2 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white transition-all"
                                   onClick={() =>
                                     onApproveSubject?.(res.key, s.name)
                                   }

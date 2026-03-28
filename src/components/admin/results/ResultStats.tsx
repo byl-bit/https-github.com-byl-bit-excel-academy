@@ -30,8 +30,8 @@ export function ResultStats({ published, pending }: ResultStatsProps) {
       label: "Published Results",
       value: totalPublished,
       icon: Award,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-50",
     },
     {
       label: "Pending Approval",
@@ -51,8 +51,8 @@ export function ResultStats({ published, pending }: ResultStatsProps) {
       label: "Avg. Performance",
       value: `${avgScore.toFixed(1)}%`,
       icon: TrendingUp,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50",
+      color: "text-teal-600",
+      bgColor: "bg-teal-50",
     },
   ];
 

@@ -154,7 +154,7 @@ export function ManualEntryForm({
     <Card className="border-none shadow-xl glass-panel bg-linear-to-br from-white to-slate-50/50 overflow-hidden">
       <CardHeader className="p-8 border-b border-slate-100">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-100">
+          <div className="h-12 w-12 rounded-2xl bg-cyan-600 text-white flex items-center justify-center shadow-lg shadow-cyan-100">
             <FileText className="h-6 w-6" />
           </div>
           <div>
@@ -174,7 +174,7 @@ export function ManualEntryForm({
               Grade Filter
             </Label>
             <select
-              className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-100 outline-none cursor-pointer transition-all hover:border-indigo-300"
+              className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-cyan-100 outline-none cursor-pointer transition-all hover:border-cyan-300"
               value={filterGrade}
               onChange={(e) => setFilterGrade(e.target.value)}
             >
@@ -192,7 +192,7 @@ export function ManualEntryForm({
               Section Filter
             </Label>
             <select
-              className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-100 outline-none cursor-pointer transition-all hover:border-indigo-300"
+              className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-cyan-100 outline-none cursor-pointer transition-all hover:border-cyan-300"
               value={filterSection}
               onChange={(e) => setFilterSection(e.target.value)}
             >
@@ -210,7 +210,7 @@ export function ManualEntryForm({
               Student Selection
             </Label>
             <select
-              className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-100 outline-none cursor-pointer transition-all hover:border-indigo-300"
+              className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-cyan-100 outline-none cursor-pointer transition-all hover:border-cyan-300"
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
             >
@@ -230,7 +230,7 @@ export function ManualEntryForm({
               Conduct Grade
             </Label>
             <select
-              className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-100 outline-none cursor-pointer transition-all hover:border-indigo-300"
+              className="w-full h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-cyan-100 outline-none cursor-pointer transition-all hover:border-cyan-300"
               value={conduct}
               onChange={(e) => setConduct(e.target.value)}
             >
@@ -264,7 +264,7 @@ export function ManualEntryForm({
 
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <Award className="h-4 w-4 text-indigo-400" />
+            <Award className="h-4 w-4 text-cyan-400" />
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
               Score Breakdown
             </h4>
@@ -273,9 +273,9 @@ export function ManualEntryForm({
             {subjects.map((sub) => (
               <div
                 key={sub}
-                className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs hover:border-indigo-100 transition-all group"
+                className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs hover:border-cyan-100 transition-all group"
               >
-                <Label className="text-[9px] font-black text-slate-400 uppercase tracking-tight block mb-2 transition-colors group-hover:text-indigo-600 truncate">
+                <Label className="text-[9px] font-black text-slate-400 uppercase tracking-tight block mb-2 transition-colors group-hover:text-cyan-600 truncate">
                   {sub}
                 </Label>
                 <Input
@@ -285,7 +285,7 @@ export function ManualEntryForm({
                   value={marks[sub] ?? ""}
                   onChange={(e) => handleMarkChange(sub, e.target.value)}
                   placeholder="0"
-                  className="h-10 text-center font-black text-lg border-none bg-slate-50 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all"
+                  className="h-10 text-center font-black text-lg border-none bg-slate-50 rounded-xl focus:ring-2 focus:ring-cyan-100 focus:bg-white transition-all"
                 />
               </div>
             ))}
@@ -320,7 +320,7 @@ export function ManualEntryForm({
 
           <Button
             size="lg"
-            className="w-full md:w-auto min-w-[240px] h-14 bg-slate-900 hover:bg-indigo-600 text-white rounded-2xl font-black shadow-xl shadow-slate-200 transition-all transform hover:scale-[1.02] active:scale-95 text-lg group"
+            className="w-full md:w-auto min-w-[240px] h-14 bg-slate-900 hover:bg-cyan-600 text-white rounded-2xl font-black shadow-xl shadow-slate-200 transition-all transform hover:scale-[1.02] active:scale-95 text-lg group"
             disabled={!selectedStudentId || isSaving}
             onClick={handleSave}
           >

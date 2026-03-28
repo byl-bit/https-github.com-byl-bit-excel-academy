@@ -187,8 +187,8 @@ export function TeacherDirectory({
     <div className="space-y-6 animate-fade-in">
       <div className="glass-panel p-4 md:p-6 rounded-2xl shadow-sm space-y-4 md:space-y-0 md:flex md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-indigo-100 flex items-center justify-center shadow-inner">
-            <Shield className="h-6 w-6 text-indigo-600" />
+          <div className="h-12 w-12 rounded-xl bg-teal-100 flex items-center justify-center shadow-inner">
+            <Shield className="h-6 w-6 text-teal-600" />
           </div>
           <div>
             <h3 className="text-xl font-black text-slate-800 tracking-tight">
@@ -202,10 +202,10 @@ export function TeacherDirectory({
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-teal-500 transition-colors" />
             <Input
               placeholder="Find teacher..."
-              className="pl-10 h-10 w-full md:w-64 bg-white/50 border-slate-200 focus:ring-2 focus:ring-indigo-100 rounded-xl font-medium transition-all"
+              className="pl-10 h-10 w-full md:w-64 bg-white/50 border-slate-200 focus:ring-2 focus:ring-teal-100 rounded-xl font-medium transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -232,7 +232,7 @@ export function TeacherDirectory({
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full gap-2 h-10 rounded-xl bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100 font-bold"
+                className="w-full gap-2 h-10 rounded-xl bg-teal-50 border-teal-100 text-teal-700 hover:bg-teal-100 font-bold"
                 onClick={() =>
                   document.getElementById("teacher-csv-import")?.click()
                 }
@@ -274,13 +274,13 @@ export function TeacherDirectory({
                   currentPage * ITEMS_PER_PAGE,
                 )
                 .map((teacher) => (
-                  <tr
+                   <tr
                     key={teacher.id}
-                    className="hover:bg-indigo-50/30 transition-colors group"
+                    className="hover:bg-teal-50/30 transition-colors group"
                   >
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-indigo-50 group-hover:scale-105 transition-all overflow-hidden border-2 border-white shadow-sm shrink-0">
+                        <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-teal-50 group-hover:scale-105 transition-all overflow-hidden border-2 border-white shadow-sm shrink-0">
                           {teacher.photo ? (
                             <img
                               src={teacher.photo}
@@ -288,11 +288,11 @@ export function TeacherDirectory({
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <School className="h-6 w-6 text-indigo-600" />
+                            <School className="h-6 w-6 text-teal-600" />
                           )}
                         </div>
                         <div className="space-y-0.5">
-                          <p className="font-black text-slate-800 group-hover:text-indigo-700 transition-colors leading-tight">
+                          <p className="font-black text-slate-800 group-hover:text-teal-700 transition-colors leading-tight">
                             {teacher.fullName || teacher.name}
                           </p>
                           <p className="text-[10px] font-bold text-slate-400 tracking-tight">
@@ -302,12 +302,12 @@ export function TeacherDirectory({
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="font-mono text-[11px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg border border-indigo-100 font-black">
+                      <span className="font-mono text-[11px] bg-teal-50 text-teal-700 px-2 py-1 rounded-lg border border-teal-100 font-black">
                         {teacher.teacherId}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-center">
-                      <span className="font-black text-indigo-600 text-[11px] uppercase bg-indigo-50/50 px-2 py-1 rounded border border-indigo-100/50">
+                      <span className="font-black text-teal-600 text-[11px] uppercase bg-teal-50/50 px-2 py-1 rounded border border-teal-100/50">
                         Grade {teacher.grade}-{teacher.section}
                       </span>
                     </td>
@@ -337,7 +337,7 @@ export function TeacherDirectory({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-10 w-10 bg-slate-50 text-slate-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-xs border border-slate-100 active:scale-90"
+                          className="h-10 w-10 bg-slate-50 text-slate-600 hover:bg-teal-600 hover:text-white rounded-xl transition-all shadow-xs border border-slate-100 active:scale-90"
                           onClick={() => setViewingTeacher(teacher)}
                           title="View Full Profile"
                         >
@@ -347,9 +347,8 @@ export function TeacherDirectory({
 
                         <Button
                           variant="ghost"
-
                           size="icon"
-                          className="h-9 w-9 text-indigo-600 hover:bg-indigo-100/50 rounded-xl"
+                          className="h-9 w-9 text-teal-600 hover:bg-teal-100/50 rounded-xl"
                           title="Assign Home Room"
                           onClick={() => handleRoomClick(teacher)}
                         >
@@ -358,7 +357,7 @@ export function TeacherDirectory({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-9 w-9 text-blue-600 hover:bg-blue-100/50 rounded-xl"
+                          className="h-9 w-9 text-cyan-600 hover:bg-cyan-100/50 rounded-xl"
                           onClick={() => handleEditClick(teacher)}
                         >
                           <Edit className="h-4 w-4" />
