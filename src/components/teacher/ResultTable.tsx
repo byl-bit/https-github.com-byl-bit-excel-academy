@@ -77,14 +77,25 @@ export function ResultTable({
 
   const [activeSemester, setActiveSemester] = useState<"1" | "2" | "average">("1");
 
-  const currentGrade = String(students[0]?.grade || user?.grade || "all");
+  const normalizeGrade = (g: any) => {
+    if (!g) return "all";
+    const str = String(g).toLowerCase();
+    if (str === "all" || str === "undefined") return "all";
+    const match = str.match(/\d+/);
+    return match ? match[0] : str;
+  };
+
+  const currentGrade = normalizeGrade(students[0]?.grade || user?.grade || "all");
 
   const gradeAssessmentTypes = (settings?.assessmentTypes || []).filter(
-    (type: AssessmentType) => !type.grade || type.grade === "all" || String(type.grade) === currentGrade
+    (type: AssessmentType) => {
+      const typeGrade = normalizeGrade(type.grade);
+      return typeGrade === "all" || typeGrade === currentGrade;
+    }
   );
 
   const activeAssessmentTypes = gradeAssessmentTypes.filter(
-    (type: AssessmentType) => type.semester === activeSemester
+    (type: AssessmentType) => type.semester === activeSemester || (!type.semester && activeSemester === "1")
   );
 
   const isDynamic = gradeAssessmentTypes.length > 0;
@@ -145,14 +156,13 @@ export function ResultTable({
             marksMap[studentId] = {};
             const rSubjects = r["subjects"] as Subject[] | undefined;
             (rSubjects || []).forEach((sub: Subject) => {
+              marksMap[studentId][`${sub.name}_sem1`] = sub.sem1 || 0;
+              marksMap[studentId][`${sub.name}_sem2`] = sub.sem2 || 0;
               if (isDynamic && sub.assessments) {
                 Object.keys(sub.assessments).forEach((typeId) => {
                   marksMap[studentId][`${sub.name}__${typeId}`] = sub
                     .assessments?.[typeId] as number;
                 });
-              } else {
-                marksMap[studentId][`${sub.name}_sem1`] = sub.sem1 || 0;
-                marksMap[studentId][`${sub.name}_sem2`] = sub.sem2 || 0;
               }
             });
           }
@@ -228,10 +238,15 @@ export function ResultTable({
                 (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
             }
           });
-          // Individual subject marks also preserved at 1 decimal
+          // We must preserved existing manual sem1 and sem2 values from the DB or form fallback
+          const s1 = marks[`${s}_sem1`] || (subjectsArrRaw.find((ss) => ss.name === s)?.sem1) || 0;
+          const s2 = marks[`${s}_sem2`] || (subjectsArrRaw.find((ss) => ss.name === s)?.sem2) || 0;
+          
           return {
             name: s,
             assessments,
+            sem1: s1,
+            sem2: s2,
             marks: Math.round(subTotal * 10) / 10,
           };
         } else {
@@ -356,9 +371,16 @@ export function ResultTable({
                   (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
               }
             });
+            // We must preserve existing manual sem1 and sem2 values from the DB or form fallback
+            const targetStudent = classResults.find(r => r.student_id === sid) as any;
+            const s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
+            const s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
+
             return {
               name: s,
               assessments,
+              sem1: s1,
+              sem2: s2,
               marks: Math.round(subTotal * 10) / 10,
             };
           } else {
