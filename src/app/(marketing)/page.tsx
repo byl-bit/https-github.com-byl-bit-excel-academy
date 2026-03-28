@@ -49,7 +49,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-white">
+    <div className="flex flex-col min-h-screen font-sans bg-white" style={{ zoom: "90%" }}>
       {/* --- HERO SECTION --- */}
       <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden bg-slate-950">
         {/* Animated Background */}
