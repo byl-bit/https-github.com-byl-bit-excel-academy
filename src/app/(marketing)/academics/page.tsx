@@ -25,8 +25,15 @@ export default function AcademicsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-linear-to-br from-slate-900 via-blue-900 to-slate-900 text-white py-20">
-        <div className="absolute inset-0 bg-[url('/hero-banner.png')] opacity-10 bg-cover bg-center"></div>
+      <section className="relative py-24 md:py-32 bg-slate-950 text-white overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/images/school_banner.jpg" 
+            alt="Excel Academy Campus" 
+            className="w-full h-full object-cover opacity-40 blur-[2px]"
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-slate-900/80 via-slate-900/40 to-slate-950" />
+        </div>
         <div className="container relative z-10 px-6 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium mb-6">
             <GraduationCap className="w-4 h-4" />
@@ -61,8 +68,8 @@ export default function AcademicsPage() {
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="border-none shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Brain className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Brain className="w-8 h-8 text-cyan-600" />
                 </div>
                 <h3 className="text-xl font-bold mb-3">Critical Thinking</h3>
                 <p className="text-slate-600">
@@ -132,7 +139,7 @@ export default function AcademicsPage() {
                 description:
                   "Developing core competencies in reading, writing, mathematics, and science",
                 icon: BookOpen,
-                color: "bg-blue-100 text-blue-600",
+                color: "bg-cyan-100 text-cyan-600",
               },
               {
                 level: "Upper Primary",
@@ -206,7 +213,7 @@ export default function AcademicsPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: "Mathematics", icon: Calculator, color: "text-blue-600" },
+              { name: "Mathematics", icon: Calculator, color: "text-cyan-600" },
               { name: "Sciences", icon: Microscope, color: "text-green-600" },
               { name: "Languages", icon: Languages, color: "text-purple-600" },
               { name: "Social Studies", icon: Globe, color: "text-orange-600" },
@@ -216,7 +223,7 @@ export default function AcademicsPage() {
                 icon: Trophy,
                 color: "text-red-600",
               },
-              { name: "Technology", icon: Brain, color: "text-indigo-600" },
+              { name: "Technology", icon: Brain, color: "text-cyan-600" },
               {
                 name: "Life Skills",
                 icon: CheckCircle,
@@ -272,12 +279,12 @@ export default function AcademicsPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-linear-to-br from-blue-600 to-blue-700 text-white">
+      <section className="py-16 bg-linear-to-br from-cyan-600 to-navy-900 text-white">
         <div className="container px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ready to Join Excel Academy?
           </h2>
-          <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-cyan-100 mb-8 max-w-2xl mx-auto">
             Give your child the gift of quality education. Applications are now
             open for the upcoming academic year.
           </p>
@@ -285,7 +292,7 @@ export default function AcademicsPage() {
             <Button
               asChild
               size="lg"
-              className="bg-white text-blue-600 hover:bg-slate-100 font-bold rounded-full px-8"
+              className="bg-white text-cyan-600 hover:bg-slate-100 font-bold rounded-full px-8"
             >
               <Link href="/admissions/apply">Apply Now</Link>
             </Button>

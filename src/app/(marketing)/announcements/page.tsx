@@ -118,19 +118,27 @@ export default function AnnouncementsPage() {
   return (
     <div className="min-h-screen bg-slate-50 pb-24">
       {/* Header Section */}
-      <section className="bg-linear-to-b from-blue-900 via-indigo-900 to-slate-950 text-white pt-24 pb-32">
+      <section className="relative pt-24 pb-32 bg-slate-950 text-white overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/images/school_banner.jpg" 
+            alt="Excel Academy Campus" 
+            className="w-full h-full object-cover opacity-40 blur-[2px]"
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-slate-900/80 via-slate-900/40 to-slate-950" />
+        </div>
         <div className="container px-6 mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-black uppercase tracking-widest mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-cyan-200 text-xs font-black uppercase tracking-widest mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Megaphone className="w-3 h-3 text-yellow-500" />
             Official Channel
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
             School{" "}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-400">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-teal-400">
               Announcements
             </span>
           </h1>
-          <p className="text-xl text-blue-100/70 max-w-2xl mx-auto font-light animate-in fade-in slide-in-from-bottom-12 duration-700">
+          <p className="text-xl text-cyan-100/70 max-w-2xl mx-auto font-light animate-in fade-in slide-in-from-bottom-12 duration-700">
             Stay informed about campus life, academic deadlines, and upcoming
             events at Excel Academy.
           </p>
@@ -145,7 +153,7 @@ export default function AnnouncementsPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
             <Input
               placeholder="Search updates..."
-              className="h-14 pl-12 rounded-2xl border-none bg-slate-50 focus:ring-2 focus:ring-blue-500"
+              className="h-14 pl-12 rounded-2xl border-none bg-slate-50 focus:ring-2 focus:ring-cyan-500"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -158,7 +166,7 @@ export default function AnnouncementsPage() {
                 className={`px-5 h-14 rounded-2xl text-sm font-bold uppercase tracking-wider transition-all
                                     ${
                                       filterType === type
-                                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                                        ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/30"
                                         : "bg-slate-50 text-slate-500 hover:bg-slate-100"
                                     }`}
               >
@@ -183,7 +191,7 @@ export default function AnnouncementsPage() {
                       className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0
                                             ${
                                               announcement.type === "academic"
-                                                ? "bg-blue-50 text-blue-600"
+                                                ? "bg-cyan-50 text-cyan-600"
                                                 : announcement.type === "event"
                                                   ? "bg-orange-50 text-orange-600"
                                                   : "bg-purple-50 text-purple-600"
@@ -197,7 +205,7 @@ export default function AnnouncementsPage() {
                                                 ${
                                                   announcement.type ===
                                                   "academic"
-                                                    ? "bg-blue-100 text-blue-700"
+                                                    ? "bg-cyan-100 text-cyan-700"
                                                     : announcement.type ===
                                                         "event"
                                                       ? "bg-orange-100 text-orange-700"
@@ -224,7 +232,7 @@ export default function AnnouncementsPage() {
                     Verified Post
                   </div>
                 </div>
-                <CardTitle className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">
+                <CardTitle className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight group-hover:text-cyan-600 transition-colors">
                   {announcement.title}
                 </CardTitle>
               </CardHeader>
@@ -261,7 +269,7 @@ export default function AnnouncementsPage() {
                                                 ${
                                                   votes[String(announcement.id)]
                                                     ?.myVote === "like"
-                                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                                                    ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/30"
                                                     : "bg-slate-50 text-slate-400 hover:bg-slate-100"
                                                 }`}
                     >
@@ -289,7 +297,7 @@ export default function AnnouncementsPage() {
 
                   <Button
                     variant="ghost"
-                    className="text-blue-600 font-black hover:bg-blue-50 rounded-xl group/btn"
+                    className="text-cyan-600 font-black hover:bg-cyan-50 rounded-xl group/btn"
                   >
                     Share{" "}
                     <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -314,7 +322,7 @@ export default function AnnouncementsPage() {
               </p>
               <Button
                 variant="link"
-                className="mt-4 text-blue-600 font-bold"
+                className="mt-4 text-cyan-600 font-bold"
                 onClick={() => {
                   setSearchQuery("");
                   setFilterType("all");

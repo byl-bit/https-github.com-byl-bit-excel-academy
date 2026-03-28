@@ -221,8 +221,8 @@ export default function Home() {
                   label: "Years of Excellence",
                   value: "25",
                   icon: Award,
-                  color: "text-blue-600",
-                  bgColor: "bg-blue-50",
+                  color: "text-teal-600",
+                  bgColor: "bg-teal-50",
                 },
               ].map((stat, i) => (
                 <div
@@ -277,8 +277,8 @@ export default function Home() {
                 icon: Globe,
                 title: "Global Perspective",
                 desc: "Preparing students to thrive in an interconnected world with multicultural awareness and international collaboration.",
-                color: "blue",
-                gradient: "from-blue-500 to-cyan-500",
+                color: "cyan",
+                gradient: "from-cyan-600 to-teal-600",
               },
               {
                 icon: Lightbulb,
@@ -305,10 +305,10 @@ export default function Home() {
                 icon: BookOpen,
                 title: "Modern Facilities",
                 desc: "State-of-the-art classrooms, science labs, computer labs, library, and sports facilities for optimal learning.",
-                color: "indigo",
-                gradient: "from-indigo-500 to-blue-500",
+                color: "teal",
+                gradient: "from-teal-600 to-cyan-700",
               },
-            ].map((feature, idx) => (
+            ].map((feature: any, idx) => (
               <Card
                 key={idx}
                 className="card-premium group relative overflow-hidden hover:-translate-y-2 bg-linear-to-b from-white to-slate-50 border border-white/50"
