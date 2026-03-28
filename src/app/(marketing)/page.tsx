@@ -26,44 +26,66 @@ import { useAuth } from "@/contexts/AuthContext";
 import { FormattedText } from "@/components/FormattedText";
 import { SlideshowMedia } from "@/components/SlideshowMedia";
 
+const backgroundImages = [
+  "/bg1.jpg",
+  "/bg2.jpg",
+  "/bg3.jpg",
+  "/bg4.jpg",
+];
+
 export default function Home() {
   const { user, isAuthenticated } = useAuth() as any;
   const [academicYear, setAcademicYear] = useState("");
+  const [currentBg, setCurrentBg] = useState(0);
 
   useEffect(() => {
     const y = new Date().getFullYear();
     setAcademicYear(`${y}-${y + 1}`);
+
+    const interval = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="flex flex-col min-h-screen font-sans bg-white">
       {/* --- HERO SECTION --- */}
-      <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden bg-linear-to-br from-blue-950 via-blue-900 to-indigo-950">
+      <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden bg-slate-950">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">
-          <NextImage
-            src="/hero-banner.png"
-            alt="Campus Background"
-            fill
-            className="object-cover opacity-15"
-            priority
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-blue-950 via-blue-900/90 to-transparent" />
+          {backgroundImages.map((img, idx) => (
+            <div
+              key={img}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                idx === currentBg ? "opacity-50" : "opacity-0"
+              }`}
+            >
+              <NextImage
+                src={img}
+                alt={`Campus Background ${idx + 1}`}
+                fill
+                className="object-cover"
+                priority={idx === 0}
+              />
+            </div>
+          ))}
+          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-cyan-950/60 to-transparent" />
 
           {/* Animated Orbs */}
           <div
-            className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"
+            className="absolute top-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"
             style={{ animationDuration: "4s" }}
           />
           <div
-            className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse"
+            className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-teal-500/20 rounded-full blur-3xl animate-pulse"
             style={{ animationDuration: "6s" }}
           />
         </div>
 
         <div className="container relative z-10 px-6 py-24 text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-sm font-semibold text-blue-100 mb-8 shadow-lg animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-sm font-semibold text-cyan-50 mb-8 shadow-lg animate-fade-in-up">
             <Sparkles className="w-4 h-4 text-yellow-300" />
             Admissions Open for {academicYear || "2026-2027"}
           </div>
@@ -71,13 +93,13 @@ export default function Home() {
           {/* Main Heading */}
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-8 animate-fade-in-up delay-100">
             <span className="block text-white mb-2">Shape Your</span>
-            <span className="block text-transparent bg-clip-text bg-linear-to-r from-blue-300 via-cyan-200 to-blue-400">
+            <span className="block text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-teal-200 to-cyan-500">
               Brilliant Future
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="max-w-3xl mx-auto text-xl sm:text-2xl text-blue-100 mb-12 leading-relaxed font-light animate-fade-in-up delay-200">
+          <p className="max-w-3xl mx-auto text-xl sm:text-2xl text-cyan-50 mb-12 leading-relaxed font-light animate-fade-in-up delay-200">
             Join Ethiopia's leading educational institution where excellence
             meets innovation.
             <span className="block mt-2 font-semibold text-white">
@@ -92,7 +114,7 @@ export default function Home() {
                 <Button
                   asChild
                   size="lg"
-                  className="h-16 px-10 rounded-full text-lg font-bold bg-white text-blue-950 hover:bg-blue-50 shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all hover:scale-105"
+                  className="h-16 px-10 rounded-full text-lg font-bold bg-white text-slate-900 hover:bg-cyan-50 shadow-2xl shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all hover:scale-105"
                 >
                   <Link href="/admissions/apply">
                     <Award className="mr-2 h-6 w-6" />
@@ -115,7 +137,7 @@ export default function Home() {
               <Button
                 asChild
                 size="lg"
-                className="h-16 px-10 rounded-full text-lg font-bold bg-white text-blue-950 hover:bg-blue-50 shadow-2xl shadow-blue-500/30 transition-all hover:scale-105"
+                className="h-16 px-10 rounded-full text-lg font-bold bg-white text-slate-900 hover:bg-cyan-50 shadow-2xl shadow-cyan-500/30 transition-all hover:scale-105"
               >
                 <Link
                   href={
@@ -134,7 +156,7 @@ export default function Home() {
           </div>
 
           {/* Trust Indicators */}
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-8 text-blue-200 animate-fade-in-up delay-400">
+          <div className="mt-16 flex flex-wrap items-center justify-center gap-8 text-cyan-100 animate-fade-in-up delay-400">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-green-400" />
               <span className="text-sm font-medium">
@@ -146,7 +168,7 @@ export default function Home() {
               <span className="text-sm font-medium">Top Rated School</span>
             </div>
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-400" />
+              <Users className="w-5 h-5 text-cyan-400" />
               <span className="text-sm font-medium">1200+ Students</span>
             </div>
           </div>
@@ -177,22 +199,22 @@ export default function Home() {
                   label: "Expert Faculty",
                   value: "50+",
                   icon: Users,
-                  color: "text-blue-600",
-                  bgColor: "bg-blue-50",
+                  color: "text-cyan-600",
+                  bgColor: "bg-cyan-50",
                 },
                 {
                   label: "Active Students",
                   value: "1,200+",
                   icon: GraduationCap,
-                  color: "text-indigo-600",
-                  bgColor: "bg-indigo-50",
+                  color: "text-teal-600",
+                  bgColor: "bg-teal-50",
                 },
                 {
                   label: "Years of Excellence",
                   value: "25",
                   icon: Award,
-                  color: "text-purple-600",
-                  bgColor: "bg-purple-50",
+                  color: "text-blue-600",
+                  bgColor: "bg-blue-50",
                 },
               ].map((stat, i) => (
                 <div
@@ -221,7 +243,7 @@ export default function Home() {
       <section className="py-24 bg-slate-50">
         <div className="container px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-bold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-100 text-cyan-800 text-sm font-bold mb-4">
               <Target className="w-4 h-4" />
               Why Excel Academy
             </div>
@@ -240,15 +262,15 @@ export default function Home() {
                 icon: GraduationCap,
                 title: "Academic Excellence",
                 desc: "Rigorous curriculum aligned with international standards, ensuring students excel in global assessments and university admissions.",
-                color: "blue",
-                gradient: "from-blue-500 to-cyan-500",
+                color: "cyan",
+                gradient: "from-cyan-500 to-teal-500",
               },
               {
                 icon: Globe,
                 title: "Global Perspective",
                 desc: "Preparing students to thrive in an interconnected world with multicultural awareness and international collaboration.",
-                color: "purple",
-                gradient: "from-purple-500 to-pink-500",
+                color: "blue",
+                gradient: "from-blue-500 to-cyan-500",
               },
               {
                 icon: Lightbulb,
@@ -292,13 +314,13 @@ export default function Home() {
                   >
                     <feature.icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-cyan-600 transition-colors">
                     {feature.title}
                   </h3>
                   <p className="text-slate-600 leading-relaxed mb-4">
                     {feature.desc}
                   </p>
-                  <div className="flex items-center text-blue-600 font-semibold text-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                  <div className="flex items-center text-cyan-600 font-semibold text-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
                     Learn more <ChevronRight className="w-4 h-4 ml-1" />
                   </div>
                 </CardContent>
@@ -316,11 +338,11 @@ export default function Home() {
       </section>
 
       {/* --- CTA SECTION --- */}
-      <section className="relative py-32 bg-linear-to-br from-blue-950 via-indigo-900 to-blue-950 text-white overflow-hidden">
+      <section className="relative py-32 bg-slate-950 text-white overflow-hidden">
         {/* Background Effects */}
         <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500 blur-3xl rounded-full" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500 blur-3xl rounded-full" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500 blur-3xl rounded-full" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-500 blur-3xl rounded-full" />
         </div>
 
         <div className="container relative z-10 px-6 text-center">
@@ -331,7 +353,7 @@ export default function Home() {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 tracking-tight">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-12 leading-relaxed">
+          <p className="text-xl md:text-2xl text-cyan-50 max-w-3xl mx-auto mb-12 leading-relaxed">
             Join thousands of successful students who chose Excel Academy.
             Applications are now open for the {academicYear || "2026-2027"}{" "}
             academic year.
@@ -341,7 +363,7 @@ export default function Home() {
             <Button
               size="lg"
               asChild
-              className="h-16 px-10 rounded-full bg-white text-blue-950 hover:bg-blue-50 font-bold text-lg shadow-2xl hover:shadow-white/20 transition-all hover:scale-105"
+              className="h-16 px-10 rounded-full bg-cyan-500 text-white hover:bg-cyan-400 font-bold text-lg shadow-2xl hover:shadow-cyan-500/50 transition-all hover:scale-105"
             >
               <Link href="/admissions/apply">
                 <Award className="mr-2 h-6 w-6" />
@@ -362,7 +384,7 @@ export default function Home() {
           </div>
 
           {/* Contact Info */}
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-8 text-blue-200">
+          <div className="mt-16 flex flex-wrap items-center justify-center gap-8 text-cyan-100">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
               <span className="text-sm">Open Mon-Sat, 8AM-5PM</span>
@@ -399,7 +421,7 @@ function HomeAnnouncements() {
     return (
       <div className="space-y-4">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-bold mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-100 text-cyan-800 text-sm font-bold mb-4">
             <Calendar className="w-4 h-4" />
             Latest Updates
           </div>
@@ -439,7 +461,7 @@ function HomeAnnouncements() {
   return (
     <>
       <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-bold mb-4">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-100 text-cyan-800 text-sm font-bold mb-4">
           <Calendar className="w-4 h-4" />
           Latest Updates
         </div>
@@ -452,7 +474,7 @@ function HomeAnnouncements() {
         </p>
         <Button
           variant="outline"
-          className="rounded-full border-2 border-slate-300 hover:border-blue-600 hover:text-blue-600 transition-colors px-6 font-semibold"
+          className="rounded-full border-2 border-slate-300 hover:border-cyan-600 hover:text-cyan-600 transition-colors px-6 font-semibold"
           asChild
         >
           <Link href="/announcements">
@@ -499,7 +521,7 @@ function HomeAnnouncements() {
                 })}
               </div>
 
-              <h3 className="text-xl font-bold text-slate-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-xl font-bold text-slate-900 mb-3 line-clamp-2 group-hover:text-cyan-600 transition-colors">
                 {announcement.title}
               </h3>
 
@@ -507,7 +529,7 @@ function HomeAnnouncements() {
                 <FormattedText text={announcement.body} />
               </div>
 
-              <div className="flex items-center text-blue-600 font-semibold text-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+              <div className="flex items-center text-cyan-600 font-semibold text-sm opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
                 Read more <ChevronRight className="w-4 h-4 ml-1" />
               </div>
             </CardContent>
