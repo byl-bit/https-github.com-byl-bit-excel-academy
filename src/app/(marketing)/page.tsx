@@ -57,8 +57,8 @@ export default function Home() {
           {backgroundImages.map((img, idx) => (
             <div
               key={img}
-              className={`absolute inset-0 transition-all duration-[2000ms] ease-in-out ${
-                idx === currentBg ? "opacity-60 scale-100" : "opacity-0 scale-105"
+              className={`absolute inset-0 transition-all duration-2000 ease-in-out ${
+                idx === currentBg ? "opacity-100 z-10 scale-100" : "opacity-0 z-0 scale-105"
               }`}
             >
               <NextImage
@@ -70,7 +70,7 @@ export default function Home() {
               />
             </div>
           ))}
-          <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-cyan-950/40 to-slate-950/90" />
+          <div className="absolute inset-0 z-20 bg-linear-to-b from-slate-950/50 via-cyan-950/10 to-slate-950/60" />
 
           {/* Animated Orbs */}
           <div
@@ -85,7 +85,7 @@ export default function Home() {
 
         <div className="container relative z-10 px-6 py-24 flex flex-col items-center justify-center text-center">
           {/* Glassmorphism Content Wrapper */}
-          <div className="relative p-10 md:p-16 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl overflow-hidden animate-fade-in-up w-full max-w-5xl group">
+          <div className="relative p-10 md:p-16 rounded-3xl bg-black/40 backdrop-blur-md border border-white/20 shadow-2xl overflow-hidden animate-fade-in-up w-full max-w-5xl group">
             <div className="absolute inset-0 bg-linear-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
             
             {/* Badge */}
@@ -311,7 +311,7 @@ export default function Home() {
             ].map((feature, idx) => (
               <Card
                 key={idx}
-                className="card-premium group relative overflow-hidden hover:-translate-y-2 bg-gradient-to-b from-white to-slate-50 border border-white/50"
+                className="card-premium group relative overflow-hidden hover:-translate-y-2 bg-linear-to-b from-white to-slate-50 border border-white/50"
               >
                 <div
                   className={`absolute top-0 left-0 w-full h-1 bg-linear-to-r ${feature.gradient} opacity-80 group-hover:opacity-100 transition-opacity`}
