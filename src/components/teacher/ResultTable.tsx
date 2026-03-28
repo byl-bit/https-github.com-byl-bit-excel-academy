@@ -239,8 +239,9 @@ export function ResultTable({
             }
           });
           // We must preserved existing manual sem1 and sem2 values from the DB or form fallback
-          const s1 = marks[`${s}_sem1`] || (subjectsArrRaw.find((ss) => ss.name === s)?.sem1) || 0;
-          const s2 = marks[`${s}_sem2`] || (subjectsArrRaw.find((ss) => ss.name === s)?.sem2) || 0;
+          const targetStudent = classResults.find(r => r.student_id === studentId) as any;
+          const s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
+          const s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
           
           return {
             name: s,
