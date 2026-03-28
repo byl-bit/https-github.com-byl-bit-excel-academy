@@ -86,7 +86,7 @@ export function TeacherOverview({
       if (i > 0) doc.addPage();
 
       // --- Header ---
-      doc.setFillColor(37, 99, 235); // Blue-600
+      doc.setFillColor(8, 145, 178); // Cyan-600
       doc.rect(0, 0, pageWidth, 40, "F");
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(22);
@@ -99,7 +99,7 @@ export function TeacherOverview({
       });
 
       // --- Student Details ---
-      doc.setTextColor(30, 58, 138); // Blue-950
+      doc.setTextColor(2, 6, 23); // Navy (Slate-950)
       let y = 60;
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
@@ -132,10 +132,10 @@ export function TeacherOverview({
       y = 100;
 
       // --- Results Table Header ---
-      doc.setFillColor(239, 246, 255); // Blue-50
+      doc.setFillColor(236, 254, 255); // Cyan-50
       doc.rect(15, y - 5, pageWidth - 30, 10, "F");
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(37, 99, 235); // Blue-600
+      doc.setTextColor(8, 145, 178); // Cyan-600
 
       doc.text("SUBJECT", 20, y + 2);
       let xPos = 110;
@@ -145,7 +145,7 @@ export function TeacherOverview({
 
       y += 10;
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(30, 58, 138); // Blue-950
+      doc.setTextColor(2, 6, 23); // Navy (Slate-950)
 
       // --- Rows ---
       (result.subjects || []).forEach((sub: Subject, idx: number) => {
@@ -164,7 +164,7 @@ export function TeacherOverview({
 
       // --- Summary ---
       y += 10;
-      doc.setDrawColor(37, 99, 235); // Blue-600
+      doc.setDrawColor(8, 145, 178); // Cyan-600
       doc.line(15, y, pageWidth - 15, y);
       y += 15;
 
@@ -195,26 +195,26 @@ export function TeacherOverview({
   return (
     <div className="space-y-10 animate-fade-in-up">
       {/* Welcome Header */}
-      <div className="card-premium overflow-hidden border-none ring-1 ring-slate-200/50 shadow-2xl shadow-blue-500/5 relative group p-0">
-        <div className="absolute inset-0 bg-linear-to-br from-blue-600/5 via-transparent to-indigo-600/5"></div>
-        <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-blue-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
-        <div className="absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-indigo-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
+      <div className="card-premium overflow-hidden border-none ring-1 ring-slate-200/50 shadow-2xl shadow-cyan-500/5 relative group p-0">
+        <div className="absolute inset-0 bg-linear-to-br from-cyan-600/5 via-transparent to-teal-600/5"></div>
+        <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-cyan-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
+        <div className="absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-teal-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
 
         <div className="relative z-10 p-10 sm:p-14 flex flex-col md:flex-row justify-between items-center gap-10 md:gap-16">
           <div className="text-center md:text-left space-y-6 flex-1">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100/50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-2 shadow-xs ring-4 ring-blue-50/50">
-                <span className="flex h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse"></span> Terminal Active
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100/50 text-cyan-600 text-[10px] font-black uppercase tracking-widest mb-2 shadow-xs ring-4 ring-cyan-50/50">
+                <span className="flex h-1.5 w-1.5 rounded-full bg-cyan-600 animate-pulse"></span> Terminal Active
               </div>
               <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
                 Welcome, <span className="text-gradient drop-shadow-sm">{user.name}</span>
               </h1>
               <p className="text-slate-500 text-lg font-bold flex items-center justify-center md:justify-start gap-2.5 opacity-80 mt-4">
                 <div className="h-10 w-10 rounded-xl bg-white shadow-xs border border-slate-100 flex items-center justify-center">
-                  <School className="h-5 w-5 text-blue-500" />
+                  <School className="h-5 w-5 text-cyan-500" />
                 </div>
                 {user.grade && user.section ? (
-                  <span className="text-slate-700">Homeroom: <span className="text-blue-600 font-extrabold">Grade {user.grade} • Section {user.section}</span></span>
+                  <span className="text-slate-700">Homeroom: <span className="text-cyan-600 font-extrabold">Grade {user.grade} • Section {user.section}</span></span>
                 ) : (
                   <span className="italic">Subject Faculty • Specialized Instruction</span>
                 )}
@@ -243,7 +243,7 @@ export function TeacherOverview({
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
-          { label: "Class Students", value: students.length, color: "blue", icon: Users },
+          { label: "Class Students", value: students.length, color: "cyan", icon: Users },
           { label: "Live Results", value: publishedCount, color: "emerald", icon: CheckCircle },
           { label: "Pending Actions", value: pendingCount + draftCount, color: "amber", icon: Clock },
         ].map((stat, i) => (
@@ -296,7 +296,7 @@ export function TeacherOverview({
               </div>
               <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
                 <div
-                  className="h-full bg-linear-to-r from-indigo-500 to-blue-500 rounded-full transition-all duration-1000 shadow-lg shadow-indigo-100"
+                  className="h-full bg-linear-to-r from-cyan-500 to-teal-500 rounded-full transition-all duration-1000 shadow-lg shadow-cyan-100"
                   style={{
                     width: `${students.length > 0 ? (classResults.filter((r) => r.result === "PASS").length / students.length) * 100 : 0}%`,
                   }}
@@ -323,7 +323,7 @@ export function TeacherOverview({
               </div>
               <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
                 <div
-                  className="h-full bg-linear-to-r from-blue-500 to-sky-400 rounded-full transition-all duration-1000 shadow-lg shadow-blue-100"
+                  className="h-full bg-linear-to-r from-cyan-500 to-teal-500 rounded-full transition-all duration-1000 shadow-lg shadow-cyan-100"
                   style={{
                     width: `${students.length > 0 ? (publishedCount / students.length) * 100 : 0}%`,
                   }}
@@ -352,9 +352,9 @@ export function TeacherOverview({
             ) : (
               <div className="space-y-3">
                 {pendingCount > 0 && (
-                  <div className="flex items-center gap-4 bg-white/80 p-5 rounded-2xl border border-blue-50 shadow-xs group hover:bg-white transition-colors">
-                    <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                      <Clock className="h-6 w-6 text-blue-500" />
+                  <div className="flex items-center gap-4 bg-white/80 p-5 rounded-2xl border border-cyan-50 shadow-xs group hover:bg-white transition-colors">
+                    <div className="h-12 w-12 rounded-xl bg-cyan-50 flex items-center justify-center">
+                      <Clock className="h-6 w-6 text-cyan-500" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-black text-slate-800 uppercase tracking-tight">
@@ -364,7 +364,7 @@ export function TeacherOverview({
                         Awaiting final admin signature
                       </p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all" />
                   </div>
                 )}
                 {draftCount > 0 && (
@@ -535,7 +535,7 @@ export function TeacherOverview({
                               normalizeGender(
                                 result.gender || (result as any).sex,
                               ) === "M"
-                                ? "bg-blue-50 text-blue-600 border-blue-100"
+                                ? "bg-cyan-50 text-cyan-600 border-cyan-100"
                                 : normalizeGender(
                                       result.gender || (result as any).sex,
                                     ) === "F"

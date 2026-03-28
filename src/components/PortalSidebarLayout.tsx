@@ -69,7 +69,7 @@ export function PortalSidebarLayout({
               <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">
                 EXCEL {/*<span className="animate-santa">🎅</span>*/}
               </h1>
-              <p className="text-[10px] font-bold text-blue-500 uppercase tracking-[0.2em] leading-none mt-1.5 opacity-90">
+              <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-[0.2em] leading-none mt-1.5 opacity-90">
                 ACADEMY
               </p>
             </div>
@@ -106,8 +106,8 @@ export function PortalSidebarLayout({
                     className={cn(
                       "h-[18px] w-[18px] transition-all duration-300",
                       isActive
-                        ? "text-blue-600 fill-blue-600/10"
-                        : "text-slate-400 group-hover:text-blue-500",
+                        ? "text-cyan-600 fill-cyan-600/10"
+                        : "text-slate-400 group-hover:text-cyan-500",
                     )}
                   />
                   <span className="truncate">{item.label}</span>
@@ -117,8 +117,8 @@ export function PortalSidebarLayout({
                     className={cn(
                       "text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto shadow-sm",
                       isActive
-                        ? "bg-blue-600 text-white"
-                        : "bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600",
+                        ? "bg-cyan-600 text-white"
+                        : "bg-slate-100 text-slate-600 group-hover:bg-cyan-50 group-hover:text-cyan-600",
                     )}
                   >
                     {item.badge}
@@ -130,7 +130,7 @@ export function PortalSidebarLayout({
             const className = cn(
               "flex items-center justify-between w-full gap-3 px-4 py-3 rounded-xl transition-all duration-200 group font-semibold text-[13px] text-left relative overflow-hidden",
               isActive
-                ? "bg-blue-50/80 text-blue-700 shadow-sm ring-1 ring-blue-100"
+                ? "bg-cyan-50/80 text-cyan-700 shadow-sm ring-1 ring-cyan-100"
                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
             );
 
@@ -145,7 +145,7 @@ export function PortalSidebarLayout({
                   className={className}
                 >
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-r-full" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-cyan-600 rounded-r-full" />
                   )}
                   {content}
                 </button>
@@ -160,7 +160,7 @@ export function PortalSidebarLayout({
                 className={className}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-r-full" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-cyan-600 rounded-r-full" />
                 )}
                 {content}
               </Link>
@@ -173,9 +173,9 @@ export function PortalSidebarLayout({
         {role !== "admin" ? (
           <Link
             href={`/${role}/profile`}
-            className="relative overflow-hidden flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-linear-to-br from-slate-50 to-white shadow-sm group hover:shadow-md hover:border-blue-100 transition-all duration-300"
+            className="relative overflow-hidden flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-linear-to-br from-slate-50 to-white shadow-sm group hover:shadow-md hover:border-cyan-100 transition-all duration-300"
           >
-            <div className="h-10 w-10 shrink-0 rounded-full bg-linear-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white group-hover:scale-105 transition-transform overflow-hidden">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-linear-to-tr from-cyan-600 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white group-hover:scale-105 transition-transform overflow-hidden">
               {user?.photo ? (
                 <img
                   src={user.photo}
@@ -187,7 +187,7 @@ export function PortalSidebarLayout({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-800 truncate group-hover:text-blue-700 transition-colors">
+              <p className="text-sm font-bold text-slate-800 truncate group-hover:text-cyan-700 transition-colors">
                 {user?.name || user?.fullName || "User"}
               </p>
               <p className="text-[10px] font-semibold text-slate-400 truncate uppercase tracking-tight">
@@ -209,7 +209,7 @@ export function PortalSidebarLayout({
           </Link>
         ) : (
           <div className="relative overflow-hidden flex items-center gap-3 p-3 rounded-2xl border border-slate-100 bg-linear-to-br from-slate-50 to-white shadow-sm group hover:shadow-md transition-all duration-300">
-            <div className="h-10 w-10 shrink-0 rounded-full bg-linear-to-tr from-red-600 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-linear-to-tr from-red-600 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white">
               {(user?.name || user?.fullName)?.[0]?.toUpperCase() || "A"}
             </div>
             <div className="flex-1 min-w-0">
@@ -287,7 +287,7 @@ export function PortalSidebarLayout({
                   <h1 className="font-black text-[10px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase">
                     Excel {/*<span className="animate-santa">🎅</span>*/}
                   </h1>
-                  <p className="text-[7px] sm:text-[9px] font-extrabold text-blue-500 uppercase tracking-widest mt-0.5 opacity-90">
+                  <p className="text-[7px] sm:text-[9px] font-extrabold text-cyan-500 uppercase tracking-widest mt-0.5 opacity-90">
                     Academy
                   </p>
                 </div>
@@ -318,7 +318,7 @@ export function PortalSidebarLayout({
                   <span className="text-[10px] font-black text-slate-900 leading-none">
                     ADMINISTRATOR
                   </span>
-                  <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest mt-1">
+                  <span className="text-[9px] font-bold text-cyan-600 uppercase tracking-widest mt-1">
                     ID: {user?.adminId || `AD-${new Date().getFullYear()}-001`}
                   </span>
                 </div>
@@ -327,7 +327,7 @@ export function PortalSidebarLayout({
 
                 <div className="flex items-center gap-1">
                   <div className="relative">
-                    <div className="text-slate-400 hover:text-blue-600 rounded-xl h-9 w-9 flex items-center justify-center transition-colors cursor-pointer group">
+                    <div className="text-slate-400 hover:text-cyan-600 rounded-xl h-9 w-9 flex items-center justify-center transition-colors cursor-pointer group">
                       <Bell className="h-4 w-4" />
                       {notificationCount > 0 && (
                         <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[8px] font-black text-white ring-2 ring-white animate-pulse">
@@ -354,7 +354,7 @@ export function PortalSidebarLayout({
                   <span className="text-sm font-black text-slate-900 leading-none capitalize">
                     {role}
                   </span>
-                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">
+                  <span className="text-[10px] font-bold text-cyan-600 uppercase tracking-widest mt-1">
                     ID:{" "}
                     {role === "student"
                       ? user?.studentId || user?.id
@@ -363,7 +363,7 @@ export function PortalSidebarLayout({
                 </div>
 
                 <div className="relative shrink-0">
-                  <div className="text-slate-400 hover:text-blue-600 rounded-full h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center transition-colors cursor-pointer relative group">
+                  <div className="text-slate-400 hover:text-cyan-600 rounded-full h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center transition-colors cursor-pointer relative group">
                     <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                     {notificationCount > 0 && (
                       <span className="absolute top-0 right-0 sm:top-1 sm:right-1 flex h-3.5 w-3.5 sm:h-4.5 sm:w-4.5 items-center justify-center rounded-full bg-red-600 text-[8px] sm:text-[10px] font-black text-white ring-2 ring-white animate-pulse">
@@ -375,7 +375,7 @@ export function PortalSidebarLayout({
 
                 <Link
                   href={`/${role}/profile`}
-                  className="h-8 w-8 sm:h-10 sm:w-10 shrink-0 rounded-full bg-linear-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-[10px] sm:text-sm shadow-md ring-2 ring-white hover:scale-105 transition-transform overflow-hidden"
+                  className="h-8 w-8 sm:h-10 sm:w-10 shrink-0 rounded-full bg-linear-to-tr from-cyan-600 to-teal-500 flex items-center justify-center text-white font-bold text-[10px] sm:text-sm shadow-md ring-2 ring-white hover:scale-105 transition-transform overflow-hidden"
                 >
                   {user?.photo ? (
                     <img

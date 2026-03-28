@@ -26,7 +26,7 @@ export function StudentProfileDialog({ student, isOpen, onClose }: StudentProfil
       <DialogContent className="w-[95vw] sm:max-w-2xl bg-white/90 backdrop-blur-2xl border-none shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden p-0 rounded-4xl ring-1 ring-slate-200/50 flex flex-col max-h-[90vh]">
 
         {/* Animated Accent Bar */}
-        <div className="h-2 w-full bg-linear-to-r from-blue-500 via-indigo-600 to-violet-600 shrink-0" />
+        <div className="h-2 w-full bg-linear-to-r from-teal-500 via-cyan-600 to-teal-600 shrink-0" />
         
         {/* Header Section - Sticky */}
         <DialogHeader className="p-6 sm:p-8 pb-4 sm:pb-6 bg-slate-50/50 relative overflow-hidden shrink-0">
@@ -36,7 +36,7 @@ export function StudentProfileDialog({ student, isOpen, onClose }: StudentProfil
           
           <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
             <div className="shrink-0 relative group">
-              <div className="absolute -inset-1 bg-linear-to-r from-blue-500 to-indigo-600 rounded-3xl blur opacity-25" />
+              <div className="absolute -inset-1 bg-linear-to-r from-teal-500 to-cyan-600 rounded-3xl blur opacity-25" />
               <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-2xl border-4 border-white shadow-2xl bg-white flex items-center justify-center overflow-hidden">
                 {student.photo ? (
                   <img
@@ -59,7 +59,7 @@ export function StudentProfileDialog({ student, isOpen, onClose }: StudentProfil
               </div>
               
               <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-1">
-                <span className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl bg-blue-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20">
+                <span className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl bg-teal-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-lg shadow-teal-500/20">
                   <Fingerprint className="h-3 sm:h-3.5 w-3 sm:w-3.5" /> {student.studentId || "PENDING"}
                 </span>
                 <span className={cn(
@@ -80,7 +80,7 @@ export function StudentProfileDialog({ student, isOpen, onClose }: StudentProfil
           {/* Personal Information */}
           <section className="space-y-5 sm:space-y-6">
             <div className="flex items-center gap-3 ml-1">
-              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shadow-xs border border-blue-100">
+              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-cyan-50 flex items-center justify-center text-cyan-600 shadow-xs border border-cyan-100">
                 <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </div>
               <h3 className="text-[10px] sm:text-[11px] font-black text-slate-900 uppercase tracking-[0.25em]">
@@ -105,7 +105,7 @@ export function StudentProfileDialog({ student, isOpen, onClose }: StudentProfil
           {/* Academic Information */}
           <section className="space-y-5 sm:space-y-6">
             <div className="flex items-center gap-3 ml-1">
-              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shadow-xs border border-indigo-100">
+              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600 shadow-xs border border-teal-100">
                 <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </div>
               <h3 className="text-[10px] sm:text-[11px] font-black text-slate-900 uppercase tracking-[0.25em]">

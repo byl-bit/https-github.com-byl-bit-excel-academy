@@ -89,14 +89,14 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-10 pb-10 animate-fade-in-up">
       {/* Hero Section */}
-      <div className="card-premium overflow-hidden border-none ring-1 ring-slate-200/50 shadow-2xl shadow-blue-500/5 relative group p-0">
-        <div className="absolute inset-0 bg-linear-to-br from-blue-600/5 via-transparent to-indigo-600/5"></div>
-        <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-blue-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
-        <div className="absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-indigo-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
+      <div className="card-premium overflow-hidden border-none ring-1 ring-slate-200/50 shadow-2xl shadow-cyan-500/5 relative group p-0">
+        <div className="absolute inset-0 bg-linear-to-br from-cyan-600/5 via-transparent to-teal-600/5"></div>
+        <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-cyan-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
+        <div className="absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-teal-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
 
         <div className="relative z-10 p-10 sm:p-14 flex flex-col md:flex-row items-center gap-10 md:gap-14">
           <div className="relative shrink-0 group/photo">
-            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2.5rem] border-4 border-white shadow-2xl overflow-hidden bg-slate-100 group-hover/photo:scale-105 transition-transform duration-500 ring-8 ring-blue-50/50">
+            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2.5rem] border-4 border-white shadow-2xl overflow-hidden bg-slate-100 group-hover/photo:scale-105 transition-transform duration-500 ring-8 ring-cyan-50/50">
               {user.photo ? (
                 <img
                   src={user.photo}
@@ -119,7 +119,7 @@ export default function StudentDashboard() {
 
           <div className="text-center md:text-left flex-1 space-y-6">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100/50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-2 shadow-xs">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100/50 text-cyan-600 text-[10px] font-black uppercase tracking-widest mb-2 shadow-xs">
                 Active Session
               </div>
               <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 leading-none">
@@ -130,9 +130,9 @@ export default function StudentDashboard() {
               </h1>
               <p className="text-slate-500 text-lg font-bold flex items-center justify-center md:justify-start gap-2.5 opacity-80 mt-4">
                 <div className="h-10 w-10 rounded-xl bg-white shadow-xs border border-slate-100 flex items-center justify-center">
-                  <GraduationCap className="h-5 w-5 text-blue-500" />
+                  <GraduationCap className="h-5 w-5 text-cyan-500" />
                 </div>
-                <span className="text-slate-700">{user.fullName} • <span className="text-blue-600 font-extrabold text-sm uppercase">Grade {user.grade}-{user.section}</span></span>
+                <span className="text-slate-700">{user.fullName} • <span className="text-cyan-600 font-extrabold text-sm uppercase">Grade {user.grade}-{user.section}</span></span>
               </p>
             </div>
 
@@ -142,7 +142,7 @@ export default function StudentDashboard() {
                 <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest">ID: {user.studentId}</span>
               </div>
               <div className="bg-white/60 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-white shadow-xs flex items-center gap-3">
-                <Clock className="h-4 w-4 text-blue-500" />
+                <Clock className="h-4 w-4 text-cyan-500" />
                 <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest">Term 2024-25</span>
               </div>
             </div>
@@ -153,8 +153,8 @@ export default function StudentDashboard() {
         <div className="lg:col-span-2 card-premium relative overflow-hidden group border-none shadow-sm h-full bg-white/40 ring-1 ring-slate-200/50">
           <div className="p-8 pb-4 flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center shadow-inner">
-                <TrendingUp className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 rounded-xl bg-cyan-50 flex items-center justify-center shadow-inner">
+                <TrendingUp className="h-5 w-5 text-cyan-600" />
               </div>
               <div>
                 <h2 className="text-xl font-black text-slate-800 tracking-tight">Academic Journey</h2>
@@ -180,13 +180,13 @@ export default function StudentDashboard() {
             >
               {academicSummary ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 items-center p-8 pt-4">
-                  <div className="sm:col-span-1 flex flex-col items-center justify-center p-10 bg-linear-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] shadow-2xl shadow-blue-500/20 group-hover/card:scale-105 transition-transform duration-500 relative overflow-hidden">
+                  <div className="sm:col-span-1 flex flex-col items-center justify-center p-10 bg-linear-to-br from-cyan-600 to-teal-700 rounded-[2.5rem] shadow-2xl shadow-cyan-500/20 group-hover/card:scale-105 transition-transform duration-500 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 blur-2xl -mr-10 -mt-10" />
                     <div className="text-6xl font-black text-white mb-1 leading-none drop-shadow-md">
                       {academicSummary.average.toFixed(0)}
                       <span className="text-2xl opacity-60 ml-0.5">%</span>
                     </div>
-                    <p className="text-[10px] font-black text-blue-100 uppercase tracking-[0.2em] mt-2">
+                    <p className="text-[10px] font-black text-cyan-100 uppercase tracking-[0.2em] mt-2">
                       Aggregate
                     </p>
                   </div>
@@ -273,7 +273,7 @@ export default function StudentDashboard() {
                   fill="transparent"
                   strokeDasharray={527}
                   strokeDashoffset={527 - 527 * 0.92}
-                  className="text-blue-600 transition-all duration-1000 ease-out drop-shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+                  className="text-cyan-600 transition-all duration-1000 ease-out drop-shadow-[0_0_15px_rgba(8,145,178,0.4)]"
                   strokeLinecap="round"
                 />
               </svg>
@@ -298,19 +298,19 @@ export default function StudentDashboard() {
       {/* Quick Links Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { label: "My Profile", icon: User, href: "/student/profile", color: "text-blue-600", bg: "bg-blue-100" },
-          { label: "Evaluations", icon: FileText, href: "/student/results", color: "text-indigo-600", bg: "bg-indigo-100" },
+          { label: "My Profile", icon: User, href: "/student/profile", color: "text-cyan-600", bg: "bg-cyan-100" },
+          { label: "Evaluations", icon: FileText, href: "/student/results", color: "text-teal-600", bg: "bg-teal-100" },
           { label: "Library", icon: BookOpen, href: "/student/library", color: "text-sky-600", bg: "bg-sky-100" },
           { label: "Newsroom", icon: Bell, href: "/student/announcements", color: "text-amber-600", bg: "bg-amber-100" },
         ].map((item, i) => (
           <Link key={i} href={item.href} className="group">
-            <div className="card-premium h-full flex flex-col items-center justify-center p-8 transition-all duration-500 cursor-pointer border-none ring-1 ring-slate-200/50 hover:bg-white hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 relative overflow-hidden">
+            <div className="card-premium h-full flex flex-col items-center justify-center p-8 transition-all duration-500 cursor-pointer border-none ring-1 ring-slate-200/50 hover:bg-white hover:shadow-2xl hover:shadow-cyan-500/10 hover:-translate-y-2 relative overflow-hidden">
               <div
                 className={cn("p-6 rounded-3xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner", item.bg)}
               >
                 <item.icon className={cn("h-8 w-8", item.color)} />
               </div>
-              <span className="font-black text-[11px] text-slate-700 uppercase tracking-widest group-hover:text-blue-600 transition-colors">
+              <span className="font-black text-[11px] text-slate-700 uppercase tracking-widest group-hover:text-cyan-600 transition-colors">
                 {item.label}
               </span>
             </div>
@@ -332,7 +332,7 @@ export default function StudentDashboard() {
           </div>
           <Button
             variant="ghost"
-            className="text-blue-600 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-50 rounded-xl px-6 group"
+            className="text-cyan-600 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-cyan-50 rounded-xl px-6 group"
             asChild
           >
             <Link href="/student/announcements">

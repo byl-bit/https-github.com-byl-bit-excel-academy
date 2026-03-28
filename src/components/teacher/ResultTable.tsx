@@ -694,7 +694,7 @@ export function ResultTable({
 
   if (students.length === 0) {
     return (
-      <div className="text-center py-12 text-blue-400 bg-blue-50/50 rounded-lg border border-dashed border-blue-200">
+      <div className="text-center py-12 text-cyan-400 bg-cyan-50/50 rounded-lg border border-dashed border-cyan-200">
         <p className="font-semibold mb-2">No students found in your class</p>
         <p className="text-sm">
           Grade {user.grade} - Section {user.section} has no active students
@@ -769,8 +769,8 @@ export function ResultTable({
         {/* Professional Toolbar */}
         <div className="card-premium p-6 flex flex-col md:flex-row justify-between items-center gap-6 border-none ring-1 ring-slate-200/50 shadow-xl bg-white/60">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center shadow-inner ring-4 ring-blue-50/50 transition-transform hover:rotate-6">
-              <FileSpreadsheet className="h-6 w-6 text-blue-600" />
+            <div className="h-12 w-12 rounded-2xl bg-cyan-50 flex items-center justify-center shadow-inner ring-4 ring-cyan-50/50 transition-transform hover:rotate-6">
+              <FileSpreadsheet className="h-6 w-6 text-cyan-600" />
             </div>
             <div>
               <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">
@@ -823,8 +823,8 @@ export function ResultTable({
                   className={cn(
                     "h-9 px-4 text-xs font-bold transition-all flex items-center gap-2 shadow-sm rounded-lg border",
                     editingRows.size > 0
-                      ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
-                      : "border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600",
+                      ? "bg-cyan-600 text-white shadow-lg shadow-cyan-200"
+                      : "border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-cyan-600",
                   )}
                 >
                   <Edit className="h-4 w-4" />
@@ -836,8 +836,9 @@ export function ResultTable({
                 onClick={() => handleSubmitRoster("subject-pending")}
                 disabled={loadingFull}
                 className={cn(
-                  "h-9 px-6 text-xs font-black shadow-lg shadow-blue-100 border-none transition-all flex items-center gap-2 rounded-lg hover:scale-105 active:scale-95",
-                  "bg-blue-600 hover:bg-blue-700 text-white",
+                  "h-10 px-8 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105 active:scale-95",
+                  "bg-cyan-600 hover:bg-cyan-700 text-white",
+                  "shadow-lg shadow-cyan-500/20",
                 )}
               >
                 {loadingFull ? (
@@ -853,7 +854,7 @@ export function ResultTable({
               variant="ghost"
               size="sm"
               onClick={exportDataCSV}
-              className="h-9 w-9 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="h-9 w-9 p-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
               title="Export CSV"
             >
               <Download className="h-4 w-4" />
@@ -868,7 +869,7 @@ export function ResultTable({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-9 w-9 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="h-9 w-9 p-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
                 title="Import CSV"
               >
                 <Upload className="h-4 w-4" />
@@ -905,7 +906,7 @@ export function ResultTable({
                             <span className="uppercase tracking-widest text-slate-900">
                               {type.label}
                             </span>
-                            <span className="text-[9px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full inline-block mx-auto">
+                            <span className="text-[9px] font-bold text-cyan-500 bg-cyan-50 px-2 py-0.5 rounded-full inline-block mx-auto">
                               Weight {type.weight}%
                             </span>
                           </div>
@@ -916,7 +917,7 @@ export function ResultTable({
                         key={subject}
                         className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 last:border-0 min-w-[240px]"
                       >
-                        <div className="flex flex-col mb-3 text-xs uppercase tracking-[0.15em] text-blue-700 font-black">
+                        <div className="flex flex-col mb-3 text-xs uppercase tracking-[0.15em] text-cyan-700 font-black">
                           {subject}
                         </div>
                         <div className="grid grid-cols-3 gap-2 w-full border-t border-slate-200 pt-3">
@@ -926,7 +927,7 @@ export function ResultTable({
                           <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
                             SEM-2
                           </span>
-                          <span className="text-[9px] text-indigo-600 font-black uppercase tracking-widest bg-indigo-50/50 py-1 rounded-md">
+                          <span className="text-[9px] text-cyan-600 font-black uppercase tracking-widest bg-cyan-50/50 py-1 rounded-md">
                             AVG
                           </span>
                         </div>
@@ -937,12 +938,12 @@ export function ResultTable({
                     Aggregate
                   </th>
                   {isHomeroomView && (
-                    <th className="p-5 text-center font-black text-blue-900 bg-blue-50/50 text-[10px] uppercase tracking-[0.2em]">
+                    <th className="p-5 text-center font-black text-cyan-900 bg-cyan-50/50 text-[10px] uppercase tracking-[0.2em]">
                       Acc %
                     </th>
                   )}
                   {isHomeroomView && (
-                    <th className="p-5 text-center font-black text-blue-900 bg-blue-50/50 text-[10px] uppercase tracking-[0.2em]">
+                    <th className="p-5 text-center font-black text-cyan-900 bg-cyan-50/50 text-[10px] uppercase tracking-[0.2em]">
                       Rank
                     </th>
                   )}
@@ -979,20 +980,27 @@ export function ResultTable({
                     return (
                       <tr
                         key={sid}
-                        className="hover:bg-blue-50/20 transition-all duration-300 group/row border-b border-slate-50 last:border-0"
+                        className="hover:bg-cyan-50/20 transition-all duration-300 group/row border-b border-slate-50 last:border-0"
                       >
-                        <td className="p-5 font-bold text-slate-400 sticky left-0 bg-white group-hover/row:bg-blue-50/30 z-20 text-xs tabular-nums transition-colors">
+                        <td className="p-5 font-bold text-slate-400 sticky left-0 bg-white group-hover/row:bg-cyan-50/30 z-20 text-xs tabular-nums transition-colors">
                           {student.rollNumber || index + 1}
                         </td>
-                        <td className="p-5 font-bold text-slate-500 text-[11px] sticky left-[80px] bg-white group-hover/row:bg-blue-50/30 z-20 transition-colors border-r border-slate-200/50 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)] tabular-nums uppercase">
+                        <td className="p-5 font-bold text-slate-500 text-[11px] sticky left-[80px] bg-white group-hover/row:bg-cyan-50/30 z-20 transition-colors border-r border-slate-200/50 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)] tabular-nums uppercase">
                           {student.studentId || student.student_id || "ID-TBD"}
                         </td>
-                        <td className="p-5 font-black text-slate-800 text-sm sticky left-[200px] bg-white group-hover/row:bg-blue-50/30 z-20 transition-colors shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)] truncate max-w-[200px] uppercase tracking-tight">
+                        <td className="p-5 font-black text-slate-800 text-sm sticky left-[200px] bg-white group-hover/row:bg-cyan-50/30 z-20 transition-colors shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)] truncate max-w-[200px] uppercase tracking-tight">
                           <div className="flex flex-col group/name">
                             <span className="truncate">{student.name || student.fullName}</span>
                             <button 
-                              onClick={() => setViewingStudent(student)}
-                              className="inline-flex items-center gap-1.5 text-[8px] font-black text-blue-500 hover:text-white uppercase tracking-widest bg-blue-50 hover:bg-blue-600 px-2 py-1 rounded-lg transition-all w-max mt-1.5 border border-blue-100/50 shadow-xs active:scale-95"
+                              onClick={() => {
+                                  const studentObj = students.find(
+                                    (s) =>
+                                      String(s.studentId || s.id) ===
+                                      String(student.studentId),
+                                  );
+                                  setViewingStudent(studentObj || student);
+                                }}
+                              className="inline-flex items-center gap-1.5 text-[8px] font-black text-cyan-500 hover:text-white uppercase tracking-widest bg-cyan-50 hover:bg-cyan-600 px-2 py-1 rounded-lg transition-all w-max mt-1.5 border border-cyan-100/50 shadow-xs active:scale-95"
                             >
                               <Eye className="h-3 w-3" />
                               View profile
@@ -1008,7 +1016,7 @@ export function ResultTable({
                               normalizeGender(
                                 student.gender || (student as any).sex,
                               ) === "M"
-                                ? "bg-blue-50 text-blue-600 border-blue-100"
+                                ? "bg-cyan-50 text-cyan-600 border-cyan-100"
                                 : normalizeGender(
                                       student.gender || (student as any).sex,
                                     ) === "F"

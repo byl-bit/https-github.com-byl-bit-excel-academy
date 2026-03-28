@@ -112,11 +112,11 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
   if (!user.grade || !user.section) {
     return (
       <Card className="text-center py-12 flex flex-col items-center justify-center border-dashed border-2 border-slate-200 bg-slate-50/50">
-        <Info className="h-12 w-12 text-blue-300 mb-4" />
-        <h3 className="text-lg font-bold text-blue-900">
+        <Info className="h-12 w-12 text-cyan-300 mb-4" />
+        <h3 className="text-lg font-bold text-cyan-900">
           Attendance Unavailable
         </h3>
-        <p className="text-blue-500 max-w-sm mt-2 text-sm">
+        <p className="text-cyan-500 max-w-sm mt-2 text-sm">
           You must be assigned a Home Room (Grade/Section) to take attendance.
         </p>
       </Card>
@@ -127,8 +127,8 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
     <div className="space-y-8 animate-fade-in-up pb-20">
       <div className="card-premium p-6 flex flex-col md:flex-row justify-between items-center gap-6 border-none ring-1 ring-slate-200/50 shadow-xl bg-white/60 backdrop-blur-md">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center shadow-inner ring-4 ring-blue-50/50 transition-transform hover:rotate-6">
-            <CalendarCheck className="h-6 w-6 text-blue-600" />
+          <div className="h-12 w-12 rounded-2xl bg-cyan-50 flex items-center justify-center shadow-inner ring-4 ring-cyan-50/50 transition-transform hover:rotate-6">
+            <CalendarCheck className="h-6 w-6 text-cyan-600" />
           </div>
           <div>
             <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">
@@ -144,7 +144,7 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
           <div className="relative">
             <input
               type="date"
-              className="h-10 rounded-xl border-none bg-white px-4 py-1 text-xs text-slate-900 font-black focus:outline-none focus:ring-4 focus:ring-blue-500/10 cursor-pointer shadow-xs uppercase tracking-wider"
+              className="h-10 rounded-xl border-none bg-white px-4 py-1 text-xs text-slate-900 font-black focus:outline-none focus:ring-4 focus:ring-cyan-500/10 cursor-pointer shadow-xs uppercase tracking-wider"
               value={date ? date.toISOString().split("T")[0] : ""}
               onChange={(e) =>
                 setDate(
@@ -161,7 +161,7 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
             className={cn(
               "h-10 px-6 font-black text-[10px] uppercase tracking-widest shadow-lg transition-all rounded-xl",
               hasRecord
-                ? "bg-blue-600 shadow-blue-500/20"
+                ? "bg-cyan-600 shadow-cyan-500/20"
                 : "bg-emerald-600 shadow-emerald-500/20",
             )}
           >
@@ -180,7 +180,7 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
           <div className="card-premium p-0 overflow-hidden border-none ring-1 ring-slate-200/50 bg-white/40 backdrop-blur-sm shadow-2xl shadow-slate-200/50">
             <div className="p-5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between backdrop-blur-md">
               <h3 className="font-black text-slate-800 text-xs uppercase tracking-[0.2em] flex items-center gap-2">
-                <Users className="h-4 w-4 text-blue-500" />
+                <Users className="h-4 w-4 text-cyan-500" />
                 Active Enrollment
               </h3>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-xs">
@@ -195,10 +195,10 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
               {loading ? (
                 <div className="py-24 flex flex-col items-center justify-center text-slate-400 animate-pulse">
                   <div className="relative">
-                    <Loader2 className="h-12 w-12 mb-4 animate-spin text-blue-500" />
-                    <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-blue-100/50" />
+                    <Loader2 className="h-12 w-12 mb-4 animate-spin text-cyan-500" />
+                    <div className="absolute inset-0 h-12 w-12 rounded-full border-4 border-cyan-100/50" />
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600/50">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-600/50">
                     Hydrating Roster...
                   </p>
                 </div>
@@ -253,11 +253,11 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                             className={cn(
                               "grid grid-cols-12 gap-4 items-center px-6 py-4 cursor-pointer transition-all duration-300 group hover:z-10",
                               isPresent 
-                                ? "bg-white hover:bg-blue-50/30" 
+                                ? "bg-white hover:bg-cyan-50/30" 
                                 : "bg-red-50/20 hover:bg-red-50/40",
                             )}
                           >
-                            <div className="col-span-1 font-black text-xs text-slate-400 group-hover:text-blue-600 transition-colors">
+                            <div className="col-span-1 font-black text-xs text-slate-400 group-hover:text-cyan-600 transition-colors">
                               {student.rollNumber || "--"}
                             </div>
                             <div className="col-span-2 font-black text-[10px] text-slate-500 uppercase tabular-nums">
@@ -272,7 +272,7 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                                   e.stopPropagation();
                                   setViewingStudent(student);
                                 }}
-                                className="text-[8px] font-black text-blue-500 hover:text-blue-700 uppercase tracking-widest bg-blue-50 px-1 py-0.5 rounded transition-colors w-max mt-0.5"
+                                className="text-[8px] font-black text-cyan-500 hover:text-cyan-700 uppercase tracking-widest bg-cyan-50 px-1 py-0.5 rounded transition-colors w-max mt-0.5"
                               >
                                 View profile
                               </button>
@@ -282,7 +282,7 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                               <span className={cn(
                                 "text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-widest shadow-xs",
                                 normalizeGender(student.gender || student.sex) === "M"
-                                  ? "bg-blue-50 text-blue-600 border-blue-100"
+                                  ? "bg-cyan-50 text-cyan-600 border-cyan-100"
                                   : "bg-pink-50 text-pink-600 border-pink-100"
                               )}>
                                 {normalizeGender(student.gender || student.sex) || "-"}
@@ -324,7 +324,7 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
           <div className="card-premium p-6 space-y-8 bg-white/40 ring-1 ring-slate-200/50 backdrop-blur-sm">
             <div>
               <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-                <Info className="h-5 w-5 text-blue-600" />
+                <Info className="h-5 w-5 text-cyan-600" />
                 Ledger Summary
               </h3>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time presence tracking</p>
@@ -375,7 +375,7 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                   <div
                     className={cn(
                       "h-full rounded-full transition-all duration-1000 ease-out shadow-sm",
-                      (presentCount / (students.length || 1)) > 0.9 ? "bg-emerald-500" : "bg-blue-600"
+                      (presentCount / (students.length || 1)) > 0.9 ? "bg-emerald-500" : "bg-cyan-600"
                     )}
                     style={{
                       width: `${students.length > 0 ? (presentCount / students.length) * 100 : 0}%`,
@@ -386,7 +386,7 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
             </div>
             
             <div className="p-5 bg-linear-to-br from-slate-900 to-slate-800 rounded-3xl text-white shadow-xl shadow-slate-200 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-blue-500/10 blur-2xl -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-cyan-500/10 blur-2xl -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-1000" />
               <div className="relative z-10">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Status Advisory</p>
                 <p className="text-xs font-bold leading-relaxed mt-2 italic text-slate-300">
