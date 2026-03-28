@@ -45,13 +45,20 @@ export default function ContactPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-linear-to-br from-slate-900 via-blue-900 to-slate-900 text-white py-20">
-        <div className="absolute inset-0 bg-[url('/hero-banner.png')] opacity-10 bg-cover bg-center"></div>
+      <section className="relative py-24 md:py-32 bg-slate-950 text-white overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/images/school_banner.jpg" 
+            alt="Excel Academy Campus" 
+            className="w-full h-full object-cover opacity-40 blur-[2px]"
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-slate-900/80 via-slate-900/40 to-slate-950" />
+        </div>
         <div className="container relative z-10 px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
-            Get in Touch
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
+            Get in <span className="text-cyan-400">Touch</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto font-light">
             Have questions? We'd love to hear from you. Send us a message and
             we'll respond as soon as possible.
           </p>
@@ -62,10 +69,10 @@ export default function ContactPage() {
       <section className="py-16 bg-slate-50">
         <div className="container px-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            <Card className="border-none shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-6 text-center">
-                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-7 h-7 text-blue-600" />
+            <Card className="card-premium group hover:-translate-y-1 transition-all border border-white/50">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform">
+                  <MapPin className="w-8 h-8 text-cyan-600" />
                 </div>
                 <h3 className="font-bold text-lg mb-2">Visit Us</h3>
                 <p className="text-sm text-slate-600">
@@ -164,7 +171,7 @@ export default function ContactPage() {
                           required
                           value={formData.name}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          className="w-full h-14 px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all outline-none font-medium"
                           placeholder="John Doe"
                         />
                       </div>
@@ -183,7 +190,7 @@ export default function ContactPage() {
                           required
                           value={formData.email}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          className="w-full h-14 px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all outline-none font-medium"
                           placeholder="john@example.com"
                         />
                       </div>
@@ -203,7 +210,7 @@ export default function ContactPage() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          className="w-full h-14 px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all outline-none font-medium"
                           placeholder="+251 912 345 678"
                         />
                       </div>
@@ -222,7 +229,7 @@ export default function ContactPage() {
                           required
                           value={formData.subject}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          className="w-full h-14 px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all outline-none font-medium"
                           placeholder="Admission Inquiry"
                         />
                       </div>
@@ -242,7 +249,7 @@ export default function ContactPage() {
                         value={formData.message}
                         onChange={handleChange}
                         rows={6}
-                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all outline-none font-medium resize-none"
                         placeholder="Tell us how we can help you..."
                       />
                     </div>
@@ -250,7 +257,7 @@ export default function ContactPage() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="w-full h-14 text-base font-bold rounded-lg bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all"
+                      className="w-full h-14 text-xs font-black uppercase tracking-widest rounded-xl bg-cyan-600 hover:bg-cyan-700 shadow-xl shadow-cyan-500/20 transform active:scale-95 transition-all"
                     >
                       <Send className="mr-2 h-5 w-5" />
                       Send Message

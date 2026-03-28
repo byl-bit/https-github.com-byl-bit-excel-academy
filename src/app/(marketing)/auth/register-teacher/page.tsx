@@ -215,7 +215,7 @@ export default function RegisterTeacherPage() {
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">
                 Teacher Staff ID
               </p>
-              <p className="text-3xl font-black text-blue-600 tracking-tighter">
+              <p className="text-3xl font-black text-cyan-600 tracking-tighter">
                 {success.teacherId}
               </p>
             </div>
@@ -228,7 +228,7 @@ export default function RegisterTeacherPage() {
             <div className="grid grid-cols-2 gap-3">
               <Button
                 asChild
-                className="h-12 rounded-xl bg-blue-600 hover:bg-blue-700 font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-200"
+                className="h-12 rounded-xl bg-cyan-600 hover:bg-cyan-700 font-black uppercase text-xs tracking-widest shadow-lg shadow-cyan-200"
               >
                 <Link href="/auth/login">Continue to Login</Link>
               </Button>
@@ -247,9 +247,20 @@ export default function RegisterTeacherPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50/50">
-      <Card className="max-w-3xl w-full border-none shadow-2xl glass-panel overflow-hidden">
-        <div className="h-2 bg-linear-to-r from-blue-600 to-indigo-600" />
+    <div className="relative min-h-screen flex items-center justify-center p-4">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/images/school_banner.jpg" 
+          alt="Excel Academy Campus" 
+          className="w-full h-full object-cover blur-[3px]"
+        />
+        <div className="absolute inset-0 bg-slate-950/60" />
+      </div>
+
+      <div className="container relative z-10 mx-auto flex items-center justify-center px-4 py-8">
+        <Card className="max-w-3xl w-full border-none shadow-2xl card-premium overflow-hidden">
+        <div className="h-2 bg-linear-to-r from-cyan-600 to-indigo-600" />
         <CardHeader className="p-8 pb-4">
           <CardTitle className="text-3xl font-black text-slate-800 tracking-tighter uppercase">
             Teacher Enrollment
@@ -261,7 +272,7 @@ export default function RegisterTeacherPage() {
         <CardContent className="p-8 pt-6">
           {!isClient ? (
             <div className="h-[400px] flex flex-col items-center justify-center space-y-4">
-              <div className="h-10 w-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+              <div className="h-10 w-10 border-4 border-cyan-600/20 border-t-cyan-600 rounded-full animate-spin"></div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 Initializing Secure Form...
               </p>
@@ -293,7 +304,7 @@ export default function RegisterTeacherPage() {
                     onChange={handleChange}
                     required
                     placeholder="e.g. John Doe"
-                    className="h-12 rounded-xl border-slate-200 focus:ring-blue-600/20 focus:border-blue-600 font-bold"
+                    className="h-12 rounded-xl border-slate-200 focus:ring-cyan-600/20 focus:border-cyan-600 font-bold"
                   />
                 </div>
 
@@ -310,7 +321,7 @@ export default function RegisterTeacherPage() {
                     value={form.email}
                     onChange={handleChange}
                     placeholder="teacher@excel.edu"
-                    className="h-12 rounded-xl border-slate-200 focus:ring-blue-600/20 focus:border-blue-600 font-bold"
+                    className="h-12 rounded-xl border-slate-200 focus:ring-cyan-600/20 focus:border-cyan-600 font-bold"
                   />
                 </div>
               </div>
@@ -325,7 +336,7 @@ export default function RegisterTeacherPage() {
                   </Label>
                   <select
                     id="sex"
-                    className="w-full h-12 rounded-xl border border-slate-200 p-2 px-4 font-bold focus:ring-blue-600/20 focus:border-blue-600 bg-white transition-all appearance-none outline-none"
+                    className="w-full h-12 rounded-xl border border-slate-200 p-2 px-4 font-bold focus:ring-cyan-600/20 focus:border-cyan-600 bg-white transition-all appearance-none outline-none"
                     value={form.sex}
                     onChange={handleChange}
                     required
@@ -350,7 +361,7 @@ export default function RegisterTeacherPage() {
                     onChange={handleChange}
                     required
                     placeholder="Min 6 characters"
-                    className="h-12 rounded-xl border-slate-200 focus:ring-blue-600/20 focus:border-blue-600 font-bold"
+                    className="h-12 rounded-xl border-slate-200 focus:ring-cyan-600/20 focus:border-cyan-600 font-bold"
                   />
                 </div>
               </div>
@@ -363,7 +374,7 @@ export default function RegisterTeacherPage() {
                   Faculty Identification Photo
                 </Label>
                 <div
-                  className="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-slate-50 border border-dashed border-slate-200 group hover:border-blue-400 transition-colors cursor-pointer"
+                  className="flex flex-col md:flex-row items-center gap-6 p-6 rounded-2xl bg-slate-50 border border-dashed border-slate-200 group hover:border-cyan-400 transition-colors cursor-pointer"
                   onClick={() => document.getElementById("photo")?.click()}
                 >
                   <input
@@ -380,7 +391,7 @@ export default function RegisterTeacherPage() {
                         alt="Preview"
                         className="h-28 w-28 object-cover rounded-2xl border-4 border-white shadow-xl"
                       />
-                      <div className="absolute -right-2 -bottom-2 h-8 w-8 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg">
+                      <div className="absolute -right-2 -bottom-2 h-8 w-8 bg-cyan-600 text-white rounded-full flex items-center justify-center shadow-lg">
                         <svg
                           className="h-4 w-4"
                           fill="none"
@@ -397,7 +408,7 @@ export default function RegisterTeacherPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="h-28 w-28 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-blue-500 transition-colors shadow-sm">
+                    <div className="h-28 w-28 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-cyan-500 transition-colors shadow-sm">
                       <svg
                         className="h-10 w-10"
                         fill="none"
@@ -434,7 +445,7 @@ export default function RegisterTeacherPage() {
               <div className="flex flex-col md:flex-row gap-4 pt-4">
                 <Button
                   type="submit"
-                  className="h-14 flex-1 rounded-xl bg-blue-600 hover:bg-blue-700 font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-200 transform active:scale-95 transition-all"
+                  className="h-14 flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 font-black uppercase text-xs tracking-widest shadow-xl shadow-cyan-200 transform active:scale-95 transition-all"
                   disabled={loading}
                 >
                   {loading ? (
@@ -457,7 +468,8 @@ export default function RegisterTeacherPage() {
             </form>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -121,7 +121,7 @@ export default function LoginPage() {
           <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6 pb-4 sm:pb-6">
             {!isClient ? (
               <div className="h-[300px] flex flex-col items-center justify-center space-y-4">
-                <div className="h-10 w-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+                <div className="h-10 w-10 border-4 border-teal-500/20 border-t-cyan-600 rounded-full animate-spin"></div>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   Waking up security core...
                 </p>
@@ -157,12 +157,12 @@ export default function LoginPage() {
                       onClick={() => setRole("student")}
                       className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-lg sm:rounded-xl border-2 transition-all gap-1 touch-manipulation min-h-[70px] sm:min-h-[80px] ${
                         role === "student"
-                          ? "border-blue-600 bg-blue-50 text-blue-600 shadow-lg shadow-blue-100"
+                          ? "border-cyan-600 bg-cyan-50 text-cyan-600 shadow-lg shadow-cyan-100"
                           : "border-slate-100 bg-white hover:bg-slate-50"
                       }`}
                     >
                       <GraduationCap
-                        className={`h-5 w-5 sm:h-6 sm:w-6 ${role === "student" ? "text-blue-600" : "text-slate-400"}`}
+                        className={`h-5 w-5 sm:h-6 sm:w-6 ${role === "student" ? "text-cyan-600" : "text-slate-400"}`}
                       />
                       <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight">
                         Student
@@ -173,12 +173,12 @@ export default function LoginPage() {
                       onClick={() => setRole("teacher")}
                       className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-lg sm:rounded-xl border-2 transition-all gap-1 touch-manipulation min-h-[70px] sm:min-h-[80px] ${
                         role === "teacher"
-                          ? "border-indigo-600 bg-indigo-50 text-indigo-600 shadow-lg shadow-indigo-100"
+                          ? "border-teal-600 bg-teal-500/20 text-teal-600 shadow-lg shadow-teal-100"
                           : "border-slate-100 bg-white hover:bg-slate-50"
                       }`}
                     >
                       <Briefcase
-                        className={`h-5 w-5 sm:h-6 sm:w-6 ${role === "teacher" ? "text-indigo-600" : "text-slate-400"}`}
+                        className={`h-5 w-5 sm:h-6 sm:w-6 ${role === "teacher" ? "text-teal-600" : "text-slate-400"}`}
                       />
                       <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight">
                         Teacher
@@ -260,7 +260,7 @@ export default function LoginPage() {
                     {role !== "admin" && (
                       <Link
                         href="/auth/forgot-password"
-                        className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline"
+                        className="text-[10px] font-black text-cyan-600 uppercase tracking-widest hover:underline"
                       >
                         Reset Key?
                       </Link>
@@ -279,7 +279,7 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
-                  className="w-full h-14 text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-100 rounded-xl bg-blue-600 hover:bg-blue-700 transform active:scale-95 transition-all mt-4"
+                  className="w-full h-14 text-xs font-black uppercase tracking-widest shadow-xl shadow-cyan-100 rounded-xl bg-cyan-600 hover:bg-cyan-500 transform active:scale-95 transition-all mt-4"
                   disabled={loading}
                 >
                   {loading
@@ -302,13 +302,13 @@ export default function LoginPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <Link
                   href="/auth/register"
-                  className="h-10 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all border border-slate-50"
+                  className="h-10 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all border border-slate-50"
                 >
                   Student Signup
                 </Link>
                 <Link
                   href="/auth/register-teacher"
-                  className="h-10 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all border border-slate-50"
+                  className="h-10 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-teal-600 hover:bg-teal-500/20 rounded-lg transition-all border border-slate-50"
                 >
                   Teacher Signup
                 </Link>

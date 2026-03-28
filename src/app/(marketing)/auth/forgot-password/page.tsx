@@ -97,12 +97,23 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-4rem)] px-4 py-8">
-      <Card className="w-full max-w-md shadow-2xl border-2">
+    <div className="relative min-h-screen flex items-center justify-center p-4">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/images/school_banner.jpg" 
+          alt="Excel Academy Campus" 
+          className="w-full h-full object-cover blur-[3px]"
+        />
+        <div className="absolute inset-0 bg-slate-950/60" />
+      </div>
+
+      <div className="container relative z-10 mx-auto flex items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-md shadow-2xl border-none card-premium overflow-hidden">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center">
-            <div className="p-3 bg-blue-50 rounded-full">
-              <KeyRound className="h-8 w-8 text-blue-600" />
+            <div className="p-3 bg-cyan-50 rounded-full">
+              <KeyRound className="h-8 w-8 text-cyan-600" />
             </div>
           </div>
           <CardTitle className="text-2xl font-black">
@@ -222,7 +233,7 @@ export default function ForgotPassword() {
             </div>
             <Button
               type="submit"
-              className="w-full h-11 font-bold text-lg"
+              className="w-full h-14 font-black uppercase tracking-widest text-xs rounded-xl bg-cyan-600 hover:bg-cyan-700 shadow-xl shadow-cyan-500/20 transform active:scale-95 transition-all"
               disabled={loading}
             >
               {loading ? (
@@ -233,15 +244,16 @@ export default function ForgotPassword() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center border-t py-4">
+        <CardFooter className="flex justify-center border-t py-6 bg-slate-50/50">
           <Link
             href="/auth/login"
-            className="text-sm font-bold text-blue-600 hover:underline flex items-center gap-1"
+            className="text-sm font-black uppercase tracking-widest text-cyan-600 hover:text-cyan-700 flex items-center gap-2 transition-all"
           >
             <ArrowLeft className="h-4 w-4" /> Back to Login
           </Link>
         </CardFooter>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

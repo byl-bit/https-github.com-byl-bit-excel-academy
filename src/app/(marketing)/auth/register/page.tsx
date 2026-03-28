@@ -194,7 +194,7 @@ export default function RegisterPage() {
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2 text-center">
                 Your Unique Student ID
               </p>
-              <p className="text-4xl font-black text-center text-blue-600 tracking-tighter">
+              <p className="text-4xl font-black text-center text-cyan-600 tracking-tighter">
                 {successData.studentId}
               </p>
               <p className="text-[10px] text-slate-400 mt-4 text-center font-bold uppercase tracking-widest leading-relaxed">
@@ -209,15 +209,15 @@ export default function RegisterPage() {
               </h3>
               <ul className="text-xs text-slate-500 space-y-2 list-none font-bold uppercase tracking-wider">
                 <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />{" "}
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-600" />{" "}
                   Account is currently pending authorization
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />{" "}
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-600" />{" "}
                   Admin will review your credentials
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />{" "}
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-600" />{" "}
                   Access will be granted within 24 hours
                 </li>
               </ul>
@@ -226,7 +226,7 @@ export default function RegisterPage() {
             <div className="flex flex-col md:flex-row gap-3 pt-4">
               <Button
                 asChild
-                className="flex-1 h-14 rounded-xl bg-blue-600 hover:bg-blue-700 font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-100"
+                className="flex-1 h-14 rounded-xl bg-cyan-600 hover:bg-cyan-700 font-black uppercase text-xs tracking-widest shadow-xl shadow-cyan-100"
               >
                 <Link href="/auth/login">Proceed to Login →</Link>
               </Button>
@@ -245,13 +245,24 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="container mx-auto flex items-start sm:items-center justify-center min-h-[calc(100vh-4rem)] px-4 py-8 relative z-10">
-      <Card className="w-full max-w-3xl bg-white border-none shadow-2xl overflow-hidden glass-panel">
-        <div className="h-2 bg-linear-to-r from-blue-600 to-indigo-600" />
+    <div className="relative min-h-screen flex items-center justify-center p-4">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="/images/school_banner.jpg" 
+          alt="Excel Academy Campus" 
+          className="w-full h-full object-cover blur-[3px]"
+        />
+        <div className="absolute inset-0 bg-slate-950/60" />
+      </div>
+
+      <div className="container relative z-10 mx-auto flex items-start sm:items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-3xl bg-white border-none shadow-2xl overflow-hidden card-premium">
+        <div className="h-2 bg-linear-to-r from-cyan-600 to-indigo-600" />
         <CardHeader className="text-center pb-8 p-10 bg-slate-50/30">
           <div className="flex justify-center mb-6">
             <div className="rounded-2xl bg-white p-5 shadow-xl border border-slate-50 transform hover:scale-105 transition-transform">
-              <GraduationCap className="h-12 w-12 text-blue-600" />
+              <GraduationCap className="h-12 w-12 text-cyan-600" />
             </div>
           </div>
           <CardTitle className="text-4xl font-black text-slate-800 uppercase tracking-tighter">
@@ -264,7 +275,7 @@ export default function RegisterPage() {
         <CardContent className="p-10 pt-8">
           {!isClient ? (
             <div className="h-[500px] flex flex-col items-center justify-center space-y-4">
-              <div className="h-10 w-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+              <div className="h-10 w-10 border-4 border-cyan-600/20 border-t-cyan-600 rounded-full animate-spin"></div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 Synchronizing secure modules...
               </p>
@@ -285,7 +296,7 @@ export default function RegisterPage() {
               {/* Personal Information Section */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-                  <User className="h-4 w-4 text-blue-600" />
+                  <User className="h-4 w-4 text-cyan-600" />
                   <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">
                     Biometric Information
                   </h3>
@@ -358,7 +369,7 @@ export default function RegisterPage() {
                     </Label>
                     <select
                       id="gender"
-                      className="flex h-12 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all outline-none"
+                      className="flex h-12 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-cyan-600/20 focus:border-cyan-600 transition-all outline-none"
                       value={formData.gender}
                       onChange={(e) =>
                         setFormData({ ...formData, gender: e.target.value })
@@ -379,13 +390,13 @@ export default function RegisterPage() {
               {/* Photo Upload Section */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-                  <Camera className="h-4 w-4 text-blue-600" />
+                  <Camera className="h-4 w-4 text-cyan-600" />
                   <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">
                     Profile Visualization
                   </h3>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-6 items-center p-6 bg-slate-50 rounded-2xl border border-slate-100 border-dashed hover:border-blue-300 transition-colors">
+                <div className="flex flex-col md:flex-row gap-6 items-center p-6 bg-slate-50 rounded-2xl border border-slate-100 border-dashed hover:border-cyan-500 transition-colors">
                   <div className="shrink-0">
                     <div className="w-32 h-32 rounded-2xl border-2 border-white shadow-xl bg-white flex items-center justify-center overflow-hidden">
                       {photoPreview ? (
@@ -449,7 +460,7 @@ export default function RegisterPage() {
               {/* Academic Information Section */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-                  <BookOpen className="h-4 w-4 text-blue-600" />
+                  <BookOpen className="h-4 w-4 text-cyan-600" />
                   <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">
                     Institutional Designation
                   </h3>
@@ -465,7 +476,7 @@ export default function RegisterPage() {
                     </Label>
                     <select
                       id="grade"
-                      className="flex h-12 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all outline-none"
+                      className="flex h-12 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-cyan-600/20 focus:border-cyan-600 transition-all outline-none"
                       value={formData.grade}
                       onChange={(e) =>
                         setFormData({ ...formData, grade: e.target.value })
@@ -492,7 +503,7 @@ export default function RegisterPage() {
                     </Label>
                     <select
                       id="section"
-                      className="flex h-12 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all outline-none"
+                      className="flex h-12 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-cyan-600/20 focus:border-cyan-600 transition-all outline-none"
                       value={formData.section}
                       onChange={(e) =>
                         setFormData({ ...formData, section: e.target.value })
@@ -545,7 +556,7 @@ export default function RegisterPage() {
               {/* Account Security Section */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-                  <Lock className="h-4 w-4 text-blue-600" />
+                  <Lock className="h-4 w-4 text-cyan-600" />
                   <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">
                     Security Protocol
                   </h3>
@@ -631,7 +642,7 @@ export default function RegisterPage() {
 
                 <Button
                   type="submit"
-                  className="w-full h-14 rounded-xl bg-blue-600 hover:bg-blue-700 font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-100 transform active:scale-95 transition-all"
+                  className="w-full h-14 rounded-xl bg-cyan-600 hover:bg-cyan-700 font-black uppercase text-xs tracking-widest shadow-xl shadow-cyan-100 transform active:scale-95 transition-all"
                   disabled={loading}
                 >
                   {loading ? (
@@ -650,7 +661,7 @@ export default function RegisterPage() {
                   </p>
                   <Link
                     href="/auth/login"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-100 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 transition-all shadow-sm"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-100 text-cyan-600 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-cyan-50 transition-all shadow-sm"
                   >
                     Proceed to Authentication →
                   </Link>
@@ -659,7 +670,8 @@ export default function RegisterPage() {
             </form>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

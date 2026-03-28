@@ -90,7 +90,7 @@ export default function AdmissionPage() {
     return (
       <div className="min-h-screen py-24 px-4 flex items-center justify-center bg-slate-50">
         <Card className="max-w-xl w-full bg-white shadow-2xl border-none rounded-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
-          <div className="h-2 bg-linear-to-r from-blue-600 to-indigo-600" />
+          <div className="h-2 bg-linear-to-r from-cyan-600 to-indigo-600" />
           <CardHeader className="text-center pt-12">
             <div className="mx-auto bg-green-100 p-6 rounded-3xl w-24 h-24 flex items-center justify-center mb-6 animate-bounce">
               <CheckCircle2 className="w-12 h-12 text-green-600" />
@@ -101,7 +101,7 @@ export default function AdmissionPage() {
             <CardDescription className="text-lg text-slate-500 max-w-sm mx-auto mt-4 px-4">
               Your journey with Excel Academy starts here. We've sent a
               confirmation email to
-              <span className="font-bold text-blue-600 ml-1">
+              <span className="font-bold text-cyan-600 ml-1">
                 {formData.email}
               </span>
               .
@@ -132,16 +132,22 @@ export default function AdmissionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden">
-      {/* Background Decorations */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Universal Background Image */}
+      <div className="fixed inset-0 z-0">
+        <img 
+          src="/images/school_banner.jpg" 
+          alt="Excel Academy Campus" 
+          className="w-full h-full object-cover blur-[2px] opacity-20"
+        />
+        <div className="absolute inset-0 bg-slate-50/90" />
+      </div>
 
       <div className="container relative z-10 px-6 py-16 mx-auto max-w-6xl">
         {/* Back Button */}
         <Link
           href="/"
-          className="inline-flex items-center text-slate-400 hover:text-blue-600 font-bold text-sm mb-8 transition-colors group"
+          className="inline-flex items-center text-slate-400 hover:text-cyan-600 font-bold text-sm mb-8 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
           Back to Website
@@ -151,11 +157,11 @@ export default function AdmissionPage() {
           {/* Left Column: Form */}
           <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-black uppercase tracking-widest mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-cyan-700 text-xs font-black uppercase tracking-widest mb-4">
                 <Sparkles className="w-3 h-3" /> Admissions 2026/27
               </div>
               <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                Apply for <span className="text-blue-600">Admission</span>
+                Apply for <span className="text-cyan-600">Admission</span>
               </h1>
               <p className="text-lg text-slate-500 mt-4 font-light">
                 Start your application today and join a community of achievers.
@@ -166,7 +172,7 @@ export default function AdmissionPage() {
             <Card className="border-none shadow-2xl shadow-slate-900/5 rounded-3xl overflow-hidden bg-white">
               <CardHeader className="bg-slate-950 text-white p-8">
                 <CardTitle className="flex items-center gap-3">
-                  <FileText className="w-6 h-6 text-blue-400" /> Application
+                  <FileText className="w-6 h-6 text-cyan-400" /> Application
                   Details
                 </CardTitle>
                 <CardDescription className="text-slate-400">
@@ -177,7 +183,7 @@ export default function AdmissionPage() {
                 <form onSubmit={handleSubmit} className="space-y-8">
                   {/* Section 1: Academic Background */}
                   <div className="space-y-6">
-                    <div className="flex items-center gap-4 text-blue-600">
+                    <div className="flex items-center gap-4 text-cyan-600">
                       <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center font-black text-sm">
                         1
                       </div>
@@ -202,7 +208,7 @@ export default function AdmissionPage() {
                             required
                             value={formData.previousSchool}
                             onChange={handleChange}
-                            className="h-12 pl-11 rounded-xl border-slate-200 focus:ring-blue-500"
+                            className="h-12 pl-11 rounded-xl border-slate-200 focus:ring-cyan-500"
                           />
                         </div>
                       </div>
@@ -215,7 +221,7 @@ export default function AdmissionPage() {
                         </Label>
                         <select
                           id="grade"
-                          className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+                          className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 transition-all cursor-pointer"
                           required
                           value={formData.grade}
                           onChange={handleChange}
@@ -291,7 +297,7 @@ export default function AdmissionPage() {
                         </Label>
                         <select
                           id="gender"
-                          className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 cursor-pointer"
                           required
                           value={formData.gender}
                           onChange={handleChange}
@@ -399,14 +405,14 @@ export default function AdmissionPage() {
                     <Label className="font-bold text-slate-700">
                       Support Documents (Optional)
                     </Label>
-                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-blue-500 hover:bg-blue-50/50 transition-all cursor-pointer relative group">
+                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-cyan-500 hover:bg-blue-50/50 transition-all cursor-pointer relative group">
                       <input
                         type="file"
                         onChange={handleFileChange}
                         className="absolute inset-0 opacity-0 cursor-pointer"
                       />
                       <div className="space-y-2">
-                        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto group-hover:bg-blue-600 transition-colors">
+                        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto group-hover:bg-cyan-600 transition-colors">
                           <Upload className="w-6 h-6 text-slate-400 group-hover:text-white" />
                         </div>
                         <p className="font-bold text-slate-700">
@@ -418,7 +424,7 @@ export default function AdmissionPage() {
                         </p>
                       </div>
                       {file && (
-                        <div className="mt-4 p-2 bg-blue-100 text-blue-700 text-sm font-bold rounded-lg inline-flex items-center gap-2">
+                        <div className="mt-4 p-2 bg-blue-100 text-cyan-700 text-sm font-bold rounded-lg inline-flex items-center gap-2">
                           <CheckCircle2 className="w-4 h-4" /> {file.name}
                         </div>
                       )}
@@ -429,7 +435,7 @@ export default function AdmissionPage() {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-lg font-black shadow-xl shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95"
+                      className="w-full h-14 rounded-2xl bg-cyan-600 hover:bg-cyan-700 text-lg font-black shadow-xl shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-95"
                     >
                       {loading
                         ? "Processing Application..."
@@ -465,7 +471,7 @@ export default function AdmissionPage() {
                 ].map((item, i) => (
                   <li key={i} className="flex gap-4">
                     <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0 mt-1">
-                      <div className="w-2 h-2 rounded-full bg-blue-600" />
+                      <div className="w-2 h-2 rounded-full bg-cyan-600" />
                     </div>
                     <div>
                       <p className="font-bold text-sm text-slate-800">
@@ -484,7 +490,7 @@ export default function AdmissionPage() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
               <div className="relative z-10 space-y-4">
                 <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-                  <Info className="w-6 h-6 text-blue-400" />
+                  <Info className="w-6 h-6 text-cyan-400" />
                 </div>
                 <h3 className="text-xl font-bold">Need Assistance?</h3>
                 <p className="text-sm text-indigo-100/80 leading-relaxed">
@@ -500,7 +506,7 @@ export default function AdmissionPage() {
               </div>
             </div>
 
-            <Card className="border-none bg-blue-600 text-white rounded-4xl p-6 text-center">
+            <Card className="border-none bg-cyan-600 text-white rounded-4xl p-6 text-center">
               <p className="text-sm font-bold opacity-80 mb-2">
                 Academic Consistency
               </p>
