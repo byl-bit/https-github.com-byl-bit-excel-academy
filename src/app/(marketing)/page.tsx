@@ -27,10 +27,10 @@ import { FormattedText } from "@/components/FormattedText";
 import { SlideshowMedia } from "@/components/SlideshowMedia";
 
 const backgroundImages = [
-  "/bg1.jpg",
-  "/bg2.jpg",
-  "/bg3.jpg",
-  "/bg4.jpg",
+  "/images/school/photo_2026-03-14_10-54-52.jpg",
+  "/images/school/photo_2026-03-14_10-54-56.jpg",
+  "/images/school/photo_2026-03-14_10-55-00.jpg",
+  "/images/school/photo_2026-02-24_17-23-49.jpg",
 ];
 
 export default function Home() {
@@ -57,8 +57,8 @@ export default function Home() {
           {backgroundImages.map((img, idx) => (
             <div
               key={img}
-              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                idx === currentBg ? "opacity-50" : "opacity-0"
+              className={`absolute inset-0 transition-all duration-[2000ms] ease-in-out ${
+                idx === currentBg ? "opacity-60 scale-100" : "opacity-0 scale-105"
               }`}
             >
               <NextImage
@@ -70,7 +70,7 @@ export default function Home() {
               />
             </div>
           ))}
-          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-cyan-950/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-b from-slate-950/80 via-cyan-950/40 to-slate-950/90" />
 
           {/* Animated Orbs */}
           <div
@@ -83,53 +83,59 @@ export default function Home() {
           />
         </div>
 
-        <div className="container relative z-10 px-6 py-24 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-sm font-semibold text-cyan-50 mb-8 shadow-lg animate-fade-in-up">
-            <Sparkles className="w-4 h-4 text-yellow-300" />
-            Admissions Open for {academicYear || "2026-2027"}
-          </div>
+        <div className="container relative z-10 px-6 py-24 flex flex-col items-center justify-center text-center">
+          {/* Glassmorphism Content Wrapper */}
+          <div className="relative p-10 md:p-16 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl overflow-hidden animate-fade-in-up w-full max-w-5xl group">
+            <div className="absolute inset-0 bg-linear-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-cyan-900/30 backdrop-blur-xl border border-cyan-400/30 text-sm font-semibold text-cyan-50 mb-8 shadow-[0_0_20px_rgba(6,182,212,0.15)] animate-fade-in-up">
+              <Sparkles className="w-4 h-4 text-cyan-300" />
+              <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-200 to-teal-200">
+                Admissions Open for {academicYear || "2026-2027"}
+              </span>
+            </div>
 
-          {/* Main Heading */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-8 animate-fade-in-up delay-100">
-            <span className="block text-white mb-2">Shape Your</span>
-            <span className="block text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-teal-200 to-cyan-500">
-              Brilliant Future
-            </span>
-          </h1>
+            {/* Main Heading */}
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-8 animate-fade-in-up delay-100 drop-shadow-lg">
+              <span className="block text-white mb-2">Shape Your</span>
+              <span className="block text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-teal-200 to-cyan-500 animate-pulse" style={{animationDuration: '3s'}}>
+                Brilliant Future
+              </span>
+            </h1>
 
-          {/* Subtitle */}
-          <p className="max-w-3xl mx-auto text-xl sm:text-2xl text-cyan-50 mb-12 leading-relaxed font-light animate-fade-in-up delay-200">
-            Join Ethiopia's leading educational institution where excellence
-            meets innovation.
-            <span className="block mt-2 font-semibold text-white">
-              25 years of academic excellence. 100% pass rate.
-            </span>
-          </p>
+            {/* Subtitle */}
+            <p className="max-w-2xl mx-auto text-xl sm:text-2xl text-cyan-50 mb-12 leading-relaxed font-light animate-fade-in-up delay-200 drop-shadow-md">
+              Join Ethiopia's leading educational institution where excellence meets innovation.
+              <span className="block mt-4 font-semibold text-cyan-200 text-lg">
+                25 years of academic excellence. 100% pass rate.
+              </span>
+            </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-5 animate-fade-in-up delay-300">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in-up delay-300">
             {!isAuthenticated ? (
               <>
                 <Button
                   asChild
                   size="lg"
-                  className="h-16 px-10 rounded-full text-lg font-bold bg-white text-slate-900 hover:bg-cyan-50 shadow-2xl shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all hover:scale-105"
+                  className="h-16 px-10 rounded-full text-lg font-bold bg-cyan-500 text-white hover:bg-cyan-400 shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all hover:scale-110 hover:-translate-y-1 relative overflow-hidden group/btn border border-cyan-400"
                 >
                   <Link href="/admissions/apply">
-                    <Award className="mr-2 h-6 w-6" />
-                    Apply Now
+                    <span className="absolute inset-0 bg-linear-to-r from-teal-400/0 via-teal-400/30 to-teal-400/0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                    <Award className="mr-3 h-6 w-6 relative z-10" />
+                    <span className="relative z-10">Apply Now</span>
                   </Link>
                 </Button>
                 <Button
                   asChild
                   size="lg"
                   variant="outline"
-                  className="h-16 px-10 rounded-full text-lg font-bold bg-transparent border-2 border-white/30 text-white hover:bg-white/10 hover:border-white backdrop-blur-sm transition-all"
+                  className="h-16 px-10 rounded-full text-lg font-bold bg-white/5 border-2 border-cyan-400/50 text-white hover:bg-white/20 hover:border-cyan-300 backdrop-blur-md transition-all hover:scale-105"
                 >
                   <Link href="/auth/login">
                     Student Portal
-                    <ArrowRight className="ml-2 h-6 w-6" />
+                    <ArrowRight className="ml-3 h-6 w-6" />
                   </Link>
                 </Button>
               </>
@@ -137,7 +143,7 @@ export default function Home() {
               <Button
                 asChild
                 size="lg"
-                className="h-16 px-10 rounded-full text-lg font-bold bg-white text-slate-900 hover:bg-cyan-50 shadow-2xl shadow-cyan-500/30 transition-all hover:scale-105"
+                className="h-16 px-10 rounded-full text-lg font-bold bg-cyan-500 text-white hover:bg-cyan-400 shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all hover:scale-105 relative overflow-hidden group/btn border border-cyan-400"
               >
                 <Link
                   href={
@@ -148,11 +154,13 @@ export default function Home() {
                         : "/student"
                   }
                 >
-                  <GraduationCap className="mr-2 h-6 w-6" />
-                  Go to Dashboard
+                  <span className="absolute inset-0 bg-linear-to-r from-teal-400/0 via-teal-400/30 to-teal-400/0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                  <GraduationCap className="mr-3 h-6 w-6 relative z-10" />
+                  <span className="relative z-10">Go to Dashboard</span>
                 </Link>
               </Button>
             )}
+          </div>
           </div>
 
           {/* Trust Indicators */}
@@ -183,10 +191,10 @@ export default function Home() {
       </section>
 
       {/* --- STATS SECTION --- */}
-      <section className="relative -mt-20 z-20 px-4 sm:px-8">
+      <section className="relative -mt-24 z-20 px-4 sm:px-8">
         <div className="container mx-auto">
-          <Card className="border-none shadow-2xl shadow-slate-900/10 bg-white rounded-3xl overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-100">
+          <Card className="card-premium overflow-hidden bg-white/95 backdrop-blur-xl border border-white/40 ring-1 ring-cyan-900/5">
+            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-100/50">
               {[
                 {
                   label: "Pass Rate",
@@ -303,14 +311,14 @@ export default function Home() {
             ].map((feature, idx) => (
               <Card
                 key={idx}
-                className="group relative overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-white rounded-2xl"
+                className="card-premium group relative overflow-hidden hover:-translate-y-2 bg-gradient-to-b from-white to-slate-50 border border-white/50"
               >
                 <div
-                  className={`absolute top-0 left-0 w-full h-1 bg-linear-to-r ${feature.gradient}`}
+                  className={`absolute top-0 left-0 w-full h-1 bg-linear-to-r ${feature.gradient} opacity-80 group-hover:opacity-100 transition-opacity`}
                 />
                 <CardContent className="p-8">
                   <div
-                    className={`w-14 h-14 bg-linear-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg`}
+                    className={`w-14 h-14 bg-linear-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-${feature.color}-500/30`}
                   >
                     <feature.icon className="w-7 h-7 text-white" />
                   </div>
