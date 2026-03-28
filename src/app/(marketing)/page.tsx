@@ -105,9 +105,9 @@ export default function Home() {
             </h1>
 
             {/* Subtitle */}
-            <p className="max-w-2xl mx-auto text-xl sm:text-2xl text-cyan-50 mb-12 leading-relaxed font-light animate-fade-in-up delay-200 drop-shadow-xl">
+            <p className="max-w-2xl mx-auto text-xl sm:text-2xl text-cyan-50 mb-8 leading-relaxed font-light animate-fade-in-up delay-200 drop-shadow-xl">
               Join Ethiopia's leading educational institution where excellence meets innovation.
-              <span className="block mt-4 font-semibold text-cyan-200 text-lg">
+              <span className="block mt-2 font-semibold text-cyan-200 text-lg">
                 25 years of academic excellence. 100% pass rate.
               </span>
             </p>

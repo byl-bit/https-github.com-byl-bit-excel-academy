@@ -73,7 +73,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-white/80 backdrop-blur-xl shadow-sm transition-all duration-300 dark:border-gray-700 dark:bg-slate-900/80">
+    <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-slate-950/90 backdrop-blur-xl shadow-2xl transition-all duration-300">
       <div className="container flex h-16 sm:h-20 items-center justify-between">
         <div className="flex items-center gap-4 sm:gap-8">
           <Link
@@ -88,21 +88,21 @@ export function Navbar() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-primary">
+            <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-white">
               Excel Academy
             </span>
           </Link>
-          <div className="hidden md:flex gap-8 text-sm font-bold text-slate-800">
+          <div className="hidden md:flex gap-8 text-sm font-bold text-white">
             <Link
               href="/"
-              className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
+              className="hover:text-cyan-400 transition-all py-2 border-b-2 border-transparent hover:border-cyan-400"
             >
               Home
             </Link>
             {isAuthenticated && user?.role === "admin" && (
               <Link
                 href="/admin"
-                className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
+                className="hover:text-cyan-400 transition-all py-2 border-b-2 border-transparent hover:border-cyan-400"
               >
                 Admin Dashboard
               </Link>
@@ -110,7 +110,7 @@ export function Navbar() {
             {isAuthenticated && user?.role === "student" && (
               <Link
                 href="/student"
-                className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
+                className="hover:text-cyan-400 transition-all py-2 border-b-2 border-transparent hover:border-cyan-400"
               >
                 Student Portal
               </Link>
@@ -118,26 +118,26 @@ export function Navbar() {
             {isAuthenticated && user?.role === "teacher" && (
               <Link
                 href="/teacher"
-                className="font-black text-cyan-600 border-2 border-cyan-600 px-4 py-1.5 rounded-full hover:bg-cyan-600 hover:text-white transition-all shadow-sm"
+                className="font-black text-cyan-400 border-2 border-cyan-400 px-4 py-1.5 rounded-full hover:bg-cyan-400 hover:text-slate-950 transition-all shadow-sm"
               >
                 Teacher Portal
               </Link>
             )}
             <Link
               href="/about"
-              className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
+              className="hover:text-cyan-400 transition-all py-2 border-b-2 border-transparent hover:border-cyan-400"
             >
               About Us
             </Link>
             <Link
               href="/academics"
-              className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
+              className="hover:text-cyan-400 transition-all py-2 border-b-2 border-transparent hover:border-cyan-400"
             >
               Academics
             </Link>
             <Link
               href="/announcements"
-              className="hover:text-cyan-600 transition-all py-2 border-b-2 border-transparent hover:border-cyan-600"
+              className="hover:text-cyan-400 transition-all py-2 border-b-2 border-transparent hover:border-cyan-400"
             >
               Announcements
             </Link>
@@ -184,13 +184,13 @@ export function Navbar() {
               <Button
                 variant="outline"
                 asChild
-                className="border-cyan-200 text-cyan-700 hover:bg-cyan-50 font-black px-6 rounded-full transition-all"
+                className="border-white/20 text-white hover:bg-white/10 font-bold px-6 rounded-full transition-all"
               >
                 <Link href="/auth/login">Login</Link>
               </Button>
               <Button
                 asChild
-                className="bg-cyan-600 hover:bg-cyan-700 text-white font-black rounded-full px-6 shadow-lg shadow-cyan-500/20 transition-all hover:scale-105"
+                className="bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-full px-6 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all hover:scale-105"
               >
                 <Link href="/admissions/apply">Apply Now</Link>
               </Button>
@@ -201,7 +201,7 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden text-slate-600"
+            className="md:hidden text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
