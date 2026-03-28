@@ -12,9 +12,14 @@ interface Media {
 interface SlideshowMediaProps {
   media: Media[];
   title: string;
+  className?: string;
 }
 
-export const SlideshowMedia = ({ media, title }: SlideshowMediaProps) => {
+export const SlideshowMedia = ({
+  media,
+  title,
+  className,
+}: SlideshowMediaProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -32,7 +37,9 @@ export const SlideshowMedia = ({ media, title }: SlideshowMediaProps) => {
   const currentMedia = media[currentIndex];
 
   return (
-    <div className="relative group overflow-hidden rounded-xl border border-cyan-100 bg-slate-50 aspect-video w-full shadow-sm hover:shadow-md transition-shadow">
+    <div
+      className={`relative group overflow-hidden rounded-xl border border-cyan-100 bg-slate-50 w-full shadow-sm hover:shadow-md transition-shadow ${className || "aspect-video"}`}
+    >
       {currentMedia.type === "image" ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img

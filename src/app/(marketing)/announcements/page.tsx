@@ -138,9 +138,9 @@ export default function AnnouncementsPage() {
               Announcements
             </span>
           </h1>
-          <p className="text-xl text-cyan-100/70 max-w-2xl mx-auto font-light animate-in fade-in slide-in-from-bottom-12 duration-700">
-            Stay informed about campus life, academic deadlines, and upcoming
-            events at Excel Academy.
+          <p className="text-xl text-cyan-100/70 max-w-2xl mx-auto font-light animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
+            Stay informed about campus life, academic milestones, and essential
+            updates from the Excel Academy community.
           </p>
         </div>
       </section>
@@ -158,16 +158,16 @@ export default function AnnouncementsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex gap-2 w-full md:w-auto">
+          <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
             {["all", "academic", "event", "admin"].map((type) => (
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`px-5 h-14 rounded-2xl text-sm font-bold uppercase tracking-wider transition-all
+                className={`px-6 h-14 rounded-2xl text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all flex items-center justify-center shrink-0
                                     ${
                                       filterType === type
-                                        ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/30"
-                                        : "bg-slate-50 text-slate-500 hover:bg-slate-100"
+                                        ? "bg-cyan-600 text-white shadow-xl shadow-cyan-500/20"
+                                        : "bg-slate-50 text-slate-500 hover:bg-slate-100 border border-transparent hover:border-slate-200"
                                     }`}
               >
                 {type}
@@ -227,8 +227,8 @@ export default function AnnouncementsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-xs font-bold text-slate-300">
-                    <ShieldCheck className="w-4 h-4 text-green-500" />
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
                     Verified Post
                   </div>
                 </div>
@@ -248,6 +248,7 @@ export default function AnnouncementsPage() {
                     <SlideshowMedia
                       media={announcement.media as any}
                       title={announcement.title}
+                      className="aspect-video"
                     />
                   </div>
                 ) : announcement.imageUrl ? (
