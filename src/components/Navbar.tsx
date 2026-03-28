@@ -88,7 +88,7 @@ export function Navbar() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-white">
+            <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-cyan-400">
               Excel Academy
             </span>
           </Link>
@@ -182,9 +182,8 @@ export function Navbar() {
           ) : (
             <div className="hidden sm:flex items-center gap-3">
               <Button
-                variant="outline"
                 asChild
-                className="border-white/20 text-white hover:bg-white/10 font-bold px-6 rounded-full transition-all"
+                className="bg-cyan-500/20 border border-cyan-400/60 text-cyan-400 hover:bg-cyan-500 hover:text-white font-bold px-6 rounded-full transition-all hover:scale-105"
               >
                 <Link href="/auth/login">Login</Link>
               </Button>
