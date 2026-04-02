@@ -129,20 +129,20 @@
 @layer utilities {
   /* Regular Card Utilities */
   .card {
-    @apply bg-white border border-border shadow-sm;
+    @apply bg-background dark:bg-card border border-border shadow-sm;
   }
 
   .card-input {
-    @apply bg-white border border-input focus:ring-2 focus:ring-primary/50 transition-all rounded-lg outline-none;
+    @apply bg-background dark:bg-slate-900 border border-input focus:ring-2 focus:ring-primary/50 transition-all rounded-lg outline-none;
   }
 
   /* Premium Utilities */
   .card-premium {
-    @apply bg-white border border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 rounded-3xl;
+    @apply bg-white dark:bg-slate-900/40 border border-border/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 rounded-3xl backdrop-blur-sm;
   }
 
   .glass-premium {
-    @apply bg-white/60 backdrop-blur-xl border border-white/40 shadow-2xl;
+    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-2xl;
   }
 
   .shimmer {

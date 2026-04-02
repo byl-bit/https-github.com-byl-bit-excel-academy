@@ -28,6 +28,8 @@ export const viewport = {
   userScalable: true,
 };
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,15 +38,22 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={clsx(geistSans.className, geistMono.variable, "antialiased")}
+        className={clsx(geistSans.className, geistMono.variable, "antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100")}
         suppressHydrationWarning
       >
-        <AuthProvider>
-          <ToastProvider>
-            <ClearInputsOnRefresh />
-            {children}
-          </ToastProvider>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <ToastProvider>
+              <ClearInputsOnRefresh />
+              {children}
+            </ToastProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
