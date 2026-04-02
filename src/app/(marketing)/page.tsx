@@ -26,30 +26,50 @@ import { useAuth } from "@/contexts/AuthContext";
 import { FormattedText } from "@/components/FormattedText";
 import { SlideshowMedia } from "@/components/SlideshowMedia";
 
-const backgroundImages = [
+const defaultBackgrounds = [
   "/images/school/photo_2026-03-14_10-54-52.jpg",
   "/images/school/photo_2026-03-14_10-54-56.jpg",
   "/images/school/photo_2026-03-14_10-55-00.jpg",
   "/images/school/photo_2026-02-24_17-23-49.jpg",
-  "/images/school/photo_new_1.jpg",
-  "/images/school/photo_new_2.jpg",
-  "/images/school/photo_new_3.jpg",
 ];
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth() as any;
   const [academicYear, setAcademicYear] = useState("");
   const [currentBg, setCurrentBg] = useState(0);
+  const [backgroundImages, setBackgroundImages] = useState<string[]>(defaultBackgrounds);
 
   useEffect(() => {
+    // Determine current year
     const y = new Date().getFullYear();
     setAcademicYear(`${y}-${y + 1}`);
 
+    // Fetch dynamic background images from the gallery
+    fetch("/api/media/list?type=image")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const galleryUrls = data.map(item => item.url);
+          // Combine gallery images with default ones to ensure we always have content
+          setBackgroundImages([...galleryUrls, ...defaultBackgrounds]);
+        }
+      })
+      .catch(err => console.error("Failed to fetch dynamic backgrounds", err));
+
+    // Slideshow interval
     const interval = setInterval(() => {
-      setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
+      setCurrentBg((prev) => {
+        // Safe check for backgroundImages length
+        if (backgroundImages.length === 0) return 0;
+        return (prev + 1) % backgroundImages.length;
+      });
     }, 8000);
+    
     return () => clearInterval(interval);
-  }, []);
+  }, [backgroundImages.length]); // Added dependency on length for safety
+
+  // Fallback for empty backgroundImages (though defaultBackgrounds prevents this)
+  const currentImage = backgroundImages[currentBg] || defaultBackgrounds[0];
 
   return (
     <div className="flex flex-col min-h-screen font-sans bg-white">
