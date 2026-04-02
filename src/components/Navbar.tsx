@@ -88,14 +88,14 @@ export function Navbar() {
             className="flex items-center space-x-2 sm:space-x-3 group hover-lift active:scale-95"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="h-9 w-9 sm:h-11 sm:w-11 relative transition-transform duration-300 rounded-full overflow-hidden border border-white/30 shadow-md bg-white p-0.5">
+            <div className="h-10 sm:h-12 w-28 sm:w-40 relative transition-transform duration-300 rounded-lg overflow-hidden bg-white p-1 shadow-inner">
               <img
                 src="/school-logo-new.png"
-                alt="Excel Academy"
-                className="h-full w-full object-cover"
+                alt="Excel Academy Logo"
+                className="h-full w-full object-contain"
               />
             </div>
-            <span className="font-extrabold text-base sm:text-xl tracking-tight text-cyan-400">
+            <span className="font-extrabold text-base sm:text-xl tracking-tight text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-teal-400 hidden sm:block">
               Excel Academy
             </span>
           </Link>

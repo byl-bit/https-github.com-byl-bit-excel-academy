@@ -26,9 +26,9 @@ export default function AboutPage() {
     <div className="flex flex-col min-h-screen bg-white font-sans selection:bg-cyan-100 selection:text-cyan-900">
       {/* --- HERO SECTION --- */}
       <section className="relative py-28 md:py-40 bg-slate-950 text-white overflow-hidden">
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 text-center">
           <img 
-            src="/images/about_hero.jpg" 
+            src="/images/au-1024x683.jpg" 
             alt="Excel Academy Community" 
             className="w-full h-full object-cover opacity-60 mix-blend-overlay"
           />
@@ -39,7 +39,7 @@ export default function AboutPage() {
         <div className="container relative z-10 px-6 mx-auto text-center max-w-5xl">
           <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-cyan-500/10 backdrop-blur-xl border border-cyan-400/20 text-sm font-black text-cyan-300 mb-10 animate-in fade-in slide-in-from-bottom-4 duration-1000 uppercase tracking-widest shadow-[0_0_20px_rgba(6,182,212,0.1)]">
             <Sparkles className="w-4 h-4" />
-            Excellence Since 1999
+            20 Years of Excellence
           </div>
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 leading-[0.95]">
             Determined <br />
@@ -202,7 +202,7 @@ export default function AboutPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { name: "Desalegn", role: "School Director", icon: Shield },
-              { name: "Urteer Ibrahim", role: "Academic Vice President", icon: GraduationCap },
+              { name: "Umer Ebrahim", role: "Academic Vice President", icon: GraduationCap },
               { name: "Milkesa Admasu", role: "Unit Coordinator", icon: Users },
               { name: "Tewodros Y.", role: "Board Representative", icon: Star }
             ].map((member, i) => (

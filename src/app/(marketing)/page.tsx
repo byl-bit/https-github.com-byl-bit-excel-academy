@@ -141,7 +141,7 @@ export default function Home() {
             <p className="max-w-xl mx-auto text-lg sm:text-xl text-cyan-50 mb-8 leading-relaxed font-light animate-fade-in-up delay-200 drop-shadow-xl">
               Join Ethiopia's leading educational institution where excellence meets innovation.
               <span className="block mt-1 font-semibold text-cyan-200 text-base italic opacity-90">
-                25 years of academic excellence. 100% pass rate.
+                20 years of academic excellence. 100% pass rate.
               </span>
             </p>
 
@@ -252,7 +252,7 @@ export default function Home() {
                 },
                 {
                   label: "Years of Excellence",
-                  value: "25",
+                  value: "20",
                   icon: Award,
                   color: "text-teal-600",
                   bgColor: "bg-teal-50",
