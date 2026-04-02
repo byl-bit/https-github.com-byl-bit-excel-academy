@@ -80,31 +80,26 @@ export function Navbar() {
   };
 
   return (
-    <nav className={cn(
-      "sticky top-0 z-50 w-full transition-all duration-500",
-      scrolled 
-        ? "border-b border-white/10 bg-slate-950/80 backdrop-blur-2xl shadow-2xl py-1 sm:py-2" 
-        : "border-b border-white/5 bg-transparent py-2 sm:py-4"
-    )}>
-      <div className="container flex h-16 sm:h-20 items-center justify-between">
+    <nav className="sticky top-0 z-50 w-full transition-all duration-300 border-b border-white/10 bg-slate-950/95 backdrop-blur-xl shadow-2xl py-0">
+      <div className="container flex h-14 sm:h-16 items-center justify-between">
         <div className="flex items-center gap-4 sm:gap-8">
           <Link
             href="/"
             className="flex items-center space-x-2 sm:space-x-3 group hover-lift active:scale-95"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <div className="h-10 w-10 sm:h-12 sm:w-12 relative hover:scale-105 transition-transform duration-300 rounded-full overflow-hidden border border-white/50 shadow-md bg-white p-0.5">
+            <div className="h-9 w-9 sm:h-11 sm:w-11 relative transition-transform duration-300 rounded-full overflow-hidden border border-white/30 shadow-md bg-white p-0.5">
               <img
                 src="/school-logo-new.png"
                 alt="Excel Academy"
                 className="h-full w-full object-cover"
               />
             </div>
-            <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-cyan-400">
+            <span className="font-extrabold text-base sm:text-xl tracking-tight text-cyan-400">
               Excel Academy
             </span>
           </Link>
-          <div className="hidden md:flex gap-8 text-sm font-bold text-white">
+          <div className="hidden md:flex gap-6 text-sm font-bold text-white">
             <Link
               href="/"
               className="hover:text-cyan-400 transition-all py-2 border-b-2 border-transparent hover:border-cyan-400"
