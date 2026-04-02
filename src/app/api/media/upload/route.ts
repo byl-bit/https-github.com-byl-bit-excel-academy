@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     const buffer = new Uint8Array(arrayBuffer);
 
     // Better mime type detection
+    const category = formData.get("category") as string | null;
     let mimeType = file.type;
     const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
 
@@ -23,21 +24,19 @@ export async function POST(request: Request) {
     if (!mimeType || mimeType === "application/octet-stream") {
       const mimeMap: Record<string, string> = {
         pdf: "application/pdf",
-        doc: "application/msword",
-        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        xls: "application/vnd.ms-excel",
-        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         png: "image/png",
         jpg: "image/jpeg",
         jpeg: "image/jpeg",
         gif: "image/gif",
         txt: "text/plain",
-        csv: "text/csv",
       };
       mimeType = mimeMap[ext] || "application/octet-stream";
     }
 
     const name = customFileName || `media-${Date.now()}.${ext}`;
+
+    // If a category is provided (like 'gallery'), prefix the filename
+    const finalName = category ? `${category}/${name}` : name;
 
     let bucket = requestedBucket || "letterheads";
 
@@ -62,7 +61,7 @@ export async function POST(request: Request) {
     console.log(`[Upload] Attempting upload to: ${bucket}, File: ${name}`);
     let { data, error } = (await uploadClient.storage
       .from(bucket)
-      .upload(name, buffer, {
+      .upload(finalName, buffer, {
         contentType: mimeType,
         upsert: true,
       })) as any;
@@ -96,7 +95,7 @@ export async function POST(request: Request) {
 
             const retry = (await uploadClient.storage
               .from(bucket)
-              .upload(name, buffer, {
+              .upload(finalName, buffer, {
                 contentType: mimeType,
                 upsert: true,
               })) as any;
@@ -181,7 +180,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       url: publicUrl,
-      key: data.path,
+      key: finalName,
       bucket_used: bucket,
     });
   } catch (e: any) {

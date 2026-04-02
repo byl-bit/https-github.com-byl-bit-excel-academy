@@ -28,7 +28,7 @@ export default function GalleryPage() {
 
   useEffect(() => {
     // Fetch images from the media API
-    fetch("/api/media/list?type=image")
+    fetch("/api/media/list?type=image&prefix=gallery/")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {

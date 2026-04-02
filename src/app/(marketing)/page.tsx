@@ -45,7 +45,7 @@ export default function Home() {
     setAcademicYear(`${y}-${y + 1}`);
 
     // Fetch dynamic background images from the gallery
-    fetch("/api/media/list?type=image")
+    fetch("/api/media/list?type=image&prefix=gallery/")
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {

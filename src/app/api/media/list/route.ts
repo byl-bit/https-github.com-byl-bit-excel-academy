@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const prefix = searchParams.get("prefix") || "";
+    
     let bucket = "letterheads";
 
     // Attempt to list from 'letterheads'
-    console.log(`[List] Attempting to list from: ${bucket}`);
+    console.log(`[List] Attempting to list from: ${bucket}, Prefix: ${prefix}`);
     let { data, error } = await supabase.storage
       .from(bucket)
-      .list("", { limit: 100 });
+      .list(prefix, { limit: 100 });
 
     if (
       error &&
@@ -27,7 +30,7 @@ export async function GET() {
           console.log(`[List] Self-healing: Using existing bucket "${bucket}"`);
           const retry = await supabase.storage
             .from(bucket)
-            .list("", { limit: 100 });
+            .list(prefix, { limit: 100 });
           data = retry.data;
           error = retry.error;
         } else {
@@ -48,11 +51,12 @@ export async function GET() {
 
     const items = (data || []).map((item) => ({
       name: item.name,
-      path: item.name,
+      path: prefix ? `${prefix}/${item.name}` : item.name,
     }));
     // Build public URLs
     const urls = items.map((i) => ({
       name: i.name,
+      id: i.path,
       url: supabase.storage.from(bucket).getPublicUrl(i.path).data.publicUrl,
     }));
 
