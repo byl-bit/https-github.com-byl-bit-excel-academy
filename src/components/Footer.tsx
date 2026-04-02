@@ -29,17 +29,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand Section */}
           <div className="space-y-6">
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="h-12 w-12 relative rounded-xl overflow-hidden bg-white p-1 shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <Link href="/" className="flex items-center group">
+              <div className="h-14 w-48 relative rounded-xl overflow-hidden bg-white p-1.5 shadow-lg group-hover:scale-105 transition-transform duration-300">
                 <img
-                  src="/school-logo-new.png"
-                  alt="Excel Academy"
+                  src="/excel-academy-logo.png"
+                  alt="Excel Academy - Determined To Excel!"
                   className="h-full w-full object-contain"
                 />
               </div>
-              <span className="font-black text-2xl tracking-tighter text-white">
-                Excel Academy
-              </span>
             </Link>
             <p className="text-slate-400 leading-relaxed text-sm max-w-xs">
               Empowering the next generation through digital innovation and

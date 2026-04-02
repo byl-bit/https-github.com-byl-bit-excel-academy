@@ -58,20 +58,12 @@ export function PortalSidebarLayout({
       <div className="p-6 shrink-0 flex items-center justify-between">
         <div className="flex items-center gap-3.5">
           <div className="flex items-center gap-3">
-            <div className="h-16 w-16 relative hover:scale-105 transition-transform duration-300 rounded-full overflow-hidden border-2 border-slate-100 shadow-md bg-white p-0.5">
+            <div className="h-14 w-44 relative hover:scale-105 transition-transform duration-300 rounded-xl overflow-hidden border border-slate-100 shadow-md bg-white p-1">
               <img
-                src="/school-logo-new.png"
-                alt="Excel Academy"
-                className="h-full w-full object-cover"
+                src="/excel-academy-logo.png"
+                alt="Excel Academy - Determined To Excel!"
+                className="h-full w-full object-contain"
               />
-            </div>
-            <div>
-              <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">
-                EXCEL {/*<span className="animate-santa">🎅</span>*/}
-              </h1>
-              <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-[0.2em] leading-none mt-1.5 opacity-90">
-                ACADEMY
-              </p>
             </div>
           </div>
         </div>
@@ -276,20 +268,12 @@ export function PortalSidebarLayout({
 
             {hideSidebar && (
               <div className="flex items-center gap-1.5 sm:gap-3 mr-2 sm:mr-4 shrink-0">
-                <div className="h-10 w-10 sm:h-12 sm:w-12 relative hover:scale-105 transition-transform duration-300 rounded-full overflow-hidden border border-slate-200 shadow-sm bg-white p-0.5">
+                <div className="h-10 sm:h-12 w-28 sm:w-36 relative hover:scale-105 transition-transform duration-300 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-white p-0.5">
                   <img
-                    src="/school-logo-new.png"
-                    alt="Excel Academy"
-                    className="h-full w-full object-cover"
+                    src="/excel-academy-logo.png"
+                    alt="Excel Academy - Determined To Excel!"
+                    className="h-full w-full object-contain"
                   />
-                </div>
-                <div className="flex flex-col leading-none">
-                  <h1 className="font-black text-[10px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase">
-                    Excel {/*<span className="animate-santa">🎅</span>*/}
-                  </h1>
-                  <p className="text-[7px] sm:text-[9px] font-extrabold text-cyan-500 uppercase tracking-widest mt-0.5 opacity-90">
-                    Academy
-                  </p>
                 </div>
               </div>
             )}
