@@ -28,6 +28,7 @@ import {
   Menu,
   X,
   Trophy,
+  Image as ImageIcon,
 } from "lucide-react";
 
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -43,6 +44,7 @@ import { SubjectAllocations } from "@/components/admin/SubjectAllocations";
 import { AnnouncementManager } from "@/components/AnnouncementManager";
 import { ResetApprovals } from "@/components/admin/ResetApprovals";
 import { AppreciationLetters } from "@/components/admin/AppreciationLetters";
+import { GalleryManager } from "@/components/admin/GalleryManager";
 import { Button } from "@/components/ui/button";
 import { logActivity } from "@/lib/utils/activityLog";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
@@ -955,6 +957,7 @@ export default function AdminPage() {
       badge: unreadNotifications,
     },
     { id: "activity", label: "Logs", icon: Clock },
+    { id: "gallery", label: "Gallery", icon: ImageIcon },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -991,7 +994,7 @@ export default function AdminPage() {
     {
       label: "System",
       icon: Settings,
-      items: ["settings", "notifications"],
+      items: ["settings", "notifications", "gallery"],
     },
   ];
 
@@ -1493,6 +1496,10 @@ export default function AdminPage() {
             settings={settings}
             onUpdateSettings={handleUpdateSettings}
           />
+        )}
+
+        {activeTab === "gallery" && (
+          <GalleryManager />
         )}
       </div>
     </PortalSidebarLayout>
