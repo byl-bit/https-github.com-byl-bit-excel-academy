@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/contexts/ToastContext";
 import NextImage from "next/image";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface GalleryItem {
   id: string;
@@ -85,9 +86,18 @@ export function GalleryManager() {
     }
   };
 
-  const handleDelete = async (id: string, fileName?: string) => {
-    if (!confirm("Are you sure you want to delete this image from the gallery?")) return;
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; fileName?: string }>({
+    open: false,
+    id: "",
+  });
 
+  const handleDelete = async (id: string, fileName?: string) => {
+    setDeleteConfirm({ open: true, id, fileName });
+  };
+
+  const confirmDeleteAction = async () => {
+    const { id, fileName } = deleteConfirm;
+    setDeleteConfirm({ ...deleteConfirm, open: false });
     try {
       const res = await fetch(`/api/media/upload?id=${id}${fileName ? `&fileName=${fileName}` : ''}`, {
         method: "DELETE",
@@ -259,6 +269,16 @@ export function GalleryManager() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onClose={() => setDeleteConfirm({ ...deleteConfirm, open: false })}
+        onConfirm={confirmDeleteAction}
+        title="Delete School Asset"
+        description="Are you sure you want to delete this image? This will remove it from the home page and public gallery. This action cannot be reversed."
+        confirmText="Remove Asset"
+        variant="destructive"
+      />
     </div>
   );
 }

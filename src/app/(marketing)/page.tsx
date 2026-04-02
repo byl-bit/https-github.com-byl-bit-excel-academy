@@ -142,7 +142,7 @@ export default function Home() {
                 <Button
                   asChild
                   size="lg"
-                  className="h-16 px-10 rounded-full text-lg font-bold bg-cyan-500 text-white hover:bg-cyan-400 shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all hover:scale-110 hover:-translate-y-1 relative overflow-hidden group/btn border border-cyan-400"
+                  className="h-16 px-10 rounded-full text-lg font-bold bg-cyan-500 text-white hover:bg-cyan-400 glow-cyan-strong hover-lift relative overflow-hidden group/btn border border-cyan-400"
                 >
                   <Link href="/admissions/apply">
                     <span className="absolute inset-0 bg-linear-to-r from-teal-400/0 via-teal-400/30 to-teal-400/0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />

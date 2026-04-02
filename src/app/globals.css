@@ -235,6 +235,23 @@
   .delay-500 {
     animation-delay: 500ms;
   }
+
+  /* Interaction Utilities */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl;
+  }
+
+  .glow-cyan {
+    @apply shadow-[0_0_20px_rgba(6,182,212,0.2)];
+  }
+
+  .glow-cyan-strong {
+    @apply shadow-[0_0_40px_rgba(6,182,212,0.4)];
+  }
+
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-xl;
+  }
 }
 
 /* Custom Scrollbar - Cyan Theme */

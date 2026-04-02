@@ -24,7 +24,14 @@ export function Navbar() {
     useState<boolean>(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const isHomePage = pathname === "/";
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     try {
@@ -73,12 +80,17 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-slate-950/90 backdrop-blur-xl shadow-2xl transition-all duration-300">
+    <nav className={cn(
+      "sticky top-0 z-50 w-full transition-all duration-500",
+      scrolled 
+        ? "border-b border-white/10 bg-slate-950/80 backdrop-blur-2xl shadow-2xl py-1 sm:py-2" 
+        : "border-b border-white/5 bg-transparent py-2 sm:py-4"
+    )}>
       <div className="container flex h-16 sm:h-20 items-center justify-between">
         <div className="flex items-center gap-4 sm:gap-8">
           <Link
             href="/"
-            className="flex items-center space-x-2 sm:space-x-3 group"
+            className="flex items-center space-x-2 sm:space-x-3 group hover-lift active:scale-95"
             onClick={() => setMobileMenuOpen(false)}
           >
             <div className="h-10 w-10 sm:h-12 sm:w-12 relative hover:scale-105 transition-transform duration-300 rounded-full overflow-hidden border border-white/50 shadow-md bg-white p-0.5">
