@@ -90,12 +90,17 @@ export function ResultTable({
   const gradeAssessmentTypes = (settings?.assessmentTypes || []).filter(
     (type: AssessmentType) => {
       const typeGrade = normalizeGrade(type.grade);
+      // Ensure we match the grade and also consider 'all'
       return typeGrade === "all" || typeGrade === currentGrade;
     }
   );
 
   const activeAssessmentTypes = gradeAssessmentTypes.filter(
-    (type: AssessmentType) => type.semester === activeSemester || (!type.semester && activeSemester === "1")
+    (type: AssessmentType) => {
+      // If semester is not specified or set to 'all', show in both semesters
+      if (!type.semester || type.semester === "all") return activeSemester !== "average";
+      return type.semester === activeSemester;
+    }
   );
 
   const isDynamic = gradeAssessmentTypes.length > 0;

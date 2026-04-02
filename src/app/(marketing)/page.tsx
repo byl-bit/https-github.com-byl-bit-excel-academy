@@ -31,6 +31,9 @@ const backgroundImages = [
   "/images/school/photo_2026-03-14_10-54-56.jpg",
   "/images/school/photo_2026-03-14_10-55-00.jpg",
   "/images/school/photo_2026-02-24_17-23-49.jpg",
+  "/images/school/photo_new_1.jpg",
+  "/images/school/photo_new_2.jpg",
+  "/images/school/photo_new_3.jpg",
 ];
 
 export default function Home() {
@@ -49,7 +52,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-white" style={{ zoom: "90%" }}>
+    <div className="flex flex-col min-h-screen font-sans bg-white">
       {/* --- HERO SECTION --- */}
       <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden bg-slate-950">
         {/* Animated Background */}
