@@ -74,7 +74,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen font-sans bg-white">
       {/* --- HERO SECTION --- */}
-      <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden bg-slate-950">
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-slate-950">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">
           {backgroundImages.map((img, idx) => (
@@ -106,31 +106,41 @@ export default function Home() {
           />
         </div>
 
-        <div className="container relative z-10 px-6 py-24 flex flex-col items-center justify-center text-center">
+        <div className="container relative z-10 px-6 py-12 flex flex-col items-center justify-center text-center">
           {/* Content Wrapper (Glass Effect Removed) */}
-          <div className="relative p-10 md:p-16 rounded-3xl animate-fade-in-up w-full max-w-5xl group">
+          <div className="relative p-6 md:p-10 rounded-3xl animate-fade-in-up w-full max-w-5xl group">
             <div className="absolute inset-0 bg-linear-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
             
+            {/* Welcome Message */}
+            <div className="mb-6 space-y-2">
+              <h2 className="text-xl md:text-2xl font-bold text-white/90 tracking-tight drop-shadow-lg">
+                Welcome to <span className="text-cyan-400">Excel Academy</span>
+              </h2>
+              <p className="text-base md:text-lg text-cyan-100/80 font-medium tracking-wide">
+                Excellence at Every Stage of Education
+              </p>
+            </div>
+
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-cyan-900/40 border border-cyan-400/30 text-sm font-semibold text-cyan-50 mb-8 shadow-[0_0_20px_rgba(6,182,212,0.1)] animate-fade-in-up">
-              <Sparkles className="w-4 h-4 text-cyan-300" />
-              <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-200 to-teal-200">
-                Admissions Open for {academicYear || "2026-2027"}
+            <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-cyan-900/40 border border-cyan-400/30 text-xs font-semibold text-cyan-50 mb-6 shadow-[0_0_20px_rgba(6,182,212,0.1)] animate-fade-in-up">
+              <Sparkles className="w-3 h-3 text-cyan-300" />
+              <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-200 to-teal-200 uppercase tracking-tighter">
+                Admissions for {academicYear || "2026-2027"}
               </span>
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-8 animate-fade-in-up delay-100 drop-shadow-2xl">
-              <span className="block text-white mb-2 uppercase">Determined</span>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1] mb-6 animate-fade-in-up delay-100 drop-shadow-2xl">
+              <span className="block text-white mb-1 uppercase">Determined</span>
               <span className="block text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-teal-200 to-cyan-500 animate-pulse uppercase" style={{animationDuration: '3s'}}>
                 To Excel!
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="max-w-2xl mx-auto text-xl sm:text-2xl text-cyan-50 mb-8 leading-relaxed font-light animate-fade-in-up delay-200 drop-shadow-xl">
+            <p className="max-w-xl mx-auto text-lg sm:text-xl text-cyan-50 mb-8 leading-relaxed font-light animate-fade-in-up delay-200 drop-shadow-xl">
               Join Ethiopia's leading educational institution where excellence meets innovation.
-              <span className="block mt-2 font-semibold text-cyan-200 text-lg">
+              <span className="block mt-1 font-semibold text-cyan-200 text-base italic opacity-90">
                 25 years of academic excellence. 100% pass rate.
               </span>
             </p>
