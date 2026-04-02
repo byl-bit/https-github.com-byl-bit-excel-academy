@@ -27,8 +27,12 @@ export default function AboutPage() {
       {/* --- HERO SECTION --- */}
       <section className="relative py-28 md:py-40 bg-slate-950 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050335192-ce11558cd97d?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center opacity-30 blur-[1px]" />
-          <div className="absolute inset-0 bg-linear-to-b from-slate-900/90 via-slate-900/60 to-slate-950" />
+          <img 
+            src="/images/about_hero.jpg" 
+            alt="Excel Academy Community" 
+            className="w-full h-full object-cover opacity-60 mix-blend-overlay"
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-slate-900/95 via-slate-900/60 to-slate-950" />
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(6,182,212,0.15),transparent_70%)]" />
         </div>
 
