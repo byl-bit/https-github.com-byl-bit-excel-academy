@@ -121,9 +121,9 @@ export default function Home() {
 
             {/* Main Heading */}
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-8 animate-fade-in-up delay-100 drop-shadow-2xl">
-              <span className="block text-white mb-2">Shape Your</span>
-              <span className="block text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-teal-200 to-cyan-500 animate-pulse" style={{animationDuration: '3s'}}>
-                Brilliant Future
+              <span className="block text-white mb-2 uppercase">Determined</span>
+              <span className="block text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-teal-200 to-cyan-500 animate-pulse uppercase" style={{animationDuration: '3s'}}>
+                To Excel!
               </span>
             </h1>
 

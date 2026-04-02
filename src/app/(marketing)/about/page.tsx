@@ -42,13 +42,13 @@ export default function AboutPage() {
             Excellence Since 1999
           </div>
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 leading-[0.95]">
-            Where Knowledge <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 via-teal-300 to-cyan-200 drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]">
-              Meets Character
+            Determined <br />
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 via-teal-300 to-cyan-200 drop-shadow-[0_0_15px_rgba(34,211,238,0.3)] uppercase">
+              To Excel!
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-slate-300 leading-relaxed font-light animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-400 max-w-3xl mx-auto drop-shadow-lg italic">
-            "Excel Academy believes in providing a disciplined and high-quality environment that fosters the holistic development and moral character of each student."
+            "Excel Academy - Where Knowledge Meets Character and Every Student is Empowered to Lead."
           </p>
         </div>
       </section>
