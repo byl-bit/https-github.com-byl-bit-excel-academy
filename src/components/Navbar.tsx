@@ -13,23 +13,13 @@ import {
   Menu,
   X,
   RefreshCw,
-  Sun,
-  Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
 
 export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const [teacherPortalEnabled, setTeacherPortalEnabled] =
     useState<boolean>(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -168,22 +158,6 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Theme Toggle */}
-          {mounted && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full text-cyan-400 hover:bg-white/10 transition-all border border-white/10"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
-              ) : (
-                <Moon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
-              )}
-            </Button>
-          )}
 
           {isAuthenticated && user ? (
             <>
@@ -254,7 +228,7 @@ export function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-b border-cyan-100 dark:border-cyan-900 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-300 z-50">
+        <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-2xl border-b border-cyan-100 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-300 z-50">
           <div className="flex flex-col p-4 gap-4">
             <Link
               href="/"
@@ -263,27 +237,6 @@ export function Navbar() {
             >
               Home
             </Link>
-            {mounted && (
-              <button
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted text-slate-900 dark:text-slate-100 font-semibold w-full text-left"
-                onClick={() => {
-                  setTheme(theme === "dark" ? "light" : "dark");
-                  setMobileMenuOpen(false);
-                }}
-              >
-                {theme === "dark" ? (
-                  <>
-                    <Sun className="h-5 w-5 text-yellow-500" />
-                    Switch to Light Mode
-                  </>
-                ) : (
-                  <>
-                    <Moon className="h-5 w-5 text-slate-500" />
-                    Switch to Dark Mode
-                  </>
-                )}
-              </button>
-            )}
             {isAuthenticated ? (
               <>
                 <Link
