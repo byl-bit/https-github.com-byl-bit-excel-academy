@@ -29,7 +29,6 @@ import {
   X,
   Trophy,
   Image as ImageIcon,
-  Search,
 } from "lucide-react";
 
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -1000,87 +999,74 @@ export default function AdminPage() {
   ];
 
   const AdminHeaderMenus = (
-    <div className="flex items-center gap-6">
-      <div className="relative group hidden xl:block">
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-          <Search className="h-4 w-4 text-slate-400 group-focus-within:text-cyan-600 transition-colors" />
-        </div>
-        <input
-          type="text"
-          placeholder="Global Search..."
-          className="h-10 w-64 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all shadow-inner group-hover:bg-white"
-        />
-      </div>
-      <div className="h-6 w-px bg-slate-200 hidden xl:block" />
-      <div className="flex items-center gap-1.5">
-        {menuGroups.map((group) => (
-          <div key={group.label} className="relative group">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50/50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 font-bold text-sm transition-all shadow-sm ring-1 ring-blue-100/50 group-hover:bg-blue-100 group-hover:text-blue-800">
-              <group.icon className="h-4 w-4" />
-              <span>{group.label}</span>
-              <Menu className="h-3 w-3 opacity-30 group-hover:rotate-180 transition-transform" />
-            </button>
+    <div className="flex items-center gap-2">
+      {menuGroups.map((group) => (
+        <div key={group.label} className="relative group">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50/50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 font-bold text-sm transition-all shadow-sm ring-1 ring-blue-100/50 group-hover:bg-blue-100 group-hover:text-blue-800">
+            <group.icon className="h-4 w-4" />
+            <span>{group.label}</span>
+            <Menu className="h-3 w-3 opacity-30 group-hover:rotate-180 transition-transform" />
+          </button>
 
-            <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50 overflow-hidden">
-              <div className="absolute inset-0 bg-linear-to-br from-blue-50/20 to-indigo-50/20 pointer-events-none" />
-              <div className="relative grid gap-1">
-                {group.items.map((tabId) => {
-                  const tab = tabs.find((t) => t.id === tabId);
-                  if (!tab) return null;
-                  const isActive = activeTab === tabId;
-                  return (
-                    <button
-                      key={tabId}
-                      onClick={() => setActiveTab(tabId)}
-                      className={cn(
-                        "flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-black transition-all group/item",
-                        isActive
-                          ? "border-cyan-500 bg-cyan-50/50 text-cyan-600 ring-2 ring-cyan-500/20"
-                          : "border-transparent text-slate-500 hover:text-cyan-600 hover:bg-slate-50",
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
+          <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50 overflow-hidden">
+            <div className="absolute inset-0 bg-linear-to-br from-blue-50/20 to-indigo-50/20 pointer-events-none" />
+            <div className="relative grid gap-1">
+              {group.items.map((tabId) => {
+                const tab = tabs.find((t) => t.id === tabId);
+                if (!tab) return null;
+                const isActive = activeTab === tabId;
+                return (
+                  <button
+                    key={tabId}
+                    onClick={() => setActiveTab(tabId)}
+                    className={cn(
+                      "flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-black transition-all group/item",
+                      isActive
+                        ? "border-cyan-500 bg-cyan-50/50 text-cyan-600 ring-2 ring-cyan-500/20"
+                        : "border-transparent text-slate-500 hover:text-cyan-600 hover:bg-slate-50",
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={cn(
+                          "h-8 w-8 rounded-lg flex items-center justify-center transition-colors",
+                          isActive
+                            ? "bg-cyan-100"
+                            : "bg-slate-50 group-hover/item:bg-cyan-100",
+                        )}
+                      >
+                        <tab.icon
                           className={cn(
-                            "h-8 w-8 rounded-lg flex items-center justify-center transition-colors",
+                            "h-4 w-4",
                             isActive
-                              ? "bg-cyan-100"
-                              : "bg-slate-50 group-hover/item:bg-cyan-100",
+                              ? "text-cyan-600"
+                              : "text-slate-400 group-hover/item:text-cyan-500",
                           )}
-                        >
-                          <tab.icon
-                            className={cn(
-                              "h-4 w-4",
-                              isActive
-                                ? "text-cyan-600"
-                                : "text-slate-400 group-hover/item:text-cyan-500",
-                            )}
-                          />
-                        </div>
-                        <span className="uppercase tracking-tight underline-offset-4 decoration-2 group-hover/item:underline decoration-cyan-200/50">
-                          {tab.label}
-                        </span>
+                        />
                       </div>
-                      {tab.badge > 0 && (
-                        <span
-                          className={cn(
-                            "px-2 py-1 rounded-lg text-[10px] font-black tracking-widest border",
-                            isActive
-                              ? "bg-cyan-600 text-white border-cyan-700"
-                              : "bg-cyan-100/50 text-cyan-700 border-cyan-200/50",
-                          )}
-                        >
-                          {tab.badge}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+                      <span className="uppercase tracking-tight underline-offset-4 decoration-2 group-hover/item:underline decoration-cyan-200/50">
+                        {tab.label}
+                      </span>
+                    </div>
+                    {tab.badge > 0 && (
+                      <span
+                        className={cn(
+                          "px-2 py-1 rounded-lg text-[10px] font-black tracking-widest border",
+                          isActive
+                            ? "bg-cyan-600 text-white border-cyan-700"
+                            : "bg-cyan-100/50 text-cyan-700 border-cyan-200/50",
+                        )}
+                      >
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 
