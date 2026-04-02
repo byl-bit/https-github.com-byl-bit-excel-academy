@@ -144,7 +144,7 @@ export default function AboutPage() {
 
       {/* --- LEADERSHIP MESSAGES --- */}
       <section className="py-32 bg-slate-50 relative overflow-hidden">
-        <div className="container px-6 mx-auto text-center max-w-3xl mx-auto mb-20 space-y-4">
+        <div className="container px-6 mx-auto text-center max-w-3xl mb-20 space-y-4">
              <h2 className="text-sm font-black text-cyan-600 uppercase tracking-[0.3em]">Leadership Voice</h2>
              <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">Messages from Our Founders</h3>
         </div>
@@ -206,7 +206,7 @@ export default function AboutPage() {
               { name: "Milkesa Admasu", role: "Unit Coordinator", icon: Users },
               { name: "Tewodros Y.", role: "Board Representative", icon: Star }
             ].map((member, i) => (
-              <Card key={i} className="border-none bg-slate-50 p-8 rounded-[2rem] hover:bg-cyan-600 group transition-all duration-500 hover:-translate-y-2">
+              <Card key={i} className="border-none bg-slate-50 p-8 rounded-4xl hover:bg-cyan-600 group transition-all duration-500 hover:-translate-y-2">
                 <CardContent className="p-0 space-y-6 flex flex-col items-center text-center">
                   <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-cyan-600 group-hover:bg-white shadow-xl group-hover:scale-110 transition-all duration-500">
                     <member.icon className="w-10 h-10" />

@@ -130,7 +130,7 @@ export default function Home() {
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1] mb-6 animate-fade-in-up delay-100 drop-shadow-2xl">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-none mb-6 animate-fade-in-up delay-100 drop-shadow-2xl">
               <span className="block text-white mb-1 uppercase">Determined</span>
               <span className="block text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-teal-200 to-cyan-500 animate-pulse uppercase" style={{animationDuration: '3s'}}>
                 To Excel!
