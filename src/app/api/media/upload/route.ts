@@ -191,3 +191,44 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const fileName = searchParams.get("fileName");
+    const requestedBucket = searchParams.get("bucket") || "letterheads";
+
+    if (!id && !fileName) {
+      return NextResponse.json(
+        { error: "ID or fileName required for deletion" },
+        { status: 400 },
+      );
+    }
+
+    const client = supabaseAdmin || supabase;
+    const pathToDelete = id || (fileName ? `gallery/${fileName}` : "");
+
+    if (!pathToDelete) {
+      return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+    }
+
+    console.log(`[Delete] Attempting to delete from: ${requestedBucket}, Path: ${pathToDelete}`);
+    const { error } = await client.storage
+      .from(requestedBucket)
+      .remove([pathToDelete]);
+
+    if (error) {
+      console.error("[Delete] Supabase error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (e: any) {
+    console.error("[Delete] API Exception:", e);
+    return NextResponse.json(
+      { error: e.message || "Critical delete failure" },
+      { status: 500 },
+    );
+  }
+}
