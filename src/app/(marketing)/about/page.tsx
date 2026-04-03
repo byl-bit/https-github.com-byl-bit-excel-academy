@@ -53,6 +53,33 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* --- FOUNDERS GROUP PHOTO --- */}
+      <section className="relative w-full h-[60vh] md:h-[80vh] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/images/founders.jpg" 
+            alt="Excel Academy Founders" 
+            className="w-full h-full object-cover transition-transform duration-5000 hover:scale-110 ease-out"
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(15,23,42,0.4)_100%)]" />
+        </div>
+        <div className="container relative z-10 h-full flex flex-col justify-end pb-20 px-6 mx-auto">
+           <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-500">
+              <div className="inline-block px-4 py-1.5 rounded-lg bg-cyan-500/20 backdrop-blur-md border border-cyan-400/30 text-cyan-300 text-xs font-black uppercase tracking-[0.4em] mb-6 shadow-xl">
+                 Founding Committee
+              </div>
+              <h2 className="text-5xl md:text-8xl font-black text-white leading-[0.85] tracking-tighter mb-8 drop-shadow-2xl">
+                 United by <br/>
+                 <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-teal-200">One Vision.</span>
+              </h2>
+              <p className="text-xl md:text-2xl text-slate-200 font-light max-w-xl leading-relaxed italic drop-shadow-lg">
+                 "Our founders represent more than two decades of dedication to shaping the future of Ethiopia through quality education."
+              </p>
+           </div>
+        </div>
+      </section>
+
       {/* --- VISION & MISSION CARDS --- */}
       <section className="py-24 -mt-20 relative z-20">
         <div className="container px-6 mx-auto">
@@ -164,7 +191,7 @@ export default function AboutPage() {
                 role: "Academic Head",
                 title: "Academic Excellence",
                 message: "Our commitment to academic excellence remains unshakable. We provide a rigorous educational path that prepares students not just for university entrance, but for life. The success of our graduates at national levels is a testament to our dedicated faculty.",
-                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400&h=400"
+                image: "/images/workineh_shewangizaw.jpg"
               }
             ].map((leader, i) => (
               <div key={i} className="bg-white rounded-[2.5rem] p-10 md:p-14 shadow-xl border border-slate-100 flex flex-col md:flex-row gap-10 hover:shadow-2xl transition-shadow duration-500 group">
