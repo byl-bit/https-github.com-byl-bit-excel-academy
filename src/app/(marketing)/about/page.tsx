@@ -201,15 +201,19 @@ export default function AboutPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { name: "Desalegn", role: "School Director", icon: Shield },
+              { name: "Desalegn", role: "School Director", image: "/images/director_desalegn.jpg" },
               { name: "Umer Ebrahim", role: "Academic Vice President", icon: GraduationCap },
-              { name: "Milkesa Admasu", role: "Unit Coordinator", icon: Users },
+              { name: "Milkesa Admanu", role: "Unit Leader", image: "/images/milkesa_admanu.jpg" },
               { name: "Tewodros Y.", role: "Board Representative", icon: Star }
             ].map((member, i) => (
               <Card key={i} className="border-none bg-slate-50 p-8 rounded-4xl hover:bg-cyan-600 group transition-all duration-500 hover:-translate-y-2">
                 <CardContent className="p-0 space-y-6 flex flex-col items-center text-center">
-                  <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-cyan-600 group-hover:bg-white shadow-xl group-hover:scale-110 transition-all duration-500">
-                    <member.icon className="w-10 h-10" />
+                  <div className="w-24 h-24 rounded-2xl bg-white overflow-hidden flex items-center justify-center text-cyan-600 group-hover:bg-white shadow-xl group-hover:scale-110 transition-all duration-500">
+                    {'image' in member ? (
+                      <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <member.icon className="w-10 h-10" />
+                    )}
                   </div>
                   <div>
                     <h4 className="text-xl font-black text-slate-900 group-hover:text-white uppercase tracking-tighter transition-colors">{member.name}</h4>
