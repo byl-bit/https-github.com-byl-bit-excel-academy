@@ -19,6 +19,11 @@ export const metadata = {
   title: "Excel Academy | Student & Academic Portal",
   description:
     "Official portal for Excel Academy. View student results, download academic materials, and stay updated with the latest school announcements.",
+  icons: {
+    icon: "/excel-academy-logo.png",
+    shortcut: "/excel-academy-logo.png",
+    apple: "/excel-academy-logo.png",
+  },
 };
 
 export const viewport = {
