@@ -191,7 +191,7 @@ export default function AboutPage() {
                 role: "Academic Head",
                 title: "Academic Excellence",
                 message: "Our commitment to academic excellence remains unshakable. We provide a rigorous educational path that prepares students not just for university entrance, but for life. The success of our graduates at national levels is a testament to our dedicated faculty.",
-                image: "/images/workineh_shewangizaw.jpg"
+                image: "/images/workineh.png"
               }
             ].map((leader, i) => (
               <div key={i} className="bg-white rounded-[2.5rem] p-10 md:p-14 shadow-xl border border-slate-100 flex flex-col md:flex-row gap-10 hover:shadow-2xl transition-shadow duration-500 group">
