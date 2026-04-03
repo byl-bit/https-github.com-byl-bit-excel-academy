@@ -181,7 +181,7 @@ export default function AboutPage() {
             {[
               {
                 name: "Dr. Tewodros Yirgashewa",
-                role: "Board Member",
+                role: "Board Representative",
                 title: "Message from the Board",
                 message: "Completing high school is just the beginning of many great things to come. Despite global challenges, our students test their perseverance and ingenuity. You are stronger persons finding the resolution you did not know you had. Never stop learning, exploring, and growing.",
                 image: "/images/tewodros_yirgashewa.png"
