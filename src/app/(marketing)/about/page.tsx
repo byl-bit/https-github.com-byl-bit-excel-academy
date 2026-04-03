@@ -231,7 +231,7 @@ export default function AboutPage() {
               { name: "Desalegn", role: "School Director", image: "/images/director_desalegn.jpg" },
               { name: "Umer Ebrahim", role: "Academic Vice President", icon: GraduationCap },
               { name: "Milkesa Admanu", role: "Unit Leader", image: "/images/milkesa_admanu.jpg" },
-              { name: "Tewodros Y.", role: "Board Representative", icon: Star }
+              { name: "Tewodros Y.", role: "Board Representative", image: "/images/tewodros_yirgashewa.png" }
             ].map((member, i) => (
               <Card key={i} className="border-none bg-slate-50 p-8 rounded-4xl hover:bg-cyan-600 group transition-all duration-500 hover:-translate-y-2">
                 <CardContent className="p-0 space-y-6 flex flex-col items-center text-center">
