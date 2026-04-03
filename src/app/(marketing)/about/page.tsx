@@ -157,7 +157,7 @@ export default function AboutPage() {
                 role: "Board Member",
                 title: "Message from the Board",
                 message: "Completing high school is just the beginning of many great things to come. Despite global challenges, our students test their perseverance and ingenuity. You are stronger persons finding the resolution you did not know you had. Never stop learning, exploring, and growing.",
-                image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400&h=400"
+                image: "/images/tewodros_yirgashewa.jpg"
               },
               {
                 name: "Workineh Shewangizaw",
