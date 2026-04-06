@@ -88,8 +88,10 @@ export default function Home() {
                 src={img}
                 alt={`Campus Background ${idx + 1}`}
                 fill
+                sizes="100vw"
                 className="object-cover blur-[2px]"
                 priority={idx === 0}
+                loading={idx === 0 ? undefined : "lazy"}
               />
             </div>
           ))}
@@ -544,7 +546,9 @@ function HomeAnnouncements() {
                   }
                   alt={announcement.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  loading="lazy"
                 />
               )}
               <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-slate-800 shadow-lg">

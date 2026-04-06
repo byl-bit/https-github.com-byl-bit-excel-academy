@@ -51,13 +51,13 @@ export default function AcademicsPage() {
       </section>
 
       {/* Academic Philosophy */}
-      <section className="py-16 bg-white">
+      <section className="py-24 bg-white">
         <div className="container px-6">
           <div className="max-w-4xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 uppercase tracking-tight">
               Our Academic Philosophy
             </h2>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-700 leading-relaxed font-medium">
               At Excel Academy, we believe in nurturing well-rounded individuals
               who excel not only academically but also in character, creativity,
               and community engagement. Our curriculum is designed to challenge

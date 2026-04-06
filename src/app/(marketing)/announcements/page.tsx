@@ -138,7 +138,7 @@ export default function AnnouncementsPage() {
               Announcements
             </span>
           </h1>
-          <p className="text-xl text-cyan-100/70 max-w-2xl mx-auto font-light animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
+          <p className="text-xl text-cyan-50 max-w-2xl mx-auto font-medium animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200 drop-shadow-md">
             Stay informed about campus life, academic milestones, and essential
             updates from the Excel Academy community.
           </p>
@@ -238,7 +238,7 @@ export default function AnnouncementsPage() {
               </CardHeader>
 
               <CardContent className="p-8 md:p-10 pt-6">
-                <div className="text-lg text-slate-600 leading-relaxed font-light mb-8">
+                <div className="text-lg text-slate-700 leading-relaxed font-medium mb-8">
                   <FormattedText text={announcement.body} />
                 </div>
 
