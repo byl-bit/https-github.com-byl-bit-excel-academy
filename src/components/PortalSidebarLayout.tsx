@@ -65,11 +65,11 @@ export function PortalSidebarLayout({
                 className="h-full w-full object-cover"
               />
             </div>
-            <div>
-              <h1 className="font-black text-xl tracking-tighter text-slate-900 leading-none">
+            <div className="flex flex-col justify-center">
+              <h1 className="font-black text-xl tracking-tighter text-slate-900 leading-tight">
                 EXCEL
               </h1>
-              <p className="text-[9px] font-black text-cyan-600 uppercase tracking-[0.3em] leading-none mt-1.5 opacity-90">
+              <p className="text-[9px] font-black text-cyan-600 uppercase tracking-[0.3em] leading-tight opacity-90">
                 ACADEMY
               </p>
             </div>
@@ -283,11 +283,11 @@ export function PortalSidebarLayout({
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <div className="flex flex-col leading-none">
-                  <h1 className="font-black text-[10px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase">
+                <div className="flex flex-col justify-center pr-2">
+                  <h1 className="font-black text-[11px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase leading-tight">
                     Excel
                   </h1>
-                  <p className="text-[7px] sm:text-[9px] font-extrabold text-cyan-500 uppercase tracking-widest mt-0.5 opacity-90">
+                  <p className="text-[7px] sm:text-[9px] font-extrabold text-cyan-600 uppercase tracking-widest leading-tight opacity-90">
                     Academy
                   </p>
                 </div>
