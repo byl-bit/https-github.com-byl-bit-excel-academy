@@ -171,9 +171,13 @@ export const printResults = (
       ?.map(
         (sub: Subject) => `
         <tr>
-            <td>${sub.name}</td>
-            <td style="text-align: center;">${sub.marks}</td>
-            <td style="text-align: center;">${(sub as any).grade || calculateGrade(Number(sub.marks || 0))}</td>
+            <td style="font-weight: bold; color: #1e293b;">${sub.name}</td>
+            <td style="text-align: center; color: #0891b2; font-weight: bold;">${sub.sem1 !== undefined ? sub.sem1 : "-"}</td>
+            <td style="text-align: center; color: #0891b2; font-weight: bold;">${sub.sem2 !== undefined ? sub.sem2 : "-"}</td>
+            <td style="text-align: center; font-weight: 900; color: #0e7490;">${sub.marks}</td>
+            <td style="text-align: center; font-weight: bold; color: ${["F"].includes((sub as any).grade || calculateGrade(Number(sub.marks || 0))) ? "#ef4444" : "#0891b2"};">
+                ${(sub as any).grade || calculateGrade(Number(sub.marks || 0))}
+            </td>
         </tr>
     `,
       )
@@ -183,33 +187,53 @@ export const printResults = (
         <!DOCTYPE html>
         <html>
             <head>
-                <title>Result - ${studentName}</title>
+                <title>Academic Report - ${studentName}</title>
                 <style>
-                    @page { size: A4; margin: 1cm; }
-                    body { font-family: Arial, sans-serif; padding: 20px; color: #007acc; /* Light blue */ }
-                    .header { text-align: center; margin-bottom: 30px; color: #007acc; /* Light blue */ }
-                    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                    th, td { border: 1px solid #007acc; /* Light blue */ padding: 10px; }
-                    th { background-color: #e6f2ff; /* Light blue */ }
-                    .summary { margin-top: 20px; color: #007acc; /* Light blue */ }
-                    .summary div { margin: 10px 0; }
+                    @page { size: A4; margin: 1.5cm; }
+                    body { font-family: 'Inter', system-ui, sans-serif; padding: 0; color: #1e293b; line-height: 1.5; }
+                    .header { text-align: center; margin-bottom: 40px; border-bottom: 4px double #0891b2; padding-bottom: 20px; }
+                    .header h1 { margin: 0; font-size: 28px; font-weight: 900; color: #0891b2; letter-spacing: -0.02em; text-transform: uppercase; }
+                    .header h2 { margin: 5px 0 0; font-size: 16px; font-weight: 700; color: #64748b; letter-spacing: 0.1em; text-transform: uppercase; }
+                    
+                    .student-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+                    .student-info p { margin: 5px 0; font-size: 13px; }
+                    .student-info strong { color: #0e7490; font-weight: 800; text-transform: uppercase; font-size: 11px; margin-right: 5px; }
+
+                    table { width: 100%; border-collapse: collapse; margin: 25px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+                    th, td { border: 1px solid #e2e8f0; padding: 12px 15px; font-size: 13px; }
+                    th { background-color: #0891b2; color: white; text-transform: uppercase; font-size: 11px; font-weight: 900; letter-spacing: 0.05em; }
+                    
+                    .summary { margin-top: 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; background: #0f172a; color: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+                    .summary-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 8px; }
+                    .summary-item:last-child { border: none; padding: 0; }
+                    .summary-item span:first-child { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; }
+                    .summary-item span:last-child { font-size: 18px; font-weight: 900; color: #22d3ee; }
+                    
+                    .footer { margin-top: 60px; text-align: center; font-size: 10px; color: #94a3b8; font-style: italic; border-top: 1px solid #e2e8f0; padding-top: 20px; }
                 </style>
             </head>
             <body>
                 <div class="header">
-                    <h1>Excel Academy Secondary School</h1>
-                    <h2>Academic Result</h2>
+                    <h1>Excel Academy</h1>
+                    <h2>Official Academic Transcript</h2>
                 </div>
-                <div>
-                    <p><strong>Student Name:</strong> ${studentName}</p>
-                    <p><strong>Student ID:</strong> ${result.studentId}</p>
-                    <p><strong>Grade:</strong> ${result.grade} | <strong>Section:</strong> ${result.section}</p>
+                <div class="student-info">
+                    <div>
+                        <p><strong>Student:</strong> ${studentName}</p>
+                        <p><strong>Ref ID:</strong> ${result.studentId}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p><strong>Grade:</strong> ${result.grade} <strong>Section:</strong> ${result.section}</p>
+                        <p><strong>Session:</strong> ${new Date().getFullYear()}</p>
+                    </div>
                 </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Subject</th>
-                            <th>Marks</th>
+                            <th style="text-align: left;">Subject Name</th>
+                            <th>Sem 1 (100)</th>
+                            <th>Sem 2 (100)</th>
+                            <th>Annual (100)</th>
                             <th>Grade</th>
                         </tr>
                     </thead>
@@ -218,10 +242,26 @@ export const printResults = (
                     </tbody>
                 </table>
                 <div class="summary">
-                    <div><strong>Total:</strong> ${result.total}</div>
-                    <div><strong>Average:</strong> ${result.average}%</div>
-                    <div><strong>Rank:</strong> #${result.rank}</div>
-                    <div><strong>Result:</strong> ${result.result}</div>
+                    <div class="summary-item">
+                        <span>Aggregate Score</span>
+                        <span>${result.total} / ${((result.subjects?.length || 0) * 100)}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Final Average</span>
+                        <span>${result.average}%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Class Standing</span>
+                        <span>#${result.rank || "N/A"}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Decision</span>
+                        <span style="color: ${result.result === 'PASS' ? '#22d3ee' : '#f87171'}">${result.result || "PENDING"}</span>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>This document is electronically verified and issued by the Excel Academy Office of the Registrar.</p>
+                    <p>Determined to Excel!</p>
                 </div>
             </body>
         </html>

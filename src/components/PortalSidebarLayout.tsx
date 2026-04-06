@@ -66,10 +66,10 @@ export function PortalSidebarLayout({
               />
             </div>
             <div>
-              <h1 className="font-extrabold text-xl tracking-tight text-slate-900 leading-none">
+              <h1 className="font-black text-2xl tracking-tighter text-slate-900 leading-none">
                 EXCEL
               </h1>
-              <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-[0.2em] leading-none mt-1.5 opacity-90">
+              <p className="text-[11px] font-black text-cyan-600 uppercase tracking-[0.25em] leading-none mt-2 opacity-100">
                 ACADEMY
               </p>
             </div>
@@ -86,9 +86,9 @@ export function PortalSidebarLayout({
       </div>
 
       <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto py-2">
-        <div className="px-2 mb-2">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2">
-            Menu
+        <div className="px-3 mb-3">
+          <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] pl-2">
+            Main Menu
           </p>
         </div>
         {navItems
@@ -104,13 +104,13 @@ export function PortalSidebarLayout({
                 <div className="flex items-center gap-3.5">
                   <item.icon
                     className={cn(
-                      "h-[18px] w-[18px] transition-all duration-300",
+                      "h-5 w-5 transition-all duration-300",
                       isActive
                         ? "text-cyan-600 fill-cyan-600/10"
                         : "text-slate-400 group-hover:text-cyan-500",
                     )}
                   />
-                  <span className="truncate">{item.label}</span>
+                  <span className="truncate text-sm">{item.label}</span>
                 </div>
                 {item.badge ? (
                   <span
@@ -128,9 +128,9 @@ export function PortalSidebarLayout({
             );
 
             const className = cn(
-              "flex items-center justify-between w-full gap-3 px-4 py-3 rounded-xl transition-all duration-200 group font-semibold text-[13px] text-left relative overflow-hidden",
+              "flex items-center justify-between w-full gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group font-bold text-sm text-left relative overflow-hidden",
               isActive
-                ? "bg-cyan-50/80 text-cyan-700 shadow-sm ring-1 ring-cyan-100"
+                ? "bg-cyan-50/80 text-cyan-700 shadow-sm ring-1 ring-cyan-100/50"
                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
             );
 
@@ -187,10 +187,10 @@ export function PortalSidebarLayout({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-800 truncate group-hover:text-cyan-700 transition-colors">
+              <p className="text-[15px] font-black text-slate-800 truncate group-hover:text-cyan-700 transition-colors">
                 {user?.name || user?.fullName || "User"}
               </p>
-              <p className="text-[10px] font-semibold text-slate-400 truncate uppercase tracking-tight">
+              <p className="text-[11px] font-black text-slate-400 truncate uppercase tracking-tight">
                 {role === "student" ? user?.studentId : user?.teacherId || role}
               </p>
             </div>
@@ -213,10 +213,10 @@ export function PortalSidebarLayout({
               {(user?.name || user?.fullName)?.[0]?.toUpperCase() || "A"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-800 truncate">
+              <p className="text-[15px] font-black text-slate-800 truncate">
                 {user?.name || user?.fullName || "Admin"}
               </p>
-              <p className="text-[10px] font-semibold text-slate-400 truncate uppercase tracking-tight">
+              <p className="text-[11px] font-black text-slate-400 truncate uppercase tracking-tight">
                 System Administrator
               </p>
             </div>
@@ -314,11 +314,11 @@ export function PortalSidebarLayout({
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             {role === "admin" ? (
               <div className="flex items-center gap-3 p-1.5 pl-4 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm">
-                <div className="hidden sm:flex flex-col items-end text-right mr-2">
-                  <span className="text-[10px] font-black text-slate-900 leading-none">
+                <div className="hidden sm:flex flex-col items-end text-right mr-3">
+                  <span className="text-[11px] font-black text-slate-900 leading-none tracking-tight">
                     ADMINISTRATOR
                   </span>
-                  <span className="text-[9px] font-bold text-cyan-600 uppercase tracking-widest mt-1">
+                  <span className="text-[10px] font-black text-cyan-600 uppercase tracking-widest mt-1.5">
                     ID: {user?.adminId || `AD-${new Date().getFullYear()}-001`}
                   </span>
                 </div>
