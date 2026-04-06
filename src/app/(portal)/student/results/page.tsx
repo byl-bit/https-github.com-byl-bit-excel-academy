@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/glass-card";
 import { MOCK_RESULTS, MOCK_USERS, StudentResult, User } from "@/lib/mockData";
 import { useAuth } from "@/contexts/AuthContext";
-import { Download, AlertCircle, FileText, Award } from "lucide-react";
+import { Download, AlertCircle, FileText, Award, Eye, X, BookOpen, Info, ShieldCheck } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { calculateGrade } from "@/lib/utils/gradingLogic";
 
 export default function StudentResultsPage() {
@@ -16,6 +18,7 @@ export default function StudentResultsPage() {
   const [reportCardEnabled, setReportCardEnabled] = useState(true);
   const [certificateEnabled, setCertificateEnabled] = useState(true);
   const [assessmentTypes, setAssessmentTypes] = useState<any[]>([]);
+  const [viewingBreakdownSub, setViewingBreakdownSub] = useState<any>(null);
 
   // Track if initial fetch has been done to prevent double-fetching
   const hasFetchedRef = useRef(false);
@@ -480,6 +483,9 @@ export default function StudentResultsPage() {
                         </th>
                       </>
                     )}
+                    <th className="px-6 py-4 font-bold text-center text-xs uppercase">
+                      Breakdown
+                    </th>
                     <th className="px-6 py-4 font-bold text-right">
                       {showBreakdown ? "Total Marks" : "Average"}
                     </th>
@@ -509,11 +515,6 @@ export default function StudentResultsPage() {
                               <td
                                 key={type.id}
                                 className="px-4 py-4 text-center text-blue-500"
-                                title={
-                                  val === undefined
-                                    ? `Missing ${key}. Available: ${JSON.stringify(Object.keys(sub.assessments || {}))}`
-                                    : ""
-                                }
                               >
                                 {val !== undefined && val !== null ? val : "-"}
                               </td>
@@ -529,6 +530,17 @@ export default function StudentResultsPage() {
                             </td>
                           </>
                         )}
+                        <td className="px-6 py-4 text-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-3 text-[10px] font-black uppercase tracking-widest text-cyan-600 hover:bg-cyan-50 rounded-lg border border-cyan-100/50"
+                            onClick={() => setViewingBreakdownSub(sub)}
+                          >
+                            <Eye className="h-3 w-3 mr-1.5" />
+                            View
+                          </Button>
+                        </td>
                         <td className="px-6 py-4 text-right font-black text-teal-700">
                           {sub.marks}
                         </td>
@@ -568,6 +580,130 @@ export default function StudentResultsPage() {
           </div>
         </Card>
       ) : null}
+
+      {/* Breakdown Dialog */}
+      <Dialog open={!!viewingBreakdownSub} onOpenChange={() => setViewingBreakdownSub(null)}>
+        <DialogContent className="max-w-3xl p-0 overflow-hidden border-none rounded-3xl shadow-2xl bg-white/95 backdrop-blur-md">
+          <DialogHeader className="bg-linear-to-br from-cyan-600 to-blue-700 p-8 text-white">
+            <div className="flex justify-between items-center">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80">
+                  Assessment Ledger
+                </p>
+                <DialogTitle className="text-3xl font-black tracking-tight uppercase">
+                  {viewingBreakdownSub?.name}
+                </DialogTitle>
+                <div className="flex items-center gap-2 pt-2">
+                   <div className="h-6 w-6 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                      <BookOpen className="h-3 w-3" />
+                   </div>
+                   <span className="text-xs font-bold opacity-90 italic">
+                      Performance distribution for the current academic year
+                   </span>
+                </div>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto scrollbar-thin">
+            {["1", "2"].map((sem) => {
+              const semAssessments = assessmentTypes.filter((t: any) => t.semester === sem || (!t.semester || t.semester === "all"));
+              let semWeightedSum = 0;
+
+              return (
+                <div key={sem} className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="px-4 py-1.5 rounded-full bg-cyan-50 text-cyan-700 text-[10px] font-black uppercase tracking-widest border border-cyan-100">
+                      Semester {sem} Breakdown
+                    </div>
+                    <div className="h-px flex-1 bg-slate-100"></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {semAssessments.length === 0 ? (
+                      <div className="col-span-full py-10 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                        <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No detailed assessments configured for this semester</p>
+                      </div>
+                    ) : (
+                      semAssessments.map((type: any) => {
+                        const mark = viewingBreakdownSub?.assessments?.[String(type.id)] ?? 0;
+                        const weight = Number(type.weight || 0);
+                        const max = Number(type.maxMarks || 100);
+                        const weighted = (mark / max) * weight;
+                        semWeightedSum += weighted;
+
+                        return (
+                          <div key={type.id} className="group p-5 rounded-2xl bg-white border border-slate-100 hover:border-cyan-200 hover:shadow-xl hover:shadow-cyan-500/5 transition-all duration-500 hover:-translate-y-1">
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="space-y-0.5">
+                                <h4 className="font-black text-slate-800 text-xs uppercase tracking-tight group-hover:text-cyan-700 transition-colors">
+                                  {type.label}
+                                </h4>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                  Category Weight • {weight}%
+                                </p>
+                              </div>
+                              <div className={cn(
+                                "h-8 w-8 rounded-xl flex items-center justify-center font-black text-xs shadow-inner",
+                                mark >= (max * 0.35) ? "bg-cyan-50 text-cyan-600" : "bg-red-50 text-red-600"
+                              )}>
+                                {mark}
+                              </div>
+                            </div>
+                            
+                            {/* Visual Progress Bar */}
+                            <div className="space-y-2">
+                              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                <div 
+                                  className={cn("h-full rounded-full transition-all duration-1000", mark >= (max * 0.35) ? "bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.4)]" : "bg-red-500")}
+                                  style={{ width: `${(mark / max) * 100}%` }}
+                                />
+                              </div>
+                              <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest">
+                                <span className="text-slate-400">Score Share</span>
+                                <span className={mark >= (max * 0.35) ? "text-cyan-600" : "text-red-500"}>
+                                  +{weighted.toFixed(1)} / {weight} pts
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <div className="p-6 rounded-2xl bg-slate-900 shadow-2xl shadow-slate-200 text-white flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                        <ShieldCheck className="h-5 w-5 text-cyan-400" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Semester {sem} Net Performance</p>
+                        <p className="text-sm font-bold text-slate-100 italic">"Progress is the only indicator of success."</p>
+                      </div>
+                    </div>
+                    <div className="text-center sm:text-right">
+                       <span className="text-3xl font-black tabular-nums tracking-tighter text-cyan-400">
+                          {Math.round(semWeightedSum * 10) / 10}
+                       </span>
+                       <span className="text-slate-500 font-black text-xs ml-1 uppercase">/ 100.0</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="p-6 bg-slate-50 flex justify-end">
+            <Button 
+               onClick={() => setViewingBreakdownSub(null)}
+               className="bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px] uppercase tracking-widest px-8 h-12 rounded-xl shadow-lg transition-all active:scale-95"
+            >
+              Close Ledger
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

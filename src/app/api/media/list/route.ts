@@ -49,10 +49,15 @@ export async function GET(request: Request) {
       );
     }
 
-    const items = (data || []).map((item) => ({
-      name: item.name,
-      path: prefix ? `${prefix}/${item.name}` : item.name,
-    }));
+    const items = (data || []).map((item) => {
+      // Cleanly join prefix and item.name without double slashes
+      const cleanPrefix = prefix.endsWith("/") ? prefix.slice(0, -1) : prefix;
+      const path = prefix ? `${cleanPrefix}/${item.name}` : item.name;
+      return {
+        name: item.name,
+        path: path,
+      };
+    });
     // Build public URLs
     const urls = items.map((i) => ({
       name: i.name,

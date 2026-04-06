@@ -184,7 +184,14 @@ export function ResultTable({
     const subjectMarks = subjects.map((sub) => {
       if (isDynamic) {
         let subTotal = 0;
-        gradeAssessmentTypes.forEach((type: AssessmentType) => {
+        // Filter assessments by active semester if not in average mode
+        const targetTypes = gradeAssessmentTypes.filter((type: AssessmentType) => {
+          if (activeSemester === "average") return true; 
+          if (!type.semester || type.semester === "all") return true;
+          return type.semester === activeSemester;
+        });
+
+        targetTypes.forEach((type: AssessmentType) => {
           const val = marks[`${sub}__${type.id}`];
           if (val !== undefined && typeof val === "number") {
             subTotal +=
@@ -195,14 +202,17 @@ export function ResultTable({
       } else {
         const s1 = marks[`${sub}_sem1`] || 0;
         const s2 = marks[`${sub}_sem2`] || 0;
-        // Average of two semesters
+        
+        if (activeSemester === "1") return s1;
+        if (activeSemester === "2") return s2;
+        // Average of two semesters for 'average' view
         const sAvg = (s1 + s2) / 2;
         return Math.round(sAvg * 10) / 10;
       }
     });
 
     total = excelSum(subjectMarks);
-    const average = excelAverage(subjectMarks);
+    const average = subjects.length > 0 ? total / subjects.length : 0;
     return { total, average, subjectMarks };
   };
 
@@ -1151,13 +1161,23 @@ export function ResultTable({
 
                             let subTotalValue = 0;
                             if (isDynamic && activeSemester === "average") {
-                                // SubTotal calculation when dynamic in average view
+                                // SubTotal calculation when dynamic in average view: average of semesters
+                                let s1Sub = 0;
+                                let s2Sub = 0;
                                 gradeAssessmentTypes.forEach((type: AssessmentType) => {
                                   const val = marks[`${subject}__${type.id}`];
                                   if (val !== undefined && typeof val === "number") {
-                                    subTotalValue += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                                    const contribution = (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                                    if (type.semester === "1") s1Sub += contribution;
+                                    else if (type.semester === "2") s2Sub += contribution;
+                                    else {
+                                      // Common assessments (all) count for both or split? Typically show in both.
+                                      s1Sub += contribution;
+                                      s2Sub += contribution;
+                                    }
                                   }
                                 });
+                                subTotalValue = (s1Sub + s2Sub) / 2;
                             }
 
                             return (
