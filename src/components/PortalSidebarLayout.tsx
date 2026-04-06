@@ -66,10 +66,10 @@ export function PortalSidebarLayout({
               />
             </div>
             <div>
-              <h1 className="font-black text-2xl tracking-tighter text-slate-900 leading-none">
+              <h1 className="font-black text-xl tracking-tighter text-slate-900 leading-none">
                 EXCEL
               </h1>
-              <p className="text-[11px] font-black text-cyan-600 uppercase tracking-[0.25em] leading-none mt-2 opacity-100">
+              <p className="text-[9px] font-black text-cyan-600 uppercase tracking-[0.3em] leading-none mt-1.5 opacity-90">
                 ACADEMY
               </p>
             </div>
@@ -104,13 +104,13 @@ export function PortalSidebarLayout({
                 <div className="flex items-center gap-3.5">
                   <item.icon
                     className={cn(
-                      "h-5 w-5 transition-all duration-300",
+                      "h-4.5 w-4.5 transition-all duration-300",
                       isActive
                         ? "text-cyan-600 fill-cyan-600/10"
                         : "text-slate-400 group-hover:text-cyan-500",
                     )}
                   />
-                  <span className="truncate text-sm">{item.label}</span>
+                  <span className="truncate text-[13px]">{item.label}</span>
                 </div>
                 {item.badge ? (
                   <span
@@ -128,9 +128,9 @@ export function PortalSidebarLayout({
             );
 
             const className = cn(
-              "flex items-center justify-between w-full gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 group font-bold text-sm text-left relative overflow-hidden",
+              "flex items-center justify-between w-full gap-3 px-4 py-3 rounded-xl transition-all duration-200 group font-semibold text-[13px] text-left relative overflow-hidden",
               isActive
-                ? "bg-cyan-50/80 text-cyan-700 shadow-sm ring-1 ring-cyan-100/50"
+                ? "bg-cyan-50/80 text-cyan-700 shadow-sm ring-1 ring-cyan-100/40"
                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
             );
 
@@ -187,10 +187,10 @@ export function PortalSidebarLayout({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-black text-slate-800 truncate group-hover:text-cyan-700 transition-colors">
+              <p className="text-sm font-bold text-slate-800 truncate group-hover:text-cyan-700 transition-colors">
                 {user?.name || user?.fullName || "User"}
               </p>
-              <p className="text-[11px] font-black text-slate-400 truncate uppercase tracking-tight">
+              <p className="text-[10px] font-bold text-slate-400 truncate uppercase tracking-tight">
                 {role === "student" ? user?.studentId : user?.teacherId || role}
               </p>
             </div>
@@ -213,10 +213,10 @@ export function PortalSidebarLayout({
               {(user?.name || user?.fullName)?.[0]?.toUpperCase() || "A"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-black text-slate-800 truncate">
+              <p className="text-sm font-bold text-slate-800 truncate">
                 {user?.name || user?.fullName || "Admin"}
               </p>
-              <p className="text-[11px] font-black text-slate-400 truncate uppercase tracking-tight">
+              <p className="text-[10px] font-bold text-slate-400 truncate uppercase tracking-tight">
                 System Administrator
               </p>
             </div>
@@ -315,14 +315,13 @@ export function PortalSidebarLayout({
             {role === "admin" ? (
               <div className="flex items-center gap-3 p-1.5 pl-4 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm">
                 <div className="hidden sm:flex flex-col items-end text-right mr-3">
-                  <span className="text-[11px] font-black text-slate-900 leading-none tracking-tight">
+                  <span className="text-[10px] font-black text-slate-900 leading-none tracking-tight">
                     ADMINISTRATOR
                   </span>
-                  <span className="text-[10px] font-black text-cyan-600 uppercase tracking-widest mt-1.5">
+                  <span className="text-[9px] font-bold text-cyan-600 uppercase tracking-widest mt-1">
                     ID: {user?.adminId || `AD-${new Date().getFullYear()}-001`}
                   </span>
                 </div>
-
                 <div className="h-8 w-px bg-slate-200 hidden sm:block mx-1" />
 
                 <div className="flex items-center gap-1">
