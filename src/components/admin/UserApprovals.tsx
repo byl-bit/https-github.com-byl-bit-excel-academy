@@ -96,13 +96,13 @@ export function UserApprovals({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xl font-black text-slate-800">
+              <h3 className="text-xl font-bold text-slate-800">
                 New Admission Applications
               </h3>
               {admissionApplications.length > 0 && (
                 <button
                   onClick={() => onRejectAll && onRejectAll("admission")}
-                  className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                  className="text-xs font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
                 >
                   Reject All
                 </button>
@@ -138,7 +138,7 @@ export function UserApprovals({
                           <h4 className="font-bold text-slate-800 text-sm group-hover:text-cyan-700 transition-colors">
                             {app.studentName || app.familyFullName}
                           </h4>
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-black uppercase tracking-wider">
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-bold uppercase tracking-wider">
                             <span className="text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-100">
                               Grade {app.grade}
                             </span>
@@ -196,13 +196,13 @@ export function UserApprovals({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-black text-slate-800">
+                <h3 className="text-xl font-bold text-slate-800">
                   Student Accounts
                 </h3>
                 {pendingStudents.length > 0 && (
                   <button
                     onClick={() => onRejectAll && onRejectAll("student")}
-                    className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                    className="text-xs font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
                   >
                     Reject All
                   </button>
@@ -240,10 +240,10 @@ export function UserApprovals({
                             {user.fullName || user.name}
                           </h4>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                            <span className="text-xs font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
                               {user.studentId}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase">
+                            <span className="text-xs text-slate-400 font-bold uppercase">
                               G{user.grade}-{user.section}
                             </span>
                           </div>
@@ -295,13 +295,13 @@ export function UserApprovals({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xl font-black text-slate-800">
+              <h3 className="text-xl font-bold text-slate-800">
                 Teacher Accounts
               </h3>
               {pendingTeachers.length > 0 && (
                 <button
                   onClick={() => onRejectAll && onRejectAll("teacher")}
-                  className="text-[10px] font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                  className="text-xs font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
                 >
                   Reject All
                 </button>
@@ -338,10 +338,10 @@ export function UserApprovals({
                             {user.fullName || user.name}
                           </h4>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] font-mono font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-100">
+                            <span className="text-xs font-mono font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-100">
                               {user.teacherId}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase">
+                            <span className="text-xs text-slate-400 font-bold uppercase">
                               H: {user.grade}-{user.section}
                             </span>
                           </div>
@@ -393,7 +393,7 @@ export function UserApprovals({
               <Award className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-800">
+              <h3 className="text-xl font-bold text-slate-800">
                 Pending Result Approvals
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -404,7 +404,7 @@ export function UserApprovals({
           <Button
             variant="ghost"
             size="sm"
-            className="text-cyan-600 font-black text-[10px] uppercase tracking-widest hover:bg-cyan-50 hover:text-cyan-700 rounded-xl transition-all"
+            className="text-cyan-600 font-bold text-xs uppercase tracking-wider hover:bg-cyan-50 hover:text-cyan-700 rounded-xl transition-all"
             onClick={() => onTabChange?.("results")}
           >
             Detailed Manager <ArrowRight className="ml-2 h-3 w-3" />
@@ -446,13 +446,13 @@ export function UserApprovals({
                             {res.studentName}
                           </h4>
                           <div className="flex items-center gap-3">
-                            <span className="text-[10px] text-cyan-500 font-mono font-bold bg-cyan-50/50 px-2 py-0.5 rounded border border-cyan-100/50">
+                            <span className="text-xs text-cyan-500 font-mono font-bold bg-cyan-50/50 px-2 py-0.5 rounded border border-cyan-100/50">
                               {res.studentId}
                             </span>
-                            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tight">
+                            <span className="text-xs font-bold text-emerald-600 uppercase tracking-tight">
                               Average: {res.average.toFixed(1)}%
                             </span>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                            <span className="text-xs text-slate-400 font-bold uppercase tracking-tight">
                               Grade {res.grade}
                             </span>
                           </div>
@@ -465,7 +465,7 @@ export function UserApprovals({
                                   key={s.name}
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 text-[9px] font-black uppercase px-2 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white transition-all"
+                                  className="h-6 text-xs font-bold uppercase px-2 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white transition-all"
                                   onClick={() =>
                                     onApproveSubject?.(res.key, s.name)
                                   }

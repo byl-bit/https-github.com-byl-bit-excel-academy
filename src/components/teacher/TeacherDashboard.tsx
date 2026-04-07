@@ -203,10 +203,10 @@ export function TeacherOverview({
         <div className="relative z-10 p-10 sm:p-14 flex flex-col md:flex-row justify-between items-center gap-10 md:gap-16">
           <div className="text-center md:text-left space-y-6 flex-1">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100/50 text-cyan-600 text-[10px] font-black uppercase tracking-widest mb-2 shadow-xs ring-4 ring-cyan-50/50">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100/50 text-cyan-600 text-xs font-bold uppercase tracking-wider mb-2 shadow-xs ring-4 ring-cyan-50/50">
                 <span className="flex h-1.5 w-1.5 rounded-full bg-cyan-600 animate-pulse"></span> Terminal Active
               </div>
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
                 Welcome, <span className="text-gradient drop-shadow-sm">{user.name}</span>
               </h1>
               <p className="text-slate-500 text-lg font-bold flex items-center justify-center md:justify-start gap-2.5 opacity-80 mt-4">
@@ -214,7 +214,7 @@ export function TeacherOverview({
                   <School className="h-5 w-5 text-cyan-500" />
                 </div>
                 {user.grade && user.section ? (
-                  <span className="text-slate-700">Homeroom: <span className="text-cyan-600 font-extrabold">Grade {user.grade} • Section {user.section}</span></span>
+                  <span className="text-slate-700">Homeroom: <span className="text-cyan-600 font-bold">Grade {user.grade} • Section {user.section}</span></span>
                 ) : (
                   <span className="italic">Subject Faculty • Specialized Instruction</span>
                 )}
@@ -227,7 +227,7 @@ export function TeacherOverview({
               <Button
                 variant="premium"
                 onClick={generateBulkReports}
-                className="h-16 px-10 rounded-2xl font-black text-base flex items-center gap-4 group/btn"
+                className="h-16 px-10 rounded-2xl font-bold text-base flex items-center gap-4 group/btn"
               >
                 <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center group-hover/btn:scale-110 transition-transform">
                   <FileCheck className="h-5 w-5 text-white" />
@@ -252,10 +252,10 @@ export function TeacherOverview({
               <stat.icon className={cn("h-10 w-10", `text-${stat.color}-600`)} />
             </div>
             <div className="space-y-0.5">
-              <p className="text-5xl font-black text-slate-900 tracking-tighter tabular-nums">
+              <p className="text-3xl font-bold text-slate-900 tracking-tight tabular-nums">
                 {stat.value}
               </p>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 {stat.label}
               </p>
             </div>
@@ -275,10 +275,10 @@ export function TeacherOverview({
             <div className="space-y-4">
               <div className="flex justify-between items-end">
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
                     Class Pass Rate
                   </p>
-                  <span className="text-3xl font-black text-cyan-600">
+                  <span className="text-2xl font-bold text-cyan-600">
                     {students.length > 0
                       ? (
                           (classResults.filter((r) => r.result === "PASS")
@@ -290,7 +290,7 @@ export function TeacherOverview({
                     %
                   </span>
                 </div>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
                   +2.4% vs last term
                 </span>
               </div>
@@ -307,17 +307,17 @@ export function TeacherOverview({
             <div className="space-y-4">
               <div className="flex justify-between items-end">
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
                     Process Completion
                   </p>
-                  <span className="text-3xl font-black text-cyan-600">
+                  <span className="text-3xl font-bold text-cyan-600">
                     {students.length > 0
                       ? ((publishedCount / students.length) * 100).toFixed(0)
                       : 0}
                     %
                   </span>
                 </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                <span className="text-xs font-bold text-slate-400 uppercase">
                   On Schedule
                 </span>
               </div>
@@ -345,7 +345,7 @@ export function TeacherOverview({
                 <div className="h-16 w-16 rounded-3xl bg-slate-50 flex items-center justify-center">
                   <CheckCircle className="h-8 w-8 text-emerald-400 opacity-50" />
                 </div>
-                <p className="text-sm font-bold uppercase tracking-widest italic opacity-50">
+                <p className="text-sm font-semibold uppercase tracking-wider italic opacity-50">
                   Operational excellence - All tasks clear
                 </p>
               </div>
@@ -357,10 +357,10 @@ export function TeacherOverview({
                       <Clock className="h-6 w-6 text-cyan-500" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                      <p className="text-sm font-bold text-slate-800 uppercase tracking-tight">
                         {pendingCount} Verifications Pending
                       </p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">
+                      <p className="text-xs font-medium text-slate-400 uppercase">
                         Awaiting final admin signature
                       </p>
                     </div>
@@ -373,10 +373,10 @@ export function TeacherOverview({
                       <AlertCircle className="h-6 w-6 text-teal-500" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                      <p className="text-sm font-bold text-slate-800 uppercase tracking-tight">
                         {draftCount} Records for Review
                       </p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">
+                      <p className="text-xs font-medium text-slate-400 uppercase">
                         Input processing required
                       </p>
                     </div>
@@ -390,7 +390,7 @@ export function TeacherOverview({
                         <TrendingUp className="h-5 w-5 text-red-600" />
                       </div>
                       <div>
-                        <p className="text-xs font-black text-red-600 uppercase tracking-widest">
+                        <p className="text-xs font-bold text-red-600 uppercase tracking-wider">
                           Homeroom Priority
                         </p>
                         <p className="text-sm font-bold text-slate-800">
@@ -414,7 +414,7 @@ export function TeacherOverview({
               <FileCheck className="h-5 w-5 text-slate-600" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-800 tracking-tight">
+              <h3 className="text-xl font-bold text-slate-800 tracking-tight">
                 Recent Activity
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -440,7 +440,7 @@ export function TeacherOverview({
               <div className="h-20 w-20 bg-slate-50 rounded-4xl flex items-center justify-center mx-auto mb-6">
                 <FileCheck className="h-10 w-10 text-slate-200" />
               </div>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs italic">
+              <p className="text-slate-400 font-bold uppercase tracking-wider text-xs italic">
                 No activity logs recorded yet.
               </p>
             </div>
@@ -449,22 +449,22 @@ export function TeacherOverview({
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-100">
-                    <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                    <th className="p-5 text-xs font-bold uppercase text-slate-400 tracking-wider">
                       Student Information
                     </th>
-                    <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">
+                    <th className="p-5 text-xs font-bold uppercase text-slate-400 tracking-wider text-center">
                       Class / Roll
                     </th>
-                    <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">
+                    <th className="p-5 text-xs font-bold uppercase text-slate-400 tracking-wider text-center">
                       Gender
                     </th>
-                    <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">
+                    <th className="p-5 text-xs font-bold uppercase text-slate-400 tracking-wider text-center">
                       Assessments
                     </th>
-                    <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">
+                    <th className="p-5 text-xs font-bold uppercase text-slate-400 tracking-wider text-center">
                       Outcome
                     </th>
-                    <th className="p-5 text-[10px] font-black uppercase text-slate-400 tracking-widest text-right">
+                    <th className="p-5 text-xs font-bold uppercase text-slate-400 tracking-wider text-right">
                       Status
                     </th>
                   </tr>
@@ -492,11 +492,11 @@ export function TeacherOverview({
                               {(result.studentName ?? "").charAt(0)}
                             </div>
                             <div>
-                              <p className="font-black text-slate-800 group-hover:text-cyan-700 transition-colors leading-tight uppercase tracking-tight">
+                              <p className="font-bold text-slate-800 group-hover:text-cyan-700 transition-colors leading-tight uppercase tracking-tight">
                                 {result.studentName ?? "Student"}
                               </p>
                               <div className="flex items-center gap-2 mt-1">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
                                   ID: {result.studentId}
                                 </p>
                                 <button 
@@ -504,7 +504,7 @@ export function TeacherOverview({
                                     const studentObj = students.find(s => String(s.studentId || s.id) === String(result.studentId));
                                     setViewingStudent(studentObj || result);
                                   }}
-                                  className="group/view inline-flex items-center gap-1 text-[8px] font-black text-cyan-600 hover:text-white uppercase tracking-widest bg-cyan-50 hover:bg-cyan-600 px-2 py-1 rounded-lg transition-all border border-cyan-100/50 shadow-xs active:scale-95"
+                                  className="group/view inline-flex items-center gap-1 text-xs font-bold text-cyan-600 hover:text-white uppercase tracking-wider bg-cyan-50 hover:bg-cyan-600 px-2 py-1 rounded-lg transition-all border border-cyan-100/50 shadow-xs active:scale-95"
                                 >
                                   <Eye className="h-3 w-3" />
                                   Details
@@ -517,10 +517,10 @@ export function TeacherOverview({
                         </td>
                         <td className="p-5 text-center">
                           <div className="inline-flex flex-col items-center">
-                            <span className="text-xs font-black text-slate-700">
+                            <span className="text-xs font-bold text-slate-700">
                               {result.grade}-{result.section}
                             </span>
-                            <span className="text-[9px] font-bold text-slate-400 uppercase">
+                            <span className="text-xs font-medium text-slate-400 uppercase">
                               Roll:{" "}
                               {result.rollNumber ||
                                 (result as any).roll_number ||
@@ -531,7 +531,7 @@ export function TeacherOverview({
                         <td className="p-5 text-center">
                           <span
                             className={cn(
-                              "text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider",
+                              "text-xs font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider",
                               normalizeGender(
                                 result.gender || (result as any).sex,
                               ) === "M"
@@ -555,10 +555,10 @@ export function TeacherOverview({
                                 key={sub.name}
                                 className="flex flex-col items-center p-1.5 rounded-lg bg-white border border-slate-100 shadow-xs min-w-[50px]"
                               >
-                                <span className="text-[8px] font-black text-slate-400 uppercase truncate w-10 text-center">
+                                <span className="text-xs font-bold text-slate-400 uppercase truncate w-10 text-center">
                                   {sub.name}
                                 </span>
-                                <span className="text-[11px] font-black text-cyan-600">
+                                <span className="text-xs font-bold text-cyan-600">
                                   {sub.marks}
                                 </span>
                               </div>
@@ -568,11 +568,11 @@ export function TeacherOverview({
                         <td className="p-5 text-center">
                           <div className="inline-block relative">
                             <span
-                              className={`text-xl font-black ${(result.average ?? 0) >= 35 ? "text-emerald-600" : "text-red-500"}`}
+                              className={`text-xl font-bold ${(result.average ?? 0) >= 35 ? "text-emerald-600" : "text-red-500"}`}
                             >
                               {(result.average ?? 0).toFixed(1)}
                             </span>
-                            <span className="text-[9px] text-slate-400 ml-0.5 font-bold">
+                            <span className="text-xs text-slate-400 ml-0.5 font-medium">
                               %
                             </span>
                           </div>
@@ -580,7 +580,7 @@ export function TeacherOverview({
                         <td className="p-5 text-right">
                           <div className="flex flex-col items-end gap-1.5">
                             <span
-                              className={`text-[9px] px-2.5 py-1 rounded-lg font-black tracking-widest uppercase shadow-sm border ${
+                              className={`text-xs px-2.5 py-1 rounded-lg font-bold tracking-wider uppercase shadow-sm border ${
                                 result.status === "published"
                                   ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                                   : "bg-amber-50 text-amber-700 border-amber-100"
@@ -588,7 +588,7 @@ export function TeacherOverview({
                             >
                               {result.status || "Draft"}
                             </span>
-                            <span className="text-[8px] font-bold text-slate-400 uppercase">
+                            <span className="text-xs font-medium text-slate-400 uppercase">
                               {new Date().toLocaleDateString()}
                             </span>
                           </div>

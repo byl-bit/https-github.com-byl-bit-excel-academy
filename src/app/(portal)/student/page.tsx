@@ -119,31 +119,31 @@ export default function StudentDashboard() {
 
           <div className="text-center md:text-left flex-1 space-y-6">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100/50 text-cyan-600 text-[10px] font-black uppercase tracking-widest mb-2 shadow-xs">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-100/50 text-cyan-600 text-xs font-bold uppercase tracking-wider mb-2 shadow-xs">
                 Active Session
               </div>
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 leading-none">
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 leading-none">
                 Welcome,{" "}
                 <span className="text-gradient">
                   {user.name?.split(" ")[0]}
                 </span>
               </h1>
-              <p className="text-slate-500 text-lg font-bold flex items-center justify-center md:justify-start gap-2.5 opacity-80 mt-4">
+              <p className="text-slate-500 text-lg font-semibold flex items-center justify-center md:justify-start gap-2.5 opacity-80 mt-4">
                 <div className="h-10 w-10 rounded-xl bg-white shadow-xs border border-slate-100 flex items-center justify-center">
                   <GraduationCap className="h-5 w-5 text-cyan-500" />
                 </div>
-                <span className="text-slate-700">{user.fullName} • <span className="text-cyan-600 font-extrabold text-sm uppercase">Grade {user.grade}-{user.section}</span></span>
+                <span className="text-slate-700">{user.fullName} • <span className="text-cyan-600 font-bold text-sm uppercase">Grade {user.grade}-{user.section}</span></span>
               </p>
             </div>
 
             <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
               <div className="bg-white/60 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-white shadow-xs flex items-center gap-3">
                 <Award className="h-4 w-4 text-amber-500" />
-                <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest">ID: {user.studentId}</span>
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">ID: {user.studentId}</span>
               </div>
               <div className="bg-white/60 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-white shadow-xs flex items-center gap-3">
                 <Clock className="h-4 w-4 text-cyan-500" />
-                <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest">Term 2024-25</span>
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Term 2024-25</span>
               </div>
             </div>
           </div>
@@ -157,15 +157,15 @@ export default function StudentDashboard() {
                 <TrendingUp className="h-5 w-5 text-cyan-600" />
               </div>
               <div>
-                <h2 className="text-xl font-black text-slate-800 tracking-tight">Academic Journey</h2>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Official Evaluation Record</p>
+                <h2 className="text-xl font-bold text-slate-800 tracking-tight">Academic Journey</h2>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Official Evaluation Record</p>
               </div>
             </div>
             <Button
               variant="premium"
               size="sm"
               asChild
-              className="rounded-xl font-black text-[10px] h-9 px-5 uppercase tracking-widest"
+              className="rounded-xl font-bold text-xs h-9 px-5 uppercase tracking-wider"
             >
               <Link href="/student/results">
                 View Transcript <ArrowRight className="ml-2 h-3 w-3" />
@@ -182,28 +182,28 @@ export default function StudentDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 items-center p-8 pt-4">
                   <div className="sm:col-span-1 flex flex-col items-center justify-center p-10 bg-linear-to-br from-cyan-600 to-teal-700 rounded-[2.5rem] shadow-2xl shadow-cyan-500/20 group-hover/card:scale-105 transition-transform duration-500 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 blur-2xl -mr-10 -mt-10" />
-                    <div className="text-6xl font-black text-white mb-1 leading-none drop-shadow-md">
+                    <div className="text-5xl font-bold text-white mb-1 leading-none drop-shadow-md">
                       {academicSummary.average.toFixed(0)}
                       <span className="text-2xl opacity-60 ml-0.5">%</span>
                     </div>
-                    <p className="text-[10px] font-black text-cyan-100 uppercase tracking-[0.2em] mt-2">
+                    <p className="text-xs font-bold text-cyan-100 uppercase tracking-wider mt-2">
                       Aggregate
                     </p>
                   </div>
                   <div className="sm:col-span-2 grid grid-cols-2 gap-4">
                     <div className="p-6 bg-white/60 border border-white rounded-3xl shadow-xs group-hover/card:bg-white transition-all duration-300">
-                      <div className="text-3xl font-black text-slate-900 mb-1 tabular-nums">
+                      <div className="text-3xl font-bold text-slate-900 mb-1 tabular-nums">
                         #{academicSummary.rank}
                       </div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                         Class Rank
                       </p>
                     </div>
                     <div className="p-6 bg-white/60 border border-white rounded-3xl shadow-xs group-hover/card:bg-white transition-all duration-300">
-                      <div className="text-3xl font-black text-slate-900 mb-1 tabular-nums">
+                      <div className="text-3xl font-bold text-slate-900 mb-1 tabular-nums">
                         {academicSummary.total}
                       </div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                         Score Points
                       </p>
                     </div>
@@ -212,11 +212,11 @@ export default function StudentDashboard() {
                         <div className="h-10 w-10 rounded-2xl bg-emerald-100 flex items-center justify-center shadow-inner">
                           <CheckCircle className="h-5 w-5 text-emerald-600" />
                         </div>
-                        <span className="text-[11px] font-black text-emerald-800 uppercase tracking-widest">
+                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
                           Outcome
                         </span>
                       </div>
-                      <span className="px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 ring-4 ring-emerald-50/50">
+                      <span className="px-6 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 ring-4 ring-emerald-50/50">
                         {academicSummary.promotedOrDetained}
                       </span>
                     </div>
@@ -227,7 +227,7 @@ export default function StudentDashboard() {
                   <div className="h-20 w-20 bg-slate-50 rounded-4xl flex items-center justify-center mb-6 group-hover/card:bg-white shadow-sm transition-colors ring-8 ring-slate-50/50">
                     <FileText className="h-10 w-10 text-slate-300" />
                   </div>
-                  <h4 className="text-xl font-black text-slate-800 mb-2">
+                  <h4 className="text-xl font-bold text-slate-800 mb-2">
                     Processing Data
                   </h4>
                   <p className="text-sm font-medium text-slate-400 max-w-xs mx-auto">
@@ -246,8 +246,8 @@ export default function StudentDashboard() {
               <Calendar className="h-5 w-5 text-teal-600" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-slate-800 tracking-tight">Engagement</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Calendar Presence</p>
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Engagement</h2>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Calendar Presence</p>
             </div>
           </div>
 
@@ -278,16 +278,16 @@ export default function StudentDashboard() {
                 />
               </svg>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-20">
-                <span className="text-6xl font-black text-slate-900 leading-none tabular-nums">
+                <span className="text-6xl font-bold text-slate-900 leading-none tabular-nums">
                   {attendanceCount}
                 </span>
-                <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
+                <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">
                   Sessions
                 </span>
               </div>
             </div>
             <div className="mt-10 px-6 py-3 rounded-2xl bg-white shadow-xs border border-slate-100 group hover:shadow-lg transition-all">
-              <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+              <p className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> Consistent Attendance
               </p>
             </div>
@@ -310,7 +310,7 @@ export default function StudentDashboard() {
               >
                 <item.icon className={cn("h-8 w-8", item.color)} />
               </div>
-              <span className="font-black text-[11px] text-slate-700 uppercase tracking-widest group-hover:text-cyan-600 transition-colors">
+              <span className="font-bold text-xs text-slate-700 uppercase tracking-wider group-hover:text-cyan-600 transition-colors">
                 {item.label}
               </span>
             </div>
@@ -326,13 +326,13 @@ export default function StudentDashboard() {
               <Bell className="h-5 w-5 text-amber-600" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-slate-800 tracking-tight">Institutional Feed</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Official News & Updates</p>
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Institutional Feed</h2>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Official News & Updates</p>
             </div>
           </div>
           <Button
             variant="ghost"
-            className="text-cyan-600 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-cyan-50 rounded-xl px-6 group"
+            className="text-cyan-600 font-bold text-xs uppercase tracking-wider hover:bg-cyan-50 rounded-xl px-6 group"
             asChild
           >
             <Link href="/student/announcements">

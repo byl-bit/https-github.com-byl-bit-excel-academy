@@ -191,7 +191,7 @@ export function TeacherDirectory({
             <Shield className="h-6 w-6 text-teal-600" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-800 tracking-tight">
+            <h3 className="text-xl font-bold text-slate-800 tracking-tight">
               Teacher Directory
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -250,19 +250,19 @@ export function TeacherDirectory({
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="py-4 px-6 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-6 text-left text-xs font-bold uppercase tracking-wider text-slate-400">
                   Faculty Identity
                 </th>
-                <th className="py-4 px-4 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">
                   System ID
                 </th>
-                <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-4 text-center text-xs font-bold uppercase tracking-wider text-slate-400">
                   Home Room
                 </th>
-                <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-4 text-center text-xs font-bold uppercase tracking-wider text-slate-400">
                   Account status
                 </th>
-                <th className="py-4 px-6 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-6 text-right text-xs font-bold uppercase tracking-wider text-slate-400">
                   Management
                 </th>
               </tr>
@@ -292,22 +292,22 @@ export function TeacherDirectory({
                           )}
                         </div>
                         <div className="space-y-0.5">
-                          <p className="font-black text-slate-800 group-hover:text-teal-700 transition-colors leading-tight">
+                          <p className="font-bold text-slate-800 group-hover:text-teal-700 transition-colors leading-tight">
                             {teacher.fullName || teacher.name}
                           </p>
-                          <p className="text-[10px] font-bold text-slate-400 tracking-tight">
+                          <p className="text-xs font-medium text-slate-400 tracking-tight">
                             {teacher.email}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="font-mono text-[11px] bg-teal-50 text-teal-700 px-2 py-1 rounded-lg border border-teal-100 font-black">
+                      <span className="font-mono text-xs bg-teal-50 text-teal-700 px-2 py-1 rounded-lg border border-teal-100 font-bold">
                         {teacher.teacherId}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-center">
-                      <span className="font-black text-teal-600 text-[11px] uppercase bg-teal-50/50 px-2 py-1 rounded border border-teal-100/50">
+                      <span className="font-bold text-teal-600 text-xs uppercase bg-teal-50/50 px-2 py-1 rounded border border-teal-100/50">
                         Grade {teacher.grade}-{teacher.section}
                       </span>
                     </td>
@@ -318,7 +318,7 @@ export function TeacherDirectory({
                             teacher.status === "active" ? "pending" : "active";
                           onUpdate(teacher.id, { status: nextStatus });
                         }}
-                        className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest border shadow-sm transition-all hover:scale-105 active:scale-95 ${
+                        className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider border shadow-sm transition-all hover:scale-105 active:scale-95 ${
                           teacher.status === "active"
                             ? "bg-emerald-50 text-emerald-600 border-emerald-100"
                             : "bg-amber-50 text-amber-600 border-amber-100"

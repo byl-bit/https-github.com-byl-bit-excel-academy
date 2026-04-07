@@ -91,12 +91,12 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
 
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                     {card.title}
                   </h3>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="text-4xl font-black tracking-tighter text-slate-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-slate-900 group-hover:to-cyan-600 transition-all duration-300">
+                  <div className="text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-slate-900 group-hover:to-cyan-600 transition-all duration-300">
                     {card.value}
                   </div>
                 </div>
@@ -104,7 +104,7 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
                   <div className="h-1 w-8 bg-cyan-100 rounded-full overflow-hidden">
                     <div className="h-full bg-cyan-500 w-2/3" />
                   </div>
-                  <p className="text-[10px] font-semibold text-slate-400">
+                  <p className="text-xs font-medium text-slate-400">
                     {card.description}
                   </p>
                 </div>
@@ -118,8 +118,8 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
         <div className="card-premium border-none p-8 space-y-8 bg-white/40 ring-1 ring-slate-200/50 group">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-black text-slate-800 tracking-tight">Academic Performance</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Institutional Analytics</p>
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Academic Performance</h2>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1">Institutional Analytics</p>
             </div>
             <div className="h-12 w-12 rounded-2xl bg-cyan-50 flex items-center justify-center group-hover:bg-cyan-600 group-hover:text-white transition-all duration-500 shadow-inner">
               <TrendingUp className="h-6 w-6 text-cyan-600 group-hover:text-white transition-colors" />
@@ -130,9 +130,9 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
             <div className="space-y-4">
               <div className="flex justify-between items-end">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pass Success Rate</p>
-                  <p className="text-5xl font-black tracking-tighter text-cyan-600 tabular-nums">
-                    {stats.passRate?.toFixed(1)}<span className="text-xl ml-0.5">%</span>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pass Success Rate</p>
+                  <p className="text-3xl font-extrabold tracking-tight text-cyan-600 tabular-nums">
+                    {stats.passRate?.toFixed(1)}<span className="text-lg ml-0.5">%</span>
                   </p>
                 </div>
               </div>
@@ -147,9 +147,9 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
             <div className="space-y-4">
               <div className="flex justify-between items-end">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Distinction Average</p>
-                  <p className="text-5xl font-black tracking-tighter text-emerald-600 tabular-nums">
-                    {stats.topAverage?.toFixed(1)}<span className="text-xl ml-0.5">%</span>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Distinction Average</p>
+                  <p className="text-3xl font-extrabold tracking-tight text-emerald-600 tabular-nums">
+                    {stats.topAverage?.toFixed(1)}<span className="text-lg ml-0.5">%</span>
                   </p>
                 </div>
               </div>
@@ -166,8 +166,8 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
         <div className="card-premium border-none p-8 space-y-8 bg-white/40 ring-1 ring-slate-200/50">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-black text-slate-800 tracking-tight">System Reliability</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time Core Monitoring</p>
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight">System Reliability</h2>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1">Real-time Core Monitoring</p>
             </div>
             <div className="h-12 w-12 rounded-2xl bg-teal-50 flex items-center justify-center shadow-inner">
               <Shield className="h-6 w-6 text-teal-600" />
@@ -183,9 +183,9 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
               <div key={i} className="flex justify-between items-center p-4 bg-white/60 border border-white rounded-2xl shadow-xs group hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
                 <div className="flex items-center gap-3">
                   <div className={cn("h-2.5 w-2.5 rounded-full animate-pulse", `bg-${item.color}-500`)} style={{ boxShadow: `0 0 12px ${item.glow}` }} />
-                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">{item.label}</span>
+                  <span className="text-xs font-semibold text-slate-600 uppercase tracking-tight">{item.label}</span>
                 </div>
-                <div className={cn("text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1.5 border", `bg-${item.color}-50 text-${item.color}-700 border-${item.color}-100`)}>
+                <div className={cn("text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 border", `bg-${item.color}-50 text-${item.color}-700 border-${item.color}-100`)}>
                   <item.icon className="h-3 w-3" /> {item.status}
                 </div>
               </div>
@@ -195,14 +195,14 @@ export function AdminOverview({ stats, pendingCount }: AdminOverviewProps) {
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-1000" />
               <div className="relative z-10 flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70">Infrastructure</p>
+                  <p className="text-xs font-bold uppercase tracking-wider opacity-70">Infrastructure</p>
                   <p className="text-base font-bold flex items-center gap-2">
                     <Shield className="h-5 w-5 fill-white/20" /> 100% System Uptime
                   </p>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[8px] font-black opacity-60 uppercase tracking-widest">Latency</span>
-                  <span className="text-xl font-black tabular-nums">14ms</span>
+                  <span className="text-[10px] font-bold opacity-60 uppercase tracking-wider">Latency</span>
+                  <span className="text-lg font-bold tabular-nums">14ms</span>
                 </div>
               </div>
             </div>

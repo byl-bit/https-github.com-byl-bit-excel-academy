@@ -107,7 +107,7 @@ export default function LoginPage() {
         {/* Login Form Side */}
         <Card className="w-full bg-background/80 backdrop-blur-lg border-2 shadow-xl overflow-hidden glass-panel border-none">
           <CardHeader className="space-y-1 bg-muted/30 pb-4 sm:pb-6 border-b px-4 sm:px-6 pt-4 sm:pt-6">
-            <CardTitle className="text-xl sm:text-2xl font-black text-center uppercase tracking-tighter">
+            <CardTitle className="text-xl sm:text-2xl font-bold text-center uppercase tracking-tight">
               Portal Login
             </CardTitle>
             <CardDescription className="text-center font-medium text-xs sm:text-sm">
@@ -122,7 +122,7 @@ export default function LoginPage() {
             {!isClient ? (
               <div className="h-[300px] flex flex-col items-center justify-center space-y-4">
                 <div className="h-10 w-10 border-4 border-teal-500/20 border-t-cyan-600 rounded-full animate-spin"></div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Waking up security core...
                 </p>
               </div>
@@ -138,7 +138,7 @@ export default function LoginPage() {
                     className="rounded-xl border-red-100 bg-red-50"
                   >
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle className="font-black uppercase text-[10px] tracking-widest">
+                    <AlertTitle className="font-bold uppercase text-xs tracking-wider">
                       Identity Error
                     </AlertTitle>
                     <AlertDescription className="text-xs font-bold">
@@ -148,7 +148,7 @@ export default function LoginPage() {
                 )}
 
                 <div className="space-y-2 sm:space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">
                     Portal Selector
                   </Label>
                   <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
@@ -164,7 +164,7 @@ export default function LoginPage() {
                       <GraduationCap
                         className={`h-5 w-5 sm:h-6 sm:w-6 ${role === "student" ? "text-cyan-600" : "text-slate-400"}`}
                       />
-                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight">
+                      <span className="text-xs font-bold uppercase tracking-tight">
                         Student
                       </span>
                     </button>
@@ -180,7 +180,7 @@ export default function LoginPage() {
                       <Briefcase
                         className={`h-5 w-5 sm:h-6 sm:w-6 ${role === "teacher" ? "text-teal-600" : "text-slate-400"}`}
                       />
-                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight">
+                      <span className="text-xs font-bold uppercase tracking-tight">
                         Teacher
                       </span>
                     </button>
@@ -196,7 +196,7 @@ export default function LoginPage() {
                       <Shield
                         className={`h-5 w-5 sm:h-6 sm:w-6 ${role === "admin" ? "text-red-600" : "text-slate-400"}`}
                       />
-                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight">
+                      <span className="text-xs font-bold uppercase tracking-tight">
                         Admin
                       </span>
                     </button>
@@ -207,7 +207,7 @@ export default function LoginPage() {
                   <div className="space-y-1.5 sm:space-y-2">
                     <Label
                       htmlFor="teacherId"
-                      className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1"
+                      className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1"
                     >
                       Staff Access ID
                     </Label>
@@ -226,7 +226,7 @@ export default function LoginPage() {
                   <div className="space-y-1.5 sm:space-y-2">
                     <Label
                       htmlFor="email"
-                      className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1"
+                      className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1"
                     >
                       {role === "admin"
                         ? "Institutional Email"
@@ -253,14 +253,14 @@ export default function LoginPage() {
                   <div className="flex justify-between items-center mr-1">
                     <Label
                       htmlFor="password"
-                      className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1"
+                      className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1"
                     >
                       Security Key
                     </Label>
                     {role !== "admin" && (
                       <Link
                         href="/auth/forgot-password"
-                        className="text-[10px] font-black text-cyan-600 uppercase tracking-widest hover:underline"
+                        className="text-xs font-bold text-cyan-600 uppercase tracking-wider hover:underline"
                       >
                         Reset Key?
                       </Link>
@@ -279,7 +279,7 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
-                  className="w-full h-14 text-xs font-black uppercase tracking-widest shadow-xl shadow-cyan-100 rounded-xl bg-cyan-600 hover:bg-cyan-500 transform active:scale-95 transition-all mt-4"
+                  className="w-full h-14 text-sm font-bold uppercase tracking-wider shadow-xl shadow-cyan-100 rounded-xl bg-cyan-600 hover:bg-cyan-500 transform active:scale-95 transition-all mt-4"
                   disabled={loading}
                 >
                   {loading
@@ -302,13 +302,13 @@ export default function LoginPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <Link
                   href="/auth/register"
-                  className="h-10 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all border border-slate-50"
+                  className="h-10 flex items-center justify-center text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all border border-slate-50"
                 >
                   Student Signup
                 </Link>
                 <Link
                   href="/auth/register-teacher"
-                  className="h-10 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-teal-600 hover:bg-teal-500/20 rounded-lg transition-all border border-slate-50"
+                  className="h-10 flex items-center justify-center text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-teal-600 hover:bg-teal-500/20 rounded-lg transition-all border border-slate-50"
                 >
                   Teacher Signup
                 </Link>
@@ -320,7 +320,7 @@ export default function LoginPage() {
                 </p>
                 <Link
                   href="/admissions/apply"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                 >
                   <GraduationCap className="h-3.5 w-3.5" /> Start Admission
                   Application

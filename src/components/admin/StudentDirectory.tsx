@@ -501,7 +501,7 @@ export function StudentDirectory({
             <Users className="h-6 w-6 text-cyan-600" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-800 tracking-tight">
+            <h3 className="text-xl font-bold text-slate-800 tracking-tight">
               Student Directory
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -596,22 +596,22 @@ export function StudentDirectory({
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="py-4 px-6 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-6 text-left text-xs font-bold uppercase tracking-wider text-slate-400">
                   Student Identity
                 </th>
-                <th className="py-4 px-4 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">
                   System ID
                 </th>
-                <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-4 text-center text-xs font-bold uppercase tracking-wider text-slate-400">
                   Roll Number
                 </th>
-                <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-4 text-center text-xs font-bold uppercase tracking-wider text-slate-400">
                   Gender
                 </th>
-                <th className="py-4 px-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-4 text-center text-xs font-bold uppercase tracking-wider text-slate-400">
                   Academic Status
                 </th>
-                <th className="py-4 px-6 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <th className="py-4 px-6 text-right text-xs font-bold uppercase tracking-wider text-slate-400">
                   Management
                 </th>
               </tr>
@@ -643,23 +643,23 @@ export function StudentDirectory({
                           )}
                         </div>
                         <div className="space-y-0.5">
-                          <p className="font-black text-slate-800 group-hover:text-cyan-700 transition-colors leading-tight">
+                          <p className="font-bold text-slate-800 group-hover:text-cyan-700 transition-colors leading-tight">
                             {student.firstName} {student.middleName}{" "}
                             {student.lastName}
                           </p>
-                          <p className="text-[10px] font-bold text-slate-400 tracking-tight">
+                          <p className="text-xs font-medium text-slate-400 tracking-tight">
                             {student.email}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="font-mono text-[11px] bg-slate-100 text-slate-600 px-2 py-1 rounded-lg border border-slate-200 font-black">
+                      <span className="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg border border-slate-200 font-bold">
                         {student.studentId || "PENDING"}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-center">
-                      <span className="font-black text-xs text-slate-700">
+                      <span className="font-bold text-xs text-slate-700">
                         {student.rollNumber || "--"}
                       </span>
                     </td>
@@ -676,7 +676,7 @@ export function StudentDirectory({
                               : "N/A";
                         return (
                           <span
-                            className={`text-[10px] font-black px-2.5 py-1 rounded-full border shadow-sm ${
+                            className={`text-xs font-bold px-2.5 py-1 rounded-full border shadow-sm ${
                               genderNorm === "M"
                                 ? "bg-cyan-50 text-cyan-600 border-cyan-100"
                                 : genderNorm === "F"
@@ -691,10 +691,10 @@ export function StudentDirectory({
                     </td>
                     <td className="py-4 px-4 text-center">
                       <div className="flex flex-col items-center gap-1">
-                        <span className="font-black text-cyan-600 text-[11px] uppercase">
+                        <span className="font-bold text-cyan-600 text-xs uppercase">
                           Grade {student.grade}
                         </span>
-                        <span className="font-black px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[9px] uppercase tracking-tighter">
+                        <span className="font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] uppercase tracking-tighter">
                           Section {student.section}
                         </span>
                       </div>

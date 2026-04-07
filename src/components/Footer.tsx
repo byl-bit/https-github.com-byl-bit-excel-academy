@@ -37,7 +37,7 @@ export function Footer() {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <span className="font-black text-2xl tracking-tighter text-white">
+              <span className="font-bold text-2xl tracking-tight text-white">
                 Excel Academy
               </span>
             </Link>
@@ -128,7 +128,7 @@ export function Footer() {
                   <Mail className="w-5 h-5 text-cyan-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">
+                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">
                     Email Us
                   </p>
                   <p className="text-sm text-slate-300 font-medium group-hover:text-cyan-400 transition-colors">
@@ -145,7 +145,7 @@ export function Footer() {
                   <MessageCircle className="w-5 h-5 text-green-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">
+                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">
                     WhatsApp
                   </p>
                   <p className="text-sm text-slate-300 font-medium group-hover:text-green-400 transition-colors">
@@ -159,7 +159,7 @@ export function Footer() {
                   <MapPin className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">
+                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">
                     Location
                   </p>
                   <p className="text-sm text-slate-300 font-medium">

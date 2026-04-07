@@ -95,7 +95,7 @@ export function Navbar() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <span className="font-extrabold text-base sm:text-xl tracking-tight text-cyan-400">
+            <span className="font-bold text-base sm:text-xl tracking-tight text-cyan-400">
               Excel Academy
             </span>
           </Link>
@@ -125,7 +125,7 @@ export function Navbar() {
             {isAuthenticated && user?.role === "teacher" && (
               <Link
                 href="/teacher"
-                className="font-black text-cyan-400 border-2 border-cyan-400 px-4 py-1.5 rounded-full hover:bg-cyan-400 hover:text-slate-950 transition-all shadow-sm"
+                className="font-bold text-cyan-400 border-2 border-cyan-400 px-4 py-1.5 rounded-full hover:bg-cyan-400 hover:text-slate-950 transition-all shadow-sm"
               >
                 Teacher Portal
               </Link>
@@ -178,7 +178,7 @@ export function Navbar() {
                 </Button>
                 <div className="flex items-center gap-3 text-sm bg-cyan-50/50 px-4 py-2 rounded-full border border-cyan-100 shadow-sm">
                   <User className="h-4 w-4 text-cyan-600" />
-                  <span className="font-bold text-cyan-900 line-clamp-1">
+                  <span className="font-semibold text-cyan-900 line-clamp-1">
                     {user.fullName || user.name}
                   </span>
                 </div>

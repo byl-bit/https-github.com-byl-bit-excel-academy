@@ -66,10 +66,10 @@ export function ResultStats({ published, pending }: ResultStatsProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
                   {stat.label}
                 </p>
-                <h3 className="text-2xl font-black text-slate-800">
+                <h3 className="text-2xl font-bold text-slate-800">
                   {stat.value}
                 </h3>
               </div>

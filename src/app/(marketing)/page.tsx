@@ -132,7 +132,7 @@ export default function Home() {
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-none mb-6 animate-fade-in-up delay-100 drop-shadow-2xl">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight mb-6 animate-fade-in-up delay-100 drop-shadow-2xl">
               <span className="block text-white mb-1 uppercase">Determined</span>
               <span className="block text-transparent bg-clip-text bg-linear-to-r from-cyan-300 via-teal-200 to-cyan-500 animate-pulse uppercase" style={{animationDuration: '3s'}}>
                 To Excel!
@@ -269,7 +269,7 @@ export default function Home() {
                   >
                     <stat.icon className={`w-8 h-8 ${stat.color}`} />
                   </div>
-                  <div className="text-4xl font-black text-slate-900 mb-2">
+                  <div className="text-3xl font-bold text-slate-900 mb-2">
                     {stat.value}
                   </div>
                   <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
@@ -290,7 +290,7 @@ export default function Home() {
               <Target className="w-4 h-4" />
               Why Excel Academy
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
               Where Excellence Meets Innovation
             </h2>
             <p className="text-lg text-slate-600 leading-relaxed">
@@ -393,7 +393,7 @@ export default function Home() {
             <Sparkles className="w-8 h-8 text-yellow-300" />
           </div>
 
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 tracking-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-6 tracking-tight">
             Ready to Start Your Journey?
           </h2>
           <p className="text-xl md:text-2xl text-cyan-50 max-w-3xl mx-auto mb-12 leading-relaxed">
