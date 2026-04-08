@@ -14,6 +14,7 @@ import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import {
   ShieldAlert,
   AlertTriangle,
