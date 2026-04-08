@@ -458,10 +458,23 @@ export async function POST(request: Request) {
         let mergedSubjects = [...processedSubjects];
         if (existingPending && Array.isArray(existingPending.subjects)) {
           const subMap = new Map<string, Subject>();
-          existingPending.subjects.forEach((s: Subject) =>
-            subMap.set(s.name, s),
-          );
-          processedSubjects.forEach((s: Subject) => subMap.set(s.name, s));
+          // Deep merge: keep existing sub-fields if not in new
+          existingPending.subjects.forEach((s: Subject) => subMap.set(s.name, s));
+          processedSubjects.forEach((s: Subject) => {
+            const existing = subMap.get(s.name);
+            if (existing) {
+              subMap.set(s.name, {
+                ...existing,
+                ...s,
+                assessments: {
+                  ...(existing.assessments || {}),
+                  ...(s.assessments || {}),
+                },
+              });
+            } else {
+              subMap.set(s.name, s);
+            }
+          });
           mergedSubjects = Array.from(subMap.values());
         }
 
@@ -817,10 +830,46 @@ export async function PUT(request: Request) {
       for (const key of body.approve) {
         if (pending[key]) {
           const entry = pending[key];
+          const existingPub = published[key];
 
           // If subjects exist, compute marks from assessments (if assessmentTypes are defined) and mark them as published
-          if (entry.subjects) {
-            entry.subjects = entry.subjects.map((s: Subject) => {
+          let mergedSubjects = (entry.subjects || []) as Subject[];
+          if (existingPub && Array.isArray(existingPub.subjects)) {
+            const subMap = new Map<string, Subject>();
+            existingPub.subjects.forEach((s: Subject) => subMap.set(s.name, s));
+            mergedSubjects.forEach((s: Subject) => {
+              const existing = subMap.get(s.name);
+              const updatedSub = {
+                ...(existing || {}),
+                ...s,
+                status: "published",
+                approvedBy: actorId,
+                approvedAt: new Date().toISOString(),
+              } as Subject & Record<string, any>;
+
+              // Recalculate marks from assessments if applicable
+              if (
+                updatedSub.assessments &&
+                Array.isArray(assessmentTypes) &&
+                assessmentTypes.length > 0
+              ) {
+                let calculatedTotal = 0;
+                for (const type of assessmentTypes) {
+                  const val = (updatedSub.assessments || {})[String(type.id)];
+                  if (val !== undefined && val !== null) {
+                    calculatedTotal +=
+                      (Number(val) / (Number(type.maxMarks) || 100)) *
+                      Number(type.weight);
+                  }
+                }
+                updatedSub.marks = Math.round(calculatedTotal * 10) / 10;
+              }
+              subMap.set(s.name, updatedSub);
+            });
+            mergedSubjects = Array.from(subMap.values());
+          } else {
+            // No existing published, just process pending
+            mergedSubjects = mergedSubjects.map((s: Subject) => {
               const subj = { ...s } as Subject & Record<string, any>;
               if (
                 subj.assessments &&
@@ -829,8 +878,7 @@ export async function PUT(request: Request) {
               ) {
                 let calculatedTotal = 0;
                 for (const type of assessmentTypes) {
-                  const keyId = String(type.id);
-                  const val = (subj.assessments || {})[keyId];
+                  const val = (subj.assessments || {})[String(type.id)];
                   if (val !== undefined && val !== null) {
                     calculatedTotal +=
                       (Number(val) / (Number(type.maxMarks) || 100)) *
@@ -840,19 +888,20 @@ export async function PUT(request: Request) {
                 subj.marks = Math.round(calculatedTotal * 10) / 10;
               }
               subj.status = "published";
+              subj.approvedBy = actorId;
+              subj.approvedAt = new Date().toISOString();
               return subj;
             });
           }
 
           // Recompute totals and averages to ensure published values are consistent
-          const subjectsArr = (entry.subjects || []) as Subject[];
-          const totalMarks = subjectsArr.reduce(
+          const totalMarks = mergedSubjects.reduce(
             (sum: number, s: Subject) => sum + (Number((s as any).marks) || 0),
             0,
           );
           const totalRounded = Math.round(totalMarks * 10) / 10;
           const average =
-            Math.round((totalRounded / (subjectsArr.length || 1)) * 10) / 10;
+            Math.round((totalRounded / (mergedSubjects.length || 1)) * 10) / 10;
 
           // Properly map all fields for results table
           toPublish.push({
@@ -864,7 +913,7 @@ export async function PUT(request: Request) {
             gender:
               normalizeGender(entry.gender ?? (entry as any)["sex"] ?? null) ||
               null,
-            subjects: subjectsArr,
+            subjects: mergedSubjects,
             total: totalRounded,
             average: average,
             rank: entry.rank || null,
@@ -906,6 +955,41 @@ export async function PUT(request: Request) {
             },
             { status: 500 },
           );
+        }
+
+        // --- GLOBAL RANK RECALCULATION ---
+        try {
+          // Identify unique grade/sections impacted
+          const impactedClasses = new Set<string>();
+          toPublish.forEach(p => impactedClasses.add(`${p.grade}_${p.section}`));
+
+          for (const classKey of impactedClasses) {
+            const [g, s] = classKey.split("_");
+            const { data: classResults } = await db
+              .from("results")
+              .select("student_id, total, average, grade, section")
+              .eq("grade", g)
+              .eq("section", s);
+
+            if (classResults && classResults.length > 1) {
+              const rankInput = classResults.map(r => ({
+                studentId: String(r.student_id),
+                total: Number(r.total || 0),
+                average: Number(r.average || 0)
+              }));
+              const ranks = calculateRanks(rankInput, true);
+
+              // Update each record with its new rank
+              for (const row of classResults) {
+                const newRank = ranks[String(row.student_id)];
+                if (newRank) {
+                  await db.from("results").update({ rank: newRank }).eq("student_id", row.student_id);
+                }
+              }
+            }
+          }
+        } catch (rankErr) {
+          console.error("Failed to recalculate class ranks after approval:", rankErr);
         }
 
         // Remove from pending after successful publish
