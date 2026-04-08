@@ -9,6 +9,7 @@ import { Download, AlertCircle, FileText, Award, Eye, X, BookOpen, Info, ShieldC
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn, normalizeGender } from "@/lib/utils";
 import { calculateGrade } from "@/lib/utils/gradingLogic";
+import { generateReportCardPDF } from "@/lib/utils/export";
 
 export default function StudentResultsPage() {
   const { user } = useAuth() as { user: any };
@@ -118,135 +119,7 @@ export default function StudentResultsPage() {
 
   const downloadPDF = async () => {
     if (!result || !user) return;
-    try {
-      const jsPDF = (await import("jspdf")).default;
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-
-      const addImage = (url: string, x: number, y: number, w: number, h: number) => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.crossOrigin = "Anonymous";
-          img.onload = () => {
-            try {
-              doc.addImage(img, "JPEG", x, y, w, h);
-              resolve(true);
-            } catch (e) {
-              resolve(false);
-            }
-          };
-          img.onerror = () => resolve(false);
-          img.src = url;
-        });
-      };
-
-      // Header
-      if (settings?.letterheadUrl) {
-         await addImage(settings.letterheadUrl, 15, 10, 180, 25);
-      } else {
-        doc.setFillColor(8, 145, 178);
-        doc.rect(15, 10, pageWidth - 30, 30, "F");
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(22);
-        doc.setFont("helvetica", "bold");
-        doc.text("EXCEL ACADEMY", pageWidth / 2, 28, { align: "center" });
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.text("DETERMINED TO EXCEL!", pageWidth / 2, 35, { align: "center" });
-      }
-
-      // Student Info
-      let infoY = 50;
-      doc.setTextColor(0, 0, 0);
-      doc.line(15, infoY, pageWidth - 15, infoY);
-      infoY += 10;
-      
-      const photoUrl = user.photo || user.image;
-      if (photoUrl) {
-        await addImage(photoUrl, 160, infoY, 30, 35);
-        doc.rect(160, infoY, 30, 35);
-      } else {
-        doc.rect(160, infoY, 30, 35);
-        doc.setFontSize(8);
-        doc.text("PHOTO", 175, infoY + 18, { align: "center" });
-      }
-
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.text("STUDENT REPORT CARD", 15, infoY);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.text(`Name: ${result.studentName || user.name || user.fullName}`, 15, infoY + 8);
-      doc.text(`Student ID: ${result.studentId || user.studentId}`, 15, infoY + 14);
-      doc.text(`Grade: ${result.grade || user.grade} - ${result.section || user.section}`, 15, infoY + 20);
-      doc.text(`Roll Number: ${result.rollNumber || user.rollNumber || "N/A"}`, 15, infoY + 26);
-      doc.text(`Gender: ${normalizeGender(result.gender || user.gender)}`, 15, infoY + 32);
-
-      // Table
-      let y = infoY + 45;
-      doc.setFillColor(248, 250, 252);
-      doc.rect(15, y - 6, pageWidth - 30, 10, "F");
-      doc.setFont("helvetica", "bold");
-      doc.text("SUBJECT", 20, y);
-      doc.text("SEM 1", 90, y, { align: "center" });
-      doc.text("SEM 2", 125, y, { align: "center" });
-      doc.text("ANNUAL", 160, y, { align: "center" });
-      doc.text("GRADE", 190, y, { align: "center" });
-      doc.line(15, y + 2, pageWidth - 15, y + 2);
-      y += 10;
-      doc.setFont("helvetica", "normal");
-      
-      let s1Sum = 0, s2Sum = 0, subCount = 0;
-      result.subjects.forEach((sub: any, idx: number) => {
-        if (idx % 2 === 1) {
-          doc.setFillColor(249, 250, 251);
-          doc.rect(15, y - 6, pageWidth - 30, 10, "F");
-        }
-        const s1 = sub.sem1 ?? (sub.marks && !sub.sem2 ? sub.marks : 0);
-        const s2 = sub.sem2 ?? 0;
-        const annual = sub.marks ?? ((s1+s2)/2);
-        s1Sum += s1; s2Sum += s2; subCount++;
-        doc.text(sub.name, 20, y);
-        doc.text(s1.toFixed(1), 90, y, { align: "center" });
-        doc.text(s2.toFixed(1), 125, y, { align: "center" });
-        doc.text(annual.toFixed(1), 160, y, { align: "center" });
-        doc.text(calculateGrade(annual), 190, y, { align: "center" });
-        y += 10;
-      });
-
-      // Summary
-      y += 5;
-      doc.setDrawColor(8, 145, 178);
-      doc.line(15, y, pageWidth - 15, y);
-      y += 10;
-      doc.setFont("helvetica", "bold");
-      doc.text("ACADEMIC SUMMARY", 15, y);
-      y += 10;
-      doc.setFontSize(10);
-      const s1Avg = subCount > 0 ? s1Sum / subCount : 0;
-      const s2Avg = subCount > 0 ? s2Sum / subCount : 0;
-      doc.text(`Sem 1 Avg: ${s1Avg.toFixed(2)}%`, 15, y);
-      doc.text(`Sem 2 Avg: ${s2Avg.toFixed(2)}%`, 100, y);
-      y += 8;
-      doc.text(`Annual Avg: ${result.average.toFixed(2)}%`, 15, y);
-      doc.text(`Result: ${result.promotedOrDetained || "PENDING"}`, 100, y);
-
-      // Signatures
-      const sigY = pageHeight - 40;
-      doc.line(20, sigY, 80, sigY);
-      doc.text("School Director", 50, sigY + 5, { align: "center" });
-      if (settings?.principalName) doc.text(settings.principalName, 50, sigY + 10, { align: "center" });
-
-      doc.line(130, sigY, 190, sigY);
-      doc.text("Homeroom Teacher", 160, sigY + 5, { align: "center" });
-      const tName = settings?.homeroomName || settings?.teacherName;
-      if (tName) doc.text(tName, 160, sigY + 10, { align: "center" });
-
-      doc.save(`Report_Card_${result.studentId}.pdf`);
-    } catch (e) {
-      console.error(e);
-    }
+    await generateReportCardPDF(result, user, settings);
   };
 
   if (loading) return <div className="text-center py-12">Loading results...</div>;

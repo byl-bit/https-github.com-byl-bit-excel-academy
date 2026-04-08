@@ -19,7 +19,11 @@ import { ResultFilters } from "./results/ResultFilters";
 import { ManualEntryForm } from "./results/ManualEntryForm";
 import { ResultDirectoryTable } from "./results/ResultDirectoryTable";
 import { ResultTable } from "@/components/teacher/ResultTable";
-import { parseCSV } from "@/lib/utils/export";
+import { 
+  parseCSV, 
+  generateReportCardPDF, 
+  generateClassResultsCSV 
+} from "@/lib/utils/export";
 import type {
   User,
   PendingResult,
@@ -206,110 +210,27 @@ export function ResultsManager({
   };
 
   const handleExportXLSX = async () => {
-    const ExcelJS = await import("exceljs");
-    const { saveAs } = await import("file-saver");
-
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Academic Results");
-
-    // Dynamic Columns
-    const columns = [
-      { header: "Rank", key: "rank", width: 8 },
-      { header: "Student ID", key: "studentId", width: 18 },
-      { header: "Name", key: "studentName", width: 30 },
-      { header: "Grade", key: "grade", width: 10 },
-      { header: "Section", key: "section", width: 10 },
-      ...subjects.map((s) => ({ header: s, key: s, width: 12 })),
-      { header: "Average", key: "average", width: 12 },
-      { header: "Decision", key: "decision", width: 15 },
-    ];
-
-    worksheet.columns = columns;
-
-    filteredPublished.forEach((r) => {
-      const marks: any = {};
-      (r.subjects || []).forEach((s) => (marks[s.name] = s.marks));
-      worksheet.addRow({
-        rank: r.rank || "-",
-        studentId: r.studentId,
-        studentName: r.studentName,
-        grade: r.grade,
-        section: r.section,
-        ...marks,
-        average: r.average?.toFixed(1),
-        decision: r.promotedOrDetained || r.promoted_or_detained,
-      });
-    });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(
-      new Blob([buffer]),
-      `Excel_Academy_Results_${new Date().toISOString().split("T")[0]}.xlsx`,
-    );
+    const filename = `Excel_Academy_Results_${new Date().toISOString().split("T")[0]}`;
+    generateClassResultsCSV(filteredPublished, filename, subjects);
   };
 
   const handlePrintSingle = async (result: PublishedResult) => {
-    const jsPDF = (await import("jspdf")).default;
-    const doc = new jsPDF();
-
-    doc.setFontSize(22);
-    doc.text("EXCEL ACADEMY", 105, 20, { align: "center" });
-    doc.setFontSize(14);
-    doc.text("OFFICIAL REPORT CARD", 105, 30, { align: "center" });
-
-    doc.setLineWidth(0.5);
-    doc.line(20, 35, 190, 35);
-
-    doc.setFontSize(10);
-    doc.text(`Name: ${result.studentName}`, 20, 45);
-    doc.text(`ID: ${result.studentId}`, 20, 50);
-    doc.text(`Grade/Section: ${result.grade} - ${result.section}`, 140, 45);
-    doc.text(`Roll: ${result.rollNumber || "-"}`, 140, 50);
-
-    let y = 65;
-    doc.setFont("helvetica", "bold");
-    doc.text("Subject", 20, y);
-    doc.text("Sem 1", 70, y);
-    doc.text("Sem 2", 100, y);
-    doc.text("Average (/100)", 130, y);
-    doc.line(20, y + 2, 190, y + 2);
-
-    doc.setFont("helvetica", "normal");
-    y += 10;
-    (result.subjects || []).forEach((s) => {
-      doc.text(s.name, 20, y);
-      doc.text(s.sem1 !== undefined ? String(s.sem1) : "-", 70, y);
-      doc.text(s.sem2 !== undefined ? String(s.sem2) : "-", 100, y);
-      doc.text(String(s.marks || 0), 130, y);
-      y += 8;
-    });
-
-    y += 10;
-    doc.line(20, y - 5, 190, y - 5);
-    doc.setFont("helvetica", "bold");
-    doc.text(`Average: ${result.average?.toFixed(1)}%`, 20, y);
-    doc.text(
-      `Outcome: ${result.promotedOrDetained || result.promoted_or_detained || "N/A"}`,
-      100,
-      y,
-    );
-
-    doc.save(`Report_${result.studentId}.pdf`);
+    const student = students.find(s => String(s.studentId || s.id) === String(result.studentId));
+    await generateReportCardPDF(result, student || result, settings || {});
   };
 
   const handleBatchPrint = async () => {
     if (filteredPublished.length === 0) return;
-    const jsPDF = (await import("jspdf")).default;
-    const doc = new jsPDF();
-
+    let doc = null;
+    
     for (let i = 0; i < filteredPublished.length; i++) {
-      if (i > 0) doc.addPage();
       const r = filteredPublished[i];
-      doc.text(`Excel Academy - ${r.studentName}`, 20, 20);
-      doc.text(`Grade: ${r.grade} Section: ${r.section}`, 20, 30);
-      doc.text(`Average: ${r.average?.toFixed(1)}%`, 20, 40);
+      const student = students.find(s => String(s.studentId || s.id) === String(r.studentId));
+      // Use the doc from the previous iteration or the new one
+      doc = await generateReportCardPDF(r, student || r, settings || {}, doc);
     }
-    doc.save(`Batch_Results_${filterGrade || "Global"}.pdf`);
+    
+    doc.save(`Batch_Results_${filterGrade || "Global"}_${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
   return (

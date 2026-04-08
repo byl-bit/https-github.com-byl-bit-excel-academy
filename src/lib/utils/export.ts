@@ -144,17 +144,277 @@ export const printElement = (elementId: string, title: string = "Document") => {
   }, 250);
 };
 
-const calculateGrade = (marks: number) => {
-  if (marks >= 90) return "A+";
-  if (marks >= 80) return "A";
-  if (marks >= 70) return "B+";
-  if (marks >= 60) return "B";
-  if (marks >= 50) return "C+";
-  if (marks >= 40) return "C";
-  return "F";
+import { calculateGrade as getGrade } from "./gradingLogic";
+
+export const generateReportCardPDF = async (
+  result: any,
+  user: any,
+  settings: any,
+  existingDoc?: any,
+) => {
+  const jsPDF = (await import("jspdf")).default;
+  const doc = existingDoc || new jsPDF();
+  if (existingDoc) doc.addPage();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  const addImage = (
+    url: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+  ) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = () => {
+        try {
+          doc.addImage(img, "JPEG", x, y, w, h);
+          resolve(true);
+        } catch (e) {
+          resolve(false);
+        }
+      };
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  };
+
+  // Header
+  if (settings?.letterheadUrl) {
+    await addImage(settings.letterheadUrl, 15, 10, 180, 25);
+  } else {
+    doc.setFillColor(8, 145, 178);
+    doc.rect(15, 10, pageWidth - 30, 30, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("EXCEL ACADEMY", pageWidth / 2, 28, { align: "center" });
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("DETERMINED TO EXCEL!", pageWidth / 2, 35, { align: "center" });
+  }
+
+  // Student Info Panel
+  let infoY = 50;
+  doc.setTextColor(0, 0, 0);
+  doc.setDrawColor(226, 232, 240);
+  doc.line(15, infoY, pageWidth - 15, infoY);
+  infoY += 10;
+
+  const photoUrl = user.photo || user.image;
+  if (photoUrl) {
+    await addImage(photoUrl, 160, infoY, 30, 35);
+    doc.rect(160, infoY, 30, 35);
+  } else {
+    doc.setDrawColor(226, 232, 240);
+    doc.rect(160, infoY, 30, 35);
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text("PHOTO", 175, infoY + 18, { align: "center" });
+  }
+
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("OFFICIAL REPORT CARD", 15, infoY);
+  
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(71, 85, 105);
+  
+  const studentName = result.studentName || user.name || user.fullName || "Student Name";
+  const studentId = result.studentId || user.studentId || user.id || "ID-N/A";
+  
+  doc.text(`Student Name: ${studentName}`, 15, infoY + 10);
+  doc.text(`Student ID: ${studentId}`, 15, infoY + 16);
+  doc.text(`Grade Level: ${result.grade || user.grade || ""} - ${result.section || user.section || ""}`, 15, infoY + 22);
+  doc.text(`Roll Number: ${result.rollNumber || user.rollNumber || "N/A"}`, 15, infoY + 28);
+  doc.text(`Gender: ${normalizeGender(result.gender || user.gender || "N/A")}`, 15, infoY + 34);
+
+  // Table Structure
+  let tableY = infoY + 45;
+  doc.setFillColor(241, 245, 249);
+  doc.rect(15, tableY - 7, pageWidth - 30, 10, "F");
+  
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("SUBJECT", 20, tableY);
+  doc.text("SEM 1", 90, tableY, { align: "center" });
+  doc.text("SEM 2", 125, tableY, { align: "center" });
+  doc.text("ANNUAL", 160, tableY, { align: "center" });
+  doc.text("GRADE", 190, tableY, { align: "center" });
+  
+  doc.setDrawColor(226, 232, 240);
+  doc.line(15, tableY + 3, pageWidth - 15, tableY + 3);
+  
+  tableY += 10;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  
+  let s1Sum = 0, s2Sum = 0, subCount = 0;
+  const subjects = result.subjects || [];
+  
+  subjects.forEach((sub: any, idx: number) => {
+    if (idx % 2 === 1) {
+      doc.setFillColor(248, 250, 252);
+      doc.rect(15, tableY - 7, pageWidth - 30, 10, "F");
+    }
+    
+    const s1 = Number(sub.sem1 ?? (sub.marks && !sub.sem2 ? sub.marks : 0));
+    const s2 = Number(sub.sem2 ?? 0);
+    const annual = Number(sub.marks ?? ((s1 + s2) / 2));
+    
+    s1Sum += s1;
+    s2Sum += s2;
+    subCount++;
+    
+    doc.setTextColor(15, 23, 42);
+    doc.text(sub.name || "", 20, tableY);
+    
+    doc.setTextColor(71, 85, 105);
+    doc.text(s1.toFixed(1), 90, tableY, { align: "center" });
+    doc.text(s2.toFixed(1), 125, tableY, { align: "center" });
+    
+    doc.setTextColor(8, 145, 178);
+    doc.setFont("helvetica", "bold");
+    doc.text(annual.toFixed(1), 160, tableY, { align: "center" });
+    
+    const grade = getGrade(annual);
+    if (grade === "F") doc.setTextColor(239, 68, 68);
+    else doc.setTextColor(15, 23, 42);
+    
+    doc.text(grade, 190, tableY, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    
+    tableY += 10;
+    
+    // Check for page overflow
+    if (tableY > pageHeight - 60) {
+        doc.addPage();
+        tableY = 20;
+    }
+  });
+
+  // Summary Section
+  tableY += 5;
+  doc.setDrawColor(8, 145, 178);
+  doc.setLineWidth(0.5);
+  doc.line(15, tableY, pageWidth - 15, tableY);
+  tableY += 12;
+  
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("ACADEMIC SUMMARY", 15, tableY);
+  
+  tableY += 10;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(71, 85, 105);
+  
+  const s1Avg = subCount > 0 ? s1Sum / subCount : 0;
+  const s2Avg = subCount > 0 ? s2Sum / subCount : 0;
+  const annualAvg = Number(result.average || 0);
+  
+  doc.text(`Semester 1 Average: ${s1Avg.toFixed(2)}%`, 15, tableY);
+  doc.text(`Semester 2 Average: ${s2Avg.toFixed(2)}%`, 100, tableY);
+  
+  tableY += 8;
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(8, 145, 178);
+  doc.text(`Annual Average Score: ${annualAvg.toFixed(2)}%`, 15, tableY);
+  
+  const outcome = result.promotedOrDetained || result.promoted_or_detained || "PENDING";
+  if (outcome === "PROMOTED") doc.setTextColor(22, 163, 74);
+  else if (outcome === "DETAINED") doc.setTextColor(239, 68, 68);
+  
+  doc.text(`Final Decision: ${outcome}`, 100, tableY);
+
+  // Signatures
+  const sigY = pageHeight - 40;
+  doc.setDrawColor(148, 163, 184);
+  doc.setLineWidth(0.2);
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  
+  doc.line(25, sigY, 85, sigY);
+  doc.text("SCHOOL DIRECTOR", 55, sigY + 6, { align: "center" });
+  if (settings?.principalName) {
+    doc.setFont("helvetica", "normal");
+    doc.text(settings.principalName, 55, sigY + 12, { align: "center" });
+  }
+
+  doc.line(125, sigY, 185, sigY);
+  doc.text("HOMEROOM TEACHER", 155, sigY + 6, { align: "center" });
+  const hName = settings?.homeroomName || "Class Advisor";
+  doc.setFont("helvetica", "normal");
+  doc.text(hName, 155, sigY + 12, { align: "center" });
+
+  // Verification Note
+  doc.setFontSize(8);
+  doc.setTextColor(148, 163, 184);
+  doc.setFont("helvetica", "italic");
+  doc.text("This is an official system-generated report card of Excel Academy.", pageWidth / 2, pageHeight - 15, { align: "center" });
+
+  if (!existingDoc) {
+    doc.save(`Report_Card_${studentId}_${new Date().getFullYear()}.pdf`);
+  }
+  return doc;
 };
 
-import type { PendingResult, PublishedResult, Subject } from "@/lib/types";
+export const generateClassResultsCSV = (
+  results: Array<any>,
+  filename: string,
+  subjectsList: string[],
+) => {
+  const headers = ["Student ID", "Full Name", "Gender", "Roll Number"];
+  
+  subjectsList.forEach(sub => {
+    headers.push(`${sub} S1`, `${sub} S2`, `${sub} Annual`);
+  });
+  
+  headers.push("Grand Total", "Average %", "Rank", "Status", "Decision");
+  
+  const rows = results.map(r => {
+    const row = [
+      r.studentId || r.student_id || "",
+      r.studentName || r.student_name || "",
+      r.gender || r.sex || "",
+      r.rollNumber || r.roll_number || ""
+    ];
+    
+    subjectsList.forEach(subName => {
+      const s = (r.subjects || []).find((ss: any) => ss.name === subName);
+      if (s) {
+        row.push(
+          String(s.sem1 ?? "-"),
+          String(s.sem2 ?? "-"),
+          String(s.marks ?? "-")
+        );
+      } else {
+        row.push("-", "-", "-");
+      }
+    });
+    
+    row.push(
+      String(r.total || 0),
+      String(Number(r.average || 0).toFixed(2)),
+      String(r.rank || "-"),
+      r.result || "",
+      r.promotedOrDetained || r.promoted_or_detained || ""
+    );
+    
+    return row;
+  });
+  
+  exportToCSV(rows, filename, headers);
+};
+
+
 
 export const printResults = (
   result: PendingResult | PublishedResult,

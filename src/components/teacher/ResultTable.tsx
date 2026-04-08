@@ -29,7 +29,12 @@ import type {
   AssessmentType,
 } from "@/lib/types";
 import { cn, normalizeGender } from "@/lib/utils";
-import { exportToCSV, parseCSV } from "@/lib/utils/export";
+import { 
+  exportToCSV, 
+  parseCSV, 
+  generateClassResultsCSV, 
+  generateReportCardPDF 
+} from "@/lib/utils/export";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { AlertModal } from "@/components/ui/alert-modal";
 import { Card } from "@/components/ui/card";
@@ -629,55 +634,43 @@ export function ResultTable({
   };
 
   const exportDataCSV = () => {
-    const headers = ["StudentID", "RollNumber", "FullName"];
-    subjects.forEach((sub) => {
-      if (isDynamic) {
-        gradeAssessmentTypes.forEach((type: AssessmentType) => {
-          headers.push(`${sub}__${type.id}`);
-        });
-      } else {
-        headers.push(`${sub} Sem 1`, `${sub} Sem 2`, `${sub} Avg`);
-      }
-    });
-    headers.push("Total", "Average");
-
-    const rows = students.map((student) => {
-      const sid = String(
-        student.id || student.student_id || student.studentId || "",
-      );
-      const marks = tableMarks[sid] || {};
-      const { total, average } = calculateRowStats(sid);
-      const row = [
-        String(student.studentId || ""),
-        String(student.rollNumber || ""),
-        String(student.name || student.fullName || ""),
-      ];
-      subjects.forEach((sub) => {
-        if (isDynamic) {
-          gradeAssessmentTypes.forEach((type: AssessmentType) => {
-            const val = marks[`${sub}__${type.id}`];
-            row.push(val !== undefined ? String(val) : "");
-          });
-        } else {
-          const s1 = marks[`${sub}_sem1`];
-          const s2 = marks[`${sub}_sem2`];
-          const sAvg =
-            s1 !== undefined && s2 !== undefined ? (s1 + s2) / 2 : undefined;
-          row.push(
-            s1 !== undefined ? String(s1) : "",
-            s2 !== undefined ? String(s2) : "",
-            sAvg !== undefined ? String(Math.round(sAvg * 10) / 10) : "",
-          );
-        }
-      });
-      row.push(String(total), String(average.toFixed(2)));
-      return row;
-    });
-
     const grade = students[0]?.grade || user.grade;
     const section = students[0]?.section || user.section;
-    const filename = `Marks_Grade_${grade}_${section}_${new Date().toISOString().split("T")[0]}`;
-    exportToCSV(rows, filename, headers);
+    const filename = `Results_Grade_${grade}_${section}_${new Date().toISOString().split("T")[0]}`;
+    
+    // Convert current table state back to a result-like array for the export utility
+    const resultsToExport = students.map(student => {
+      const sid = String(student.id || student.student_id || student.studentId);
+      const marks = tableMarks[sid] || {};
+      const { total, average } = calculateRowStats(sid);
+      
+      const subjectsArr = subjects.map(s => {
+        const s1 = marks[`${s}_sem1`];
+        const s2 = marks[`${s}_sem2`];
+        const annual = marks[`${s}_marks`] || ((Number(s1||0) + Number(s2||0))/2);
+        
+        return {
+          name: s,
+          sem1: s1,
+          sem2: s2,
+          marks: annual
+        };
+      });
+
+      return {
+        ...student,
+        studentId: student.studentId || student.student_id || sid,
+        studentName: student.name || student.fullName,
+        subjects: subjectsArr,
+        total,
+        average,
+        rank: 0, // Rank will be calculated by the app logic usually
+        result: average >= 35 ? "PASS" : "FAIL",
+        promotedOrDetained: average >= 35 ? "PROMOTED" : "DETAINED"
+      };
+    });
+
+    generateClassResultsCSV(resultsToExport, filename, subjects);
   };
 
   const importFromCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1332,8 +1325,30 @@ export function ResultTable({
                                     variant="ghost"
                                     className="h-8 w-8 text-slate-400 hover:text-cyan-600 hover:bg-white rounded-xl transition-all"
                                     onClick={() => toggleEditRow(sid)}
+                                    title="Edit Marks"
                                   >
                                     <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 rounded-xl transition-all"
+                                    onClick={() => {
+                                      const resToGen = {
+                                        studentId: student.studentId || student.student_id || sid,
+                                        studentName: student.name || student.fullName,
+                                        grade: student.grade,
+                                        section: student.section,
+                                        subjects: (getRowInfo(student).existingResult as any)?.subjects || [],
+                                        total,
+                                        average,
+                                        promotedOrDetained: average >= 35 ? "PROMOTED" : "DETAINED"
+                                      };
+                                      generateReportCardPDF(resToGen, student, settings || {});
+                                    }}
+                                    title="Download Report Card"
+                                  >
+                                    <Download className="h-4 w-4" />
                                   </Button>
                                 )}
                               </div>
