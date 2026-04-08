@@ -16,6 +16,7 @@ import {
   Users,
   Edit,
   Eye,
+  FileText,
 } from "lucide-react";
 import { StudentProfileDialog } from "@/components/StudentProfileDialog";
 
