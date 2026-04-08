@@ -39,7 +39,7 @@ export default function StudentResultsPage() {
         fetch("/api/settings"),
       ]);
 
-      const storedResults = rRes.ok ? await rRes.json() : { published: {} };
+      const storedResults = rRes.ok ? await rRes.json() : {};
       const settingsData = sRes.ok ? await sRes.json() : {};
       
       setSettings(settingsData);
@@ -51,10 +51,21 @@ export default function StudentResultsPage() {
       if (settingsData.assessmentTypes)
         setAssessmentTypes(settingsData.assessmentTypes);
 
-      const published = storedResults.published || {};
-      let res = published[user.id];
+      // The API returns { published: {}, pending: {} } for admin/teachers
+      // but returns { [studentId]: result } directly for students
+      let res = storedResults[user.id];
+      
+      if (!res && storedResults.published) {
+        res = storedResults.published[user.id];
+      }
+      
       if (!res) {
-        res = Object.values(published).find(
+        // Search through all values if direct lookup fails
+        const allResults = storedResults.published 
+          ? Object.values(storedResults.published) 
+          : Object.values(storedResults);
+          
+        res = allResults.find(
           (r: any) =>
             r.studentId === user.studentId ||
             r.studentId === user.id
