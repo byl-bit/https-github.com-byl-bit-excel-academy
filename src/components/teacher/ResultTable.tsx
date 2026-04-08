@@ -1320,36 +1320,53 @@ export function ResultTable({
                                   In Review
                                 </span>
                                 {allowEditSubmitted && (
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-slate-400 hover:text-cyan-600 hover:bg-white rounded-xl transition-all"
-                                    onClick={() => toggleEditRow(sid)}
-                                    title="Edit Marks"
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 rounded-xl transition-all"
-                                    onClick={() => {
-                                      const resToGen = {
-                                        studentId: student.studentId || student.student_id || sid,
-                                        studentName: student.name || student.fullName,
-                                        grade: student.grade,
-                                        section: student.section,
-                                        subjects: (getRowInfo(student).existingResult as any)?.subjects || [],
-                                        total,
-                                        average,
-                                        promotedOrDetained: average >= 35 ? "PROMOTED" : "DETAINED"
-                                      };
-                                      generateReportCardPDF(resToGen, student, settings || {});
-                                    }}
-                                    title="Download Report Card"
-                                  >
-                                    <Download className="h-4 w-4" />
-                                  </Button>
+                                  <>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-8 w-8 text-slate-400 hover:text-cyan-600 hover:bg-white rounded-xl transition-all"
+                                      onClick={() => toggleEditRow(sid)}
+                                      title="Edit Marks"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-8 w-8 text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 rounded-xl transition-all"
+                                      onClick={() => {
+                                        const resToGen = {
+                                          studentId:
+                                            student.studentId ||
+                                            student.student_id ||
+                                            sid,
+                                          studentName:
+                                            student.name || student.fullName,
+                                          grade: student.grade,
+                                          section: student.section,
+                                          subjects:
+                                            (
+                                              getRowInfo(student)
+                                                .existingResult as any
+                                            )?.subjects || [],
+                                          total,
+                                          average,
+                                          promotedOrDetained:
+                                            average >= 35
+                                              ? "PROMOTED"
+                                              : "DETAINED",
+                                        };
+                                        generateReportCardPDF(
+                                          resToGen,
+                                          student,
+                                          settings || {},
+                                        );
+                                      }}
+                                      title="Download Report Card"
+                                    >
+                                      <FileText className="h-4 w-4" />
+                                    </Button>
+                                  </>
                                 )}
                               </div>
                             ) : isDraftHomeroom ? (
