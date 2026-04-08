@@ -16,6 +16,8 @@ interface ResultFiltersProps {
   setFilterGender: (v: string) => void;
   filterStatus: string;
   setFilterStatus: (v: string) => void;
+  filterSemester: string;
+  setFilterSemester: (v: string) => void;
   search: string;
   setSearch: (v: string) => void;
   onReset: () => void;
@@ -32,6 +34,8 @@ export function ResultFilters({
   setFilterGender,
   filterStatus,
   setFilterStatus,
+  filterSemester,
+  setFilterSemester,
   search,
   setSearch,
   onReset,
@@ -55,7 +59,21 @@ export function ResultFilters({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="space-y-1.5">
+          <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+            Semester
+          </Label>
+          <select
+            className="w-full h-11 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-cyan-100 outline-none cursor-pointer transition-all hover:bg-white"
+            value={filterSemester}
+            onChange={(e) => setFilterSemester(e.target.value)}
+          >
+            <option value="">Full Year</option>
+            <option value="1">1st Semester</option>
+            <option value="2">2nd Semester</option>
+          </select>
+        </div>
         <div className="space-y-1.5">
           <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
             Grade Level

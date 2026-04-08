@@ -159,8 +159,26 @@ export function SettingsManager({
 
   const handleAddAssessment = () => {
     const currentTypes = settings?.assessmentTypes || [];
+    
+    // Validate if this label already exists for this grade/semester
+    const exists = currentTypes.some((t: any) => 
+      t.grade === assessmentForm.grade && 
+      t.semester === assessmentForm.semester && 
+      t.label.toLowerCase() === assessmentForm.label.toLowerCase()
+    );
+
+    if (exists) {
+      setAlert({
+        open: true,
+        title: "Duplicate Assessment",
+        description: `An assessment with label "${assessmentForm.label}" already exists for this grade and semester.`,
+        variant: "error"
+      });
+      return;
+    }
+
     const newType = {
-      id: `${assessmentForm.grade}-${assessmentForm.semester}-${assessmentForm.label.toLowerCase().replace(/\s+/g, "-")}`,
+      id: `${assessmentForm.grade}-${assessmentForm.semester}-${assessmentForm.label.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
       label: assessmentForm.label,
       weight: assessmentForm.weight,
       maxMarks: assessmentForm.maxMarks,
@@ -355,84 +373,108 @@ export function SettingsManager({
             </div>
           </div>
 
-          <div className="space-y-2 pt-2">
-            {(settings?.assessmentTypes || []).map((type: any, idx: number) => (
-              <div
-                key={idx}
-                className="flex items-center gap-2 p-2 bg-slate-50 rounded-md border text-sm"
-              >
-                <div className="flex-1 flex items-center gap-2">
-                  <Input
-                    className="h-8 flex-1 font-semibold"
-                    value={type.label}
-                    onChange={(e) => {
-                      const updated = [...(settings?.assessmentTypes || [])];
-                      updated[idx] = { ...updated[idx], label: e.target.value };
-                      onUpdateSettings("assessmentTypes", updated);
-                    }}
-                    placeholder="Label"
-                  />
-                  <div className="flex items-center gap-1">
-                    <Input
-                      type="number"
-                      className="h-8 w-16 text-center"
-                      value={type.weight}
-                      onChange={(e) => {
-                        const updated = [...(settings?.assessmentTypes || [])];
-                        updated[idx] = {
-                          ...updated[idx],
-                          weight: Number(e.target.value),
-                        };
-                        onUpdateSettings("assessmentTypes", updated);
-                      }}
-                      placeholder="%"
-                    />
-                    <span className="text-xs text-muted-foreground">%</span>
+          <div className="space-y-6 pt-2">
+            {/* Group assessments by Grade and Semester */}
+            {(() => {
+              const types = settings?.assessmentTypes || [];
+              const groups: Record<string, any[]> = {};
+              
+              types.forEach((t: any) => {
+                const key = `Grade: ${t.grade === "all" ? "All" : t.grade} - Semester: ${t.semester}`;
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(t);
+              });
+
+              return Object.entries(groups).map(([groupKey, groupTypes]) => {
+                const groupTotal = groupTypes.reduce((acc, curr) => acc + (curr.weight || 0), 0);
+                const isInvalid = groupTotal !== 100;
+
+                return (
+                  <div key={groupKey} className="space-y-2 border-l-4 border-cyan-100 pl-4 py-2">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        {groupKey}
+                      </span>
+                      <span className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                        isInvalid ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
+                      )}>
+                        Total: {groupTotal}% {isInvalid && "(Must be 100%)"}
+                      </span>
+                    </div>
+                    {groupTypes.map((type, groupIdx) => {
+                      // Find actual index in settings.assessmentTypes
+                      const actualIdx = types.findIndex((t: any) => t.id === type.id);
+                      return (
+                        <div
+                          key={type.id || actualIdx}
+                          className="flex items-center gap-2 p-2 bg-slate-50 rounded-md border text-sm"
+                        >
+                          <div className="flex-1 flex items-center gap-2">
+                            <Input
+                              className="h-8 flex-1 font-semibold"
+                              value={type.label}
+                              onChange={(e) => {
+                                const updated = [...types];
+                                updated[actualIdx] = { ...updated[actualIdx], label: e.target.value };
+                                onUpdateSettings("assessmentTypes", updated);
+                              }}
+                              placeholder="Label"
+                            />
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="number"
+                                className="h-8 w-16 text-center"
+                                value={type.weight}
+                                onChange={(e) => {
+                                  const updated = [...types];
+                                  updated[actualIdx] = {
+                                    ...updated[actualIdx],
+                                    weight: Number(e.target.value),
+                                  };
+                                  onUpdateSettings("assessmentTypes", updated);
+                                }}
+                                placeholder="%"
+                              />
+                              <span className="text-xs text-muted-foreground">%</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="number"
+                                className="h-8 w-16 text-center"
+                                value={type.maxMarks}
+                                onChange={(e) => {
+                                  const updated = [...types];
+                                  updated[actualIdx] = {
+                                    ...updated[actualIdx],
+                                    maxMarks: Number(e.target.value),
+                                  };
+                                  onUpdateSettings("assessmentTypes", updated);
+                                }}
+                                placeholder="Max"
+                              />
+                              <span className="text-xs text-muted-foreground">max</span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-500 hover:bg-red-50"
+                            onClick={() => handleDeleteAssessment(actualIdx)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Input
-                      type="number"
-                      className="h-8 w-16 text-center"
-                      value={type.maxMarks}
-                      onChange={(e) => {
-                        const updated = [...(settings?.assessmentTypes || [])];
-                        updated[idx] = {
-                          ...updated[idx],
-                          maxMarks: Number(e.target.value),
-                        };
-                        onUpdateSettings("assessmentTypes", updated);
-                      }}
-                      placeholder="Max"
-                    />
-                    <span className="text-xs text-muted-foreground">max</span>
-                  </div>
-                  <div className="flex flex-col gap-0.5 ml-2">
-                    <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-medium">
-                      Grade: {type.grade === "all" ? "All" : type.grade}
-                    </span>
-                    <span className="text-[10px] bg-cyan-50 px-1.5 py-0.5 rounded text-cyan-600 font-medium">
-                      Sem: {type.semester}
-                    </span>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-red-500 hover:bg-red-50"
-                  onClick={() => handleDeleteAssessment(idx)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            {(settings?.assessmentTypes || []).length > 0 && (
-              <div className="text-xs text-right font-medium text-slate-500">
-                Total Weight:{" "}
-                {(settings?.assessmentTypes || []).reduce(
-                  (acc: number, curr: any) => acc + (curr.weight || 0),
-                  0,
-                )}
-                %
+                );
+              });
+            })()}
+            
+            {(settings?.assessmentTypes || []).length === 0 && (
+              <div className="text-center py-8 text-slate-400 text-xs italic border-2 border-dashed border-slate-100 rounded-xl">
+                No assessment types defined yet.
               </div>
             )}
           </div>

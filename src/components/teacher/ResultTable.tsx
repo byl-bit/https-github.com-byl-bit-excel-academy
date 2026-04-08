@@ -175,7 +175,7 @@ export function ResultTable({
       });
       setTableMarks((prev) => ({ ...prev, ...marksMap }));
     }
-  }, [classResults, students, subjects, isDynamic]);
+  }, [classResults, students, subjects, isDynamic, activeSemester]);
 
   const calculateRowStats = (studentId: string) => {
     const marks = tableMarks[studentId] || {};
@@ -194,10 +194,17 @@ export function ResultTable({
         targetTypes.forEach((type: AssessmentType) => {
           const val = marks[`${sub}__${type.id}`];
           if (val !== undefined && typeof val === "number") {
-            subTotal +=
-              (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+            const contribution = (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+            subTotal += contribution;
           }
         });
+        
+        // If we are in 'average' mode, the subTotal is the sum of both semesters (which should each be 100%)
+        // So we divide by 2 to get the annual average for that subject.
+        if (activeSemester === "average") {
+            subTotal = subTotal / 2;
+        }
+
         return Math.round(subTotal * 10) / 10;
       } else {
         const s1 = marks[`${sub}_sem1`] || 0;
@@ -205,7 +212,7 @@ export function ResultTable({
         
         if (activeSemester === "1") return s1;
         if (activeSemester === "2") return s2;
-        // Average of two semesters for 'average' view
+        
         const sAvg = (s1 + s2) / 2;
         return Math.round(sAvg * 10) / 10;
       }

@@ -74,6 +74,7 @@ export function ResultsManager({
   const [filterSection, setFilterSection] = useState("");
   const [filterGender, setFilterGender] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterSemester, setFilterSemester] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
 
   const grades = useMemo(
@@ -111,6 +112,15 @@ export function ResultsManager({
           matchesGender &&
           matchesStatus &&
           matchesSearch
+        );
+      })
+      .filter((r) => {
+        if (!filterSemester) return true;
+        // Check if student has data for this semester in at least one subject,
+        // or if the record itself has a semester flag (depends on how they are stored)
+        // Usually, publishedResults are annually calculated, but subjects have sem1/sem2.
+        return (r.subjects || []).some(s => 
+          filterSemester === "1" ? (s.sem1 !== undefined && s.sem1 !== null) : (s.sem2 !== undefined && s.sem2 !== null)
         );
       })
       .sort((a, b) => (a.rank || 999) - (b.rank || 999));
@@ -401,6 +411,8 @@ export function ResultsManager({
             setFilterGender={setFilterGender}
             filterStatus={filterStatus}
             setFilterStatus={setFilterStatus}
+            filterSemester={filterSemester}
+            setFilterSemester={setFilterSemester}
             search={search}
             setSearch={setSearch}
             onReset={() => {
@@ -408,6 +420,7 @@ export function ResultsManager({
               setFilterSection("");
               setFilterGender("");
               setFilterStatus("");
+              setFilterSemester("");
               setSearch("");
             }}
           />

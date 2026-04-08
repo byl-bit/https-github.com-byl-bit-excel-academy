@@ -76,120 +76,142 @@ export function TeacherOverview({
 
   const generateBulkReports = async () => {
     if (!classResults.length) return notifyError("No results to generate.");
-    const jsPDF = (await import("jspdf")).default;
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const assessmentTypes = settings?.assessmentTypes || [];
+    try {
+      const jsPDF = (await import("jspdf")).default;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      const addImage = (url: string, x: number, y: number, w: number, h: number) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.onload = () => {
+            try {
+              doc.addImage(img, "JPEG", x, y, w, h);
+              resolve(true);
+            } catch (e) {
+              resolve(false);
+            }
+          };
+          img.onerror = () => resolve(false);
+          img.src = url;
+        });
+      };
 
-    for (let i = 0; i < classResults.length; i++) {
-      const result = classResults[i];
-      if (i > 0) doc.addPage();
+      for (let i = 0; i < classResults.length; i++) {
+        const result = classResults[i];
+        if (i > 0) doc.addPage();
 
-      // --- Header ---
-      doc.setFillColor(8, 145, 178); // Cyan-600
-      doc.rect(0, 0, pageWidth, 40, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
-      doc.setFont("helvetica", "bold");
-      doc.text("EXCEL ACADEMY", pageWidth / 2, 20, { align: "center" });
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
-      doc.text("Official Student Report Card", pageWidth / 2, 30, {
-        align: "center",
-      });
-
-      // --- Student Details ---
-      doc.setTextColor(2, 6, 23); // Navy (Slate-950)
-      let y = 60;
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.text("STUDENT DETAILS", 20, 60);
-
-      doc.setFont("helvetica", "normal");
-      doc.text(
-        `Name: ${result.studentName || (result as any).student_name || "Student"}`,
-        20,
-        70,
-      );
-      doc.text(
-        `ID: ${result.studentId || (result as any).student_id || "N/A"}`,
-        20,
-        78,
-      );
-      doc.text(
-        `Gender: ${normalizeGender(result.gender || (result as any).sex) || "-"}`,
-        20,
-        86,
-      );
-      doc.text(`Grade: ${result.grade}-${result.section}`, 120, 70);
-      doc.text(
-        `Roll No: ${result.rollNumber || (result as any).roll_number || "-"}`,
-        120,
-        78,
-      );
-      doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, 86);
-
-      y = 100;
-
-      // --- Results Table Header ---
-      doc.setFillColor(236, 254, 255); // Cyan-50
-      doc.rect(15, y - 5, pageWidth - 30, 10, "F");
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(8, 145, 178); // Cyan-600
-
-      doc.text("SUBJECT", 20, y + 2);
-      let xPos = 110;
-      doc.text("MARKS", xPos, y + 2, { align: "center" });
-      xPos += 40;
-      doc.text("GRADE", xPos, y + 2, { align: "center" });
-
-      y += 10;
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(2, 6, 23); // Navy (Slate-950)
-
-      // --- Rows ---
-      (result.subjects || []).forEach((sub: Subject, idx: number) => {
-        if (idx % 2 === 0) {
-          doc.setFillColor(248, 250, 252); // Slate-50 (or very light blue)
-          doc.rect(15, y - 6, pageWidth - 30, 10, "F");
+        // --- Header (School Branding) ---
+        const sData = (settings as any) || {};
+        if (sData.letterheadUrl) {
+           await addImage(sData.letterheadUrl, 15, 10, 180, 25);
+        } else {
+          doc.setFillColor(8, 145, 178); // Cyan-600
+          doc.rect(15, 10, pageWidth - 30, 30, "F");
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(22);
+          doc.setFont("helvetica", "bold");
+          doc.text("EXCEL ACADEMY", pageWidth / 2, 28, { align: "center" });
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "normal");
+          doc.text("DETERMINED TO EXCEL!", pageWidth / 2, 35, { align: "center" });
         }
-        doc.text(sub.name, 20, y);
-        doc.text(String(sub.marks), 110, y, { align: "center" });
 
-        const grade = calculateGrade(sub.marks ?? 0);
-        doc.text(grade, 150, y, { align: "center" });
+        // --- Student Info ---
+        let infoY = 50;
+        doc.setTextColor(0, 0, 0);
+        doc.line(15, infoY, pageWidth - 15, infoY);
+        infoY += 10;
+
+        doc.rect(160, infoY, 30, 35);
+        doc.setFontSize(8);
+        doc.text("PHOTO", 175, infoY + 18, { align: "center" });
+
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text("STUDENT REPORT CARD", 15, infoY);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text(`Name: ${result.studentName || (result as any).student_name || "Student"}`, 15, infoY + 8);
+        doc.text(`ID: ${result.studentId || (result as any).student_id || "N/A"}`, 15, infoY + 14);
+        doc.text(`Grade: ${result.grade}-${result.section}`, 15, infoY + 20);
+        doc.text(`Gender: ${normalizeGender(result.gender || (result as any).sex) || "-"}`, 15, infoY + 26);
+        doc.text(`Roll No: ${result.rollNumber || (result as any).roll_number || "-"}`, 120, infoY + 8);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, infoY + 14);
+
+        // --- Results Table ---
+        let y = infoY + 45;
+        doc.setFillColor(248, 250, 252);
+        doc.rect(15, y - 6, pageWidth - 30, 10, "F");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.text("SUBJECT", 20, y);
+        doc.text("SEM 1", 90, y, { align: "center" });
+        doc.text("SEM 2", 125, y, { align: "center" });
+        doc.text("ANNUAL", 160, y, { align: "center" });
+        doc.text("GRADE", 190, y, { align: "center" });
+        doc.line(15, y + 2, pageWidth - 15, y + 2);
 
         y += 10;
-      });
+        doc.setFont("helvetica", "normal");
+        let s1Sum = 0, s2Sum = 0, subCount = 0;
 
-      // --- Summary ---
-      y += 10;
-      doc.setDrawColor(8, 145, 178); // Cyan-600
-      doc.line(15, y, pageWidth - 15, y);
-      y += 15;
+        (result.subjects || []).forEach((sub: any, idx: number) => {
+          if (idx % 2 === 1) {
+            doc.setFillColor(249, 250, 251);
+            doc.rect(15, y - 6, pageWidth - 30, 10, "F");
+          }
+          const s1 = sub.sem1 ?? (sub.marks && !sub.sem2 ? sub.marks : 0);
+          const s2 = sub.sem2 ?? 0;
+          const annual = sub.marks ?? ((s1+s2)/2);
+          s1Sum += s1; s2Sum += s2; subCount++;
 
-      doc.setFont("helvetica", "bold");
-      doc.text(`Total Score: ${result.total ?? 0}`, 20, y);
-      doc.text(`Average: ${(result.average ?? 0).toFixed(1)} / 100`, 70, y);
-      doc.text(`Conduct: ${calculateConduct(result.average ?? 0)}`, 130, y);
+          doc.text(sub.name, 20, y);
+          doc.text(s1.toFixed(1), 90, y, { align: "center" });
+          doc.text(s2.toFixed(1), 125, y, { align: "center" });
+          doc.text(annual.toFixed(1), 160, y, { align: "center" });
+          doc.text(calculateGrade(annual), 190, y, { align: "center" });
+          y += 10;
+        });
 
-      y += 10;
-      const status = result.promotedOrDetained;
-      doc.text(`Result: ${status}`, 140, y);
+        // --- Summary ---
+        y += 5;
+        doc.setDrawColor(8, 145, 178);
+        doc.line(15, y, pageWidth - 15, y);
+        y += 10;
+        doc.setFont("helvetica", "bold");
+        doc.text("ACADEMIC SUMMARY", 15, y);
+        y += 10;
+        doc.setFontSize(10);
+        const s1Avg = subCount > 0 ? s1Sum / subCount : 0;
+        const s2Avg = subCount > 0 ? s2Sum / subCount : 0;
+        doc.text(`Semester 1 Average: ${s1Avg.toFixed(2)}%`, 15, y);
+        doc.text(`Semester 2 Average: ${s2Avg.toFixed(2)}%`, 100, y);
+        y += 8;
+        doc.text(`Annual Average: ${(result.average ?? 0).toFixed(2)}%`, 15, y);
+        doc.text(`Final Result: ${result.promotedOrDetained || result.result || "PENDING"}`, 100, y);
 
-      // --- Footer ---
-      const bottomY = doc.internal.pageSize.getHeight() - 30;
-      doc.setFontSize(10);
-      doc.setTextColor(148, 163, 184); // Slate-400
-      doc.text(
-        "Generated via Excel Academy Admin Portal",
-        pageWidth / 2,
-        bottomY,
-        { align: "center" },
-      );
+        // --- Signatures ---
+        const sigY = pageHeight - 40;
+        doc.setDrawColor(0, 0, 0);
+        doc.line(20, sigY, 80, sigY);
+        doc.text("School Director", 50, sigY + 5, { align: "center" });
+        if (sData.principalName) doc.text(sData.principalName, 50, sigY + 10, { align: "center" });
+
+        doc.line(130, sigY, 190, sigY);
+        doc.text("Homeroom Teacher", 160, sigY + 5, { align: "center" });
+        const teacherName = sData.homeroomName || sData.teacherName;
+        if (teacherName) doc.text(teacherName, 160, sigY + 10, { align: "center" });
+      }
+
+      doc.save(`Bulk_Report_Cards_${user.grade}-${user.section}.pdf`);
+      success("Bulk reports generated successfully.");
+    } catch (e) {
+      console.error(e);
+      notifyError("Failed to generate bulk reports.");
     }
-
-    doc.save(`Bulk_Report_Cards_${user.grade}-${user.section}.pdf`);
   };
 
   return (

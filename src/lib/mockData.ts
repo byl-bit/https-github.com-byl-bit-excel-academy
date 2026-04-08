@@ -16,6 +16,7 @@ export interface User {
   photo?: string; // URL or Base64 string for profile photo
   createdAt?: string;
   gender?: string;
+  rollNumber?: string;
 }
 
 export interface SubjectResult {
@@ -30,6 +31,9 @@ export interface SubjectResult {
   submittedBy?: string;
   submittedAt?: string;
   assessments?: { [key: string]: number }; // For dynamic assessment types
+  sem1?: number;
+  sem2?: number;
+  semAverage?: number;
 }
 
 export interface SubjectAllocation {
@@ -62,6 +66,8 @@ export interface StudentResult {
   submittedAt?: string;
   approvedAt?: string;
   remarks?: string; // tailored remarks
+  rollNumber?: string;
+  gender?: string;
 }
 
 export interface Announcement {
