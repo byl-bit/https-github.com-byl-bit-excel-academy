@@ -1,5 +1,7 @@
 // Utility functions for exporting data
 import { normalizeGender } from "@/lib/utils";
+import type { PendingResult, PublishedResult, Subject } from "@/lib/types";
+
 
 export const exportToExcel = async (
   data: Array<Record<string, unknown>>,
@@ -145,7 +147,7 @@ export const printElement = (elementId: string, title: string = "Document") => {
   }, 250);
 };
 
-import { calculateGrade as getGrade } from "./gradingLogic";
+import { calculateGrade as getGrade, calculateGrade } from "./gradingLogic";
 
 export const generateReportCardPDF = async (
   result: any,
