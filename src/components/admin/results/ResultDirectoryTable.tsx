@@ -98,7 +98,7 @@ export function ResultDirectoryTable({
               className={cn(
                 "p-1.5 rounded-lg transition-all",
                 viewMode === "table"
-                  ? "bg-white shadow-xs text-blue-600"
+                  ? "bg-white shadow-xs text-cyan-600"
                   : "text-slate-400 hover:text-slate-600",
               )}
             >
@@ -109,7 +109,7 @@ export function ResultDirectoryTable({
               className={cn(
                 "p-1.5 rounded-lg transition-all",
                 viewMode === "cards"
-                  ? "bg-white shadow-xs text-blue-600"
+                  ? "bg-white shadow-xs text-cyan-600"
                   : "text-slate-400 hover:text-slate-600",
               )}
             >
@@ -119,7 +119,7 @@ export function ResultDirectoryTable({
 
           {!isPendingView && (
             <Button
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-black h-10 px-6 rounded-xl shadow-lg shadow-indigo-100 transition-all hover:scale-105 active:scale-95 text-[11px] uppercase tracking-widest"
+              className="bg-cyan-600 hover:bg-cyan-700 text-white font-black h-10 px-6 rounded-xl shadow-lg shadow-cyan-100 transition-all hover:scale-105 active:scale-95 text-[11px] uppercase tracking-widest"
               onClick={onBatchPrint}
             >
               <Printer className="h-4 w-4 mr-2" /> Export All (PDF)
@@ -199,7 +199,7 @@ export function ResultDirectoryTable({
                       >
                         {!isPendingView && (
                           <td className="py-5 px-6 text-center">
-                            <span className="text-xl font-black text-slate-300 group-hover:text-blue-600 transition-colors">
+                            <span className="text-xl font-black text-slate-300 group-hover:text-cyan-600 transition-colors">
                               #{r.rank || "-"}
                             </span>
                           </td>
@@ -210,7 +210,7 @@ export function ResultDirectoryTable({
                           </div>
                         </td>
                         <td className="py-5 px-6">
-                          <div className="font-black text-slate-900 text-[15px] group-hover:text-blue-600 transition-colors leading-tight">
+                          <div className="font-black text-slate-900 text-[15px] group-hover:text-cyan-600 transition-colors leading-tight">
                             {r.studentName || (r as any).student_name}
                           </div>
                           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
@@ -292,7 +292,7 @@ export function ResultDirectoryTable({
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  className="h-10 w-10 text-blue-600 hover:bg-blue-50 rounded-2xl transition-all hover:scale-110 active:scale-95"
+                                  className="h-10 w-10 text-cyan-600 hover:bg-cyan-50 rounded-2xl transition-all hover:scale-110 active:scale-95"
                                   onClick={() => onPrintSingle(resultsRow)}
                                 >
                                   <Printer className="h-5 w-5" />
@@ -313,7 +313,7 @@ export function ResultDirectoryTable({
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-10 w-10 text-indigo-500 hover:bg-indigo-50 rounded-2xl transition-all hover:scale-110 active:scale-95"
+                                    className="h-10 w-10 text-cyan-500 hover:bg-cyan-50 rounded-2xl transition-all hover:scale-110 active:scale-95"
                                     onClick={() =>
                                       onUnlock(
                                         r.key ||
@@ -397,7 +397,7 @@ export function ResultDirectoryTable({
                   <span className="text-[10px] uppercase opacity-60">Avg</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-black text-slate-900 truncate text-lg leading-tight group-hover:text-indigo-600 transition-colors">
+                  <h4 className="font-black text-slate-900 truncate text-lg leading-tight group-hover:text-cyan-600 transition-colors">
                     {r.studentName}
                   </h4>
                   <div className="flex items-center gap-2 mt-1">
@@ -405,7 +405,7 @@ export function ResultDirectoryTable({
                       {r.studentId}
                     </span>
                     <div className="h-1 w-1 rounded-full bg-slate-300" />
-                    <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+                    <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest">
                       Grade {r.grade}-{r.section}
                     </span>
                   </div>
@@ -425,7 +425,7 @@ export function ResultDirectoryTable({
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-1">
                     Class Rank
                   </p>
-                  <p className="font-black text-xl text-indigo-600">
+                  <p className="font-black text-xl text-cyan-600">
                     #{r.rank || "-"}
                   </p>
                 </div>
