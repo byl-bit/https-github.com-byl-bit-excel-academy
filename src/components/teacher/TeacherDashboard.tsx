@@ -34,12 +34,6 @@ import type {
 } from "@/lib/types";
 import { generateReportCardPDF } from "@/lib/utils/export";
 
-type AssessmentType = {
-  id: string;
-  label: string;
-  maxMarks?: number;
-  weight?: number;
-};
 
 interface TeacherOverviewProps {
   user: User;
