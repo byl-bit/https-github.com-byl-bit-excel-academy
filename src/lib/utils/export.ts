@@ -1,4 +1,5 @@
 // Utility functions for exporting data
+import { normalizeGender } from "@/lib/utils";
 
 export const exportToExcel = async (
   data: Array<Record<string, unknown>>,
