@@ -127,6 +127,8 @@ export async function POST(request: Request) {
   try {
     const actorRole = request.headers.get("x-actor-role") || "";
 
+    const body = await request.json();
+
     // Validate roll number range if provided
     const rollVal =
       getString(body, "rollNumber") || getString(body, "roll_number");

@@ -104,8 +104,6 @@ export function StudentDirectory({
     return "N/A";
   };
 
-  const { user } = useAuth() as any;
-
   const handleForceReset = async (newPass: string) => {
     const student = promptPass.student;
     if (!student) return;
