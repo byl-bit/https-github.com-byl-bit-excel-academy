@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/contexts/ToastContext";
 import NextImage from "next/image";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface GalleryItem {
@@ -30,6 +31,7 @@ interface GalleryItem {
 }
 
 export function GalleryManager() {
+  const { user } = useAuth();
   const [images, setImages] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -69,6 +71,10 @@ export function GalleryManager() {
     try {
       const res = await fetch("/api/media/upload", {
         method: "POST",
+        headers: {
+          "x-actor-role": "admin",
+          "x-actor-id": user?.id || "",
+        },
         body: formData,
       });
 
@@ -101,6 +107,10 @@ export function GalleryManager() {
     try {
       const res = await fetch(`/api/media/upload?id=${id}${fileName ? `&fileName=${fileName}` : ''}`, {
         method: "DELETE",
+        headers: {
+          "x-actor-role": "admin",
+          "x-actor-id": user?.id || "",
+        }
       });
 
       if (res.ok) {

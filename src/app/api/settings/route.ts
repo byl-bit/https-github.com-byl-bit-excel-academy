@@ -74,6 +74,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const actorRole = request.headers.get("x-actor-role") || "";
+    if (actorRole !== "admin") {
+      return NextResponse.json(
+        { error: "Unauthorized: Admin role required" },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json();
 
     if (typeof body !== "object" || body === null || Array.isArray(body)) {

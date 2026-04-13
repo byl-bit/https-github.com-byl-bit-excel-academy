@@ -30,6 +30,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { exportToCSV, parseCSV } from "@/lib/utils/export";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TeacherDirectoryProps {
   teachers: any[];
@@ -42,6 +43,7 @@ export function TeacherDirectory({
   onDelete,
   onUpdate,
 }: TeacherDirectoryProps) {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
@@ -163,7 +165,11 @@ export function TeacherDirectory({
         try {
           const res = await fetch("/api/users", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "x-actor-role": "admin",
+              "x-actor-id": user?.id || "",
+            },
             body: JSON.stringify(teachersToImport),
           });
           const result = await res.json();

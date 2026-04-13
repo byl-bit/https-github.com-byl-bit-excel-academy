@@ -54,6 +54,7 @@ export function StudentDirectory({
   onDelete,
   onUpdate,
 }: StudentDirectoryProps) {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [filterGrade, setFilterGrade] = useState("ALL");
   const [filterSection, setFilterSection] = useState("ALL");
@@ -445,7 +446,11 @@ export function StudentDirectory({
 
       const res = await fetch("/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-actor-role": "admin",
+          "x-actor-id": user?.id || "",
+        },
         body: JSON.stringify(studentsToImport),
       });
       const result = await res.json();

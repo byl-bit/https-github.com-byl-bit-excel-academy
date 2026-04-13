@@ -3,6 +3,14 @@ import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: Request) {
   try {
+    const actorRole = request.headers.get("x-actor-role") || "";
+    if (actorRole !== "admin") {
+      return NextResponse.json(
+        { error: "Unauthorized: Admin role required" },
+        { status: 403 },
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const requestedBucket = formData.get("bucket") as string | null;
@@ -194,6 +202,14 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const actorRole = request.headers.get("x-actor-role") || "";
+    if (actorRole !== "admin") {
+      return NextResponse.json(
+        { error: "Unauthorized: Admin role required" },
+        { status: 403 },
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     const fileName = searchParams.get("fileName");

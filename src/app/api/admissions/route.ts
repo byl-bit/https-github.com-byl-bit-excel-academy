@@ -33,6 +33,14 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const actorRole = request.headers.get("x-actor-role") || "";
+  if (actorRole !== "admin") {
+    return NextResponse.json(
+      { error: "Unauthorized: Admin role required" },
+      { status: 403 },
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 

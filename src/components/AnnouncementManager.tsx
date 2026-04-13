@@ -219,6 +219,10 @@ export function AnnouncementManager({
 
         const res = await fetch("/api/media/upload", {
           method: "POST",
+          headers: {
+            "x-actor-role": user?.role || "admin",
+            "x-actor-id": user?.id || "",
+          },
           body: formData,
         });
 

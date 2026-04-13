@@ -125,7 +125,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const actorRole = request.headers.get("x-actor-role") || "";
 
     // Validate roll number range if provided
     const rollVal =
@@ -138,6 +138,18 @@ export async function POST(request: Request) {
           { status: 400 },
         );
       }
+    }
+
+    // Role check for bulk or specific settings
+    const isBulk = Array.isArray(body);
+    const hasStatusActive =
+      !isBulk && isRecord(body) && getString(body, "status") === "active";
+
+    if ((isBulk || hasStatusActive) && actorRole !== "admin") {
+      return NextResponse.json(
+        { error: "Unauthorized: Admin role required for bulk import or active status" },
+        { status: 403 }
+      );
     }
 
     // Helper to map keys (including student_id and roll_number)

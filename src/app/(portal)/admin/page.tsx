@@ -205,14 +205,26 @@ export default function AdminPage() {
         gender: app.gender,
       };
 
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "x-actor-role": "admin",
+        "x-actor-id": user?.id || "",
+      };
+
       const res = await fetch("/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(newUser),
       });
 
       if (res.ok) {
-        await fetch(`/api/admissions?id=${app.id}`, { method: "DELETE" });
+        await fetch(`/api/admissions?id=${app.id}`, { 
+          method: "DELETE",
+          headers: {
+            "x-actor-role": "admin",
+            "x-actor-id": user?.id || "",
+          }
+        });
         logActivity({
           userId: user?.id || "",
           userName: user?.name || "Admin",
@@ -231,7 +243,13 @@ export default function AdminPage() {
   const handleRejectAdmission = async (id: string) => {
     if (!confirm("Reject this application?")) return;
     try {
-      const res = await fetch(`/api/admissions?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admissions?id=${id}`, { 
+        method: "DELETE",
+        headers: {
+          "x-actor-role": "admin",
+          "x-actor-id": user?.id || "",
+        }
+      });
       if (res.ok) {
         logActivity({
           userId: user?.id || "",
@@ -528,7 +546,11 @@ export default function AdminPage() {
     const updated = [...subjects, name];
     await fetch("/api/subjects", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "x-actor-role": "admin",
+        "x-actor-id": user?.id || "",
+      },
       body: JSON.stringify(updated),
     });
     localStorage.setItem("excel_academy_subjects", JSON.stringify(updated));
@@ -546,7 +568,11 @@ export default function AdminPage() {
     const updated = subjects.filter((s) => s !== name);
     await fetch("/api/subjects", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "x-actor-role": "admin",
+        "x-actor-id": user?.id || "",
+      },
       body: JSON.stringify(updated),
     });
     localStorage.setItem("excel_academy_subjects", JSON.stringify(updated));
@@ -606,7 +632,11 @@ export default function AdminPage() {
       const updatedSettings = { ...settings, [key]: value };
       const res = await fetch("/api/settings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-actor-role": "admin",
+          "x-actor-id": user?.id || "",
+        },
         body: JSON.stringify(updatedSettings),
       });
       if (res.ok) {
@@ -879,6 +909,11 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/allocations", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-actor-role": "admin",
+          "x-actor-id": user?.id || "",
+        },
         body: JSON.stringify(allocation),
       });
       if (res.ok) {
@@ -893,7 +928,13 @@ export default function AdminPage() {
   };
 
   const handleDeallocate = async (id: string) => {
-    await fetch(`/api/allocations?id=${id}`, { method: "DELETE" });
+    await fetch(`/api/allocations?id=${id}`, { 
+      method: "DELETE",
+      headers: {
+        "x-actor-role": "admin",
+        "x-actor-id": user?.id || "",
+      }
+    });
     refresh(true);
   };
 

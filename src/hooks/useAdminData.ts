@@ -116,9 +116,9 @@ export function useAdminData() {
         if (category === "all" || category === "essentials") {
           const [settingsRes, announceRes, subRes, statsRes, notificationsRes] =
             await Promise.all([
-              fetch("/api/settings", noCache),
-              fetch("/api/announcements", noCache),
-              fetch("/api/subjects", noCache),
+              fetch("/api/settings", authHeaders),
+              fetch("/api/announcements", authHeaders),
+              fetch("/api/subjects", authHeaders),
               fetch("/api/admin/stats", authHeaders),
               fetch("/api/notifications", authHeaders),
             ]);
@@ -177,7 +177,7 @@ export function useAdminData() {
           const taskMap: string[] = [];
 
           if (category === "all" || category === "users") {
-            tasks.push(fetch("/api/users", noCache));
+            tasks.push(fetch("/api/users", authHeaders));
             taskMap.push("users");
           }
           if (category === "all" || category === "results") {
@@ -185,11 +185,11 @@ export function useAdminData() {
             taskMap.push("results");
           }
           if (category === "all" || category === "admissions") {
-            tasks.push(fetch("/api/admissions", noCache));
+            tasks.push(fetch("/api/admissions", authHeaders));
             taskMap.push("admissions");
           }
           if (category === "all" || category === "resources") {
-            tasks.push(fetch("/api/resources", noCache));
+            tasks.push(fetch("/api/resources", authHeaders));
             taskMap.push("resources");
           }
           tasks.push(fetch("/api/allocations", authHeaders));

@@ -8,28 +8,47 @@ export async function GET(request: Request) {
   const section = searchParams.get("section");
   const studentId = searchParams.get("studentId");
 
+  const role = request.headers.get("x-actor-role") || "";
+  const actorId = request.headers.get("x-actor-id") || "";
+
   const headers = {
     "Content-Type": "application/json",
     "Cache-Control": "public, s-maxage=5, stale-while-revalidate=30",
   };
 
   if (studentId) {
-    // Student view: get their attendance records
-    const { data, error } = await supabase
+    // Unauthorized if student tries to view someone else
+    if (role === "student" && actorId !== studentId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { 
+        status: 403, 
+        headers 
+      });
+    }
+
+    const { data: studentData, error: studentError } = await supabase
       .from("attendance")
       .select("id, student_id, date, status, marked_by")
       .eq("student_id", studentId)
       .order("date", { ascending: false });
 
-    if (error) {
-      console.error("Supabase error fetching attendance:", error);
+    if (studentError) {
+      console.error("Supabase error fetching attendance:", studentError);
       return new Response(JSON.stringify([]), { headers });
     }
 
-    return new Response(JSON.stringify(data || []), { headers });
-  } else if (date && grade && section) {
-    // Teacher view: specific day - need to join with users table to filter by grade/section
-    const splitGrade = grade.split(" ")[1] || grade;
+    return new Response(JSON.stringify(studentData || []), { headers });
+  } 
+  
+  if (date && grade && section) {
+    // Teacher/Admin check for class view
+    if (role !== "teacher" && role !== "admin") {
+       return new Response(JSON.stringify({ error: "Unauthorized: teacher or admin role required" }), { 
+         status: 403, 
+         headers 
+       });
+    }
+
+    const splitGrade = grade ? (grade.split(" ")[1] || grade) : "";
 
     // First, get all students with matching grade and section
     const { data: students, error: studentsError } = await supabase
@@ -50,23 +69,23 @@ export async function GET(request: Request) {
     }
 
     // Get student IDs
-    const studentIds = students
-      .map((s) => s.student_id || s.id)
+    const studentIds = (students || [])
+      .map((s: any) => s.student_id || s.id)
       .filter(Boolean);
 
     // Now fetch attendance records for these students on the specified date
-    const { data, error } = await supabase
+    const { data: classData, error: classError } = await supabase
       .from("attendance")
       .select("id, student_id, date, status, marked_by")
       .eq("date", date)
       .in("student_id", studentIds);
 
-    if (error) {
-      console.error("Supabase error fetching attendance:", error);
+    if (classError) {
+      console.error("Supabase error fetching attendance:", classError);
       return new Response(JSON.stringify([]), { headers });
     }
 
-    return new Response(JSON.stringify(data || []), { headers });
+    return new Response(JSON.stringify(classData || []), { headers });
   }
 
   // Default: return empty array if no valid query params
@@ -75,6 +94,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const role = request.headers.get("x-actor-role") || "";
+    if (role !== "teacher" && role !== "admin") {
+      return NextResponse.json(
+        { error: "Unauthorized: teacher or admin role required" },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json();
     const { date, grade, section, presentStudentIds, teacherId } = body;
 

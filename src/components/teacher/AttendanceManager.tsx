@@ -44,6 +44,12 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
         const dateStr = date.toISOString().split("T")[0];
         const res = await fetch(
           `/api/attendance?date=${dateStr}&grade=${user.grade}&section=${user.section}`,
+          {
+            headers: {
+              "x-actor-role": user.role || "teacher",
+              "x-actor-id": user.id || "",
+            }
+          }
         );
         if (res.ok) {
           const data = await res.json();
@@ -82,7 +88,11 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
       const dateStr = date.toISOString().split("T")[0];
       const res = await fetch("/api/attendance", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-actor-role": user.role || "teacher",
+          "x-actor-id": user.id || "",
+        },
         body: JSON.stringify({
           date: dateStr,
           grade: user.grade,
