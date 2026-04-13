@@ -26,8 +26,7 @@ export default function HomeroomPage() {
       return;
     }
     try {
-      try {
-        const [usersRes, resultsRes, settingsRes] = await Promise.all([
+      const [usersRes, resultsRes, settingsRes] = await Promise.all([
           fetch(
             `/api/users?role=student&grade=${user.grade}&section=${user.section}`,
           ),

@@ -41,7 +41,7 @@ export default function StudentDashboard() {
     if (!user) return;
     try {
       // Parallelize requests and use specific student filters
-      const studentDisplayId = user.studentId || user.student_id || user.id;
+      const studentDisplayId = user.studentId || user.id;
       const [resRes, attRes] = await Promise.all([
         fetch(`/api/results`, {
           headers: { "x-actor-role": "student", "x-actor-id": user.id },
