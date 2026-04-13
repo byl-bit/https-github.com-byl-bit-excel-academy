@@ -192,7 +192,7 @@ export function useAdminData() {
             tasks.push(fetch("/api/resources", noCache));
             taskMap.push("resources");
           }
-          tasks.push(fetch("/api/allocations", noCache));
+          tasks.push(fetch("/api/allocations", authHeaders));
           taskMap.push("allocations");
           tasks.push(fetch("/api/admin/reset-requests", authHeaders));
           taskMap.push("resets");

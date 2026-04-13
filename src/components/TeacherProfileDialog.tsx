@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -55,6 +56,9 @@ export function TeacherProfileDialog({ teacher, isOpen, onClose }: TeacherProfil
                 <DialogTitle className="text-xl sm:text-3xl font-black text-slate-900 uppercase tracking-tight leading-tight truncate px-2 sm:px-0">
                   {fullName}
                 </DialogTitle>
+                <DialogDescription className="sr-only">
+                  View detailed institutional profile for teacher {fullName}
+                </DialogDescription>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Faculty Profile</p>
               </div>
               

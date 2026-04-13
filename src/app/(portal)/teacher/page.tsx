@@ -26,7 +26,9 @@ export default function TeacherPage() {
       try {
         // Parallelize initial fetches
         const [allocRes, settingsRes] = await Promise.all([
-          fetch("/api/allocations"),
+          fetch("/api/allocations", {
+            headers: { "x-actor-role": "teacher", "x-actor-id": user.id },
+          }),
           fetch("/api/settings"),
         ]);
 

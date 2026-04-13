@@ -16,6 +16,7 @@ import { Trash2, Edit, Plus, Image as ImageIcon, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -286,6 +287,9 @@ export function AnnouncementManager({
                 <DialogTitle>
                   {editingId ? "Edit Announcement" : "Create Announcement"}
                 </DialogTitle>
+                <DialogDescription>
+                  {editingId ? "Update the details of your existing announcement below." : "Fill in the details to broadcast a new announcement to your students and faculty."}
+                </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">

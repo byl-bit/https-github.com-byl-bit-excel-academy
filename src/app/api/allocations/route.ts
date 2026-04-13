@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import type { SubjectAllocation } from "@/lib/mockData";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 
-export async function GET() {
-  const { data, error } = await supabase
+export async function GET(req: Request) {
+  const role = req.headers.get("x-actor-role") || "";
+  const db = supabaseAdmin || supabase;
+  
+  const { data, error } = await db
     .from("allocations")
     .select("id, teacher_id, teacher_name, grade, section, subject, created_at")
     .order("created_at", { ascending: false });
@@ -19,14 +21,18 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const role = req.headers.get("x-actor-role") || "";
+    // Allow both admin and teacher to POST allocations if needed, 
+    // but typically only admin should manage them. 
+    // We'll stick to admin for safety unless requested otherwise.
     if (role !== "admin")
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
     const body = await req.json();
+    const db = supabaseAdmin || supabase;
 
     if (Array.isArray(body)) {
       // Full replace: delete all and insert new
-      await supabase
+      await db
         .from("allocations")
         .delete()
         .neq("id", "00000000-0000-0000-0000-000000000000");
@@ -38,7 +44,7 @@ export async function POST(req: Request) {
         subject: a.subject,
         created_at: a.createdAt || a.created_at || new Date().toISOString(),
       }));
-      const { error } = await supabase.from("allocations").insert(mapped);
+      const { error } = await db.from("allocations").insert(mapped);
       if (error) throw error;
       return NextResponse.json({ success: true });
     }
@@ -52,7 +58,7 @@ export async function POST(req: Request) {
       subject: body.subject,
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("allocations")
       .insert([record])
       .select()
@@ -82,7 +88,8 @@ export async function DELETE(req: Request) {
 
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
-  const { error } = await supabase.from("allocations").delete().eq("id", id);
+  const db = supabaseAdmin || supabase;
+  const { error } = await db.from("allocations").delete().eq("id", id);
 
   if (error) {
     console.error("Supabase error deleting allocation:", error);
