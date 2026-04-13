@@ -133,8 +133,8 @@ export async function POST(request: Request) {
       );
 
     if (action === "approve") {
-      // Hash the new password before saving it to the users table
-      const hashedPassword = await bcrypt.hash(String(currentReq.token), 10);
+      // The token already contains the hashed password from the reset request
+      const hashedPassword = currentReq.token;
 
       // Update user password
       const { error: updateError } = await client

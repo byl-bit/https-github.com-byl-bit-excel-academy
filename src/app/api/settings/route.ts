@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export async function GET() {
   const { data, error } = await supabase.from("settings").select("key, value");
@@ -80,17 +80,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
+    // Use admin client to bypass RLS for settings management
+    const client = supabaseAdmin || supabase;
+
     // Update each setting key
     for (const [key, value] of Object.entries(
       body as Record<string, unknown>,
     )) {
-      await supabase
+      await client
         .from("settings")
         .upsert({ key, value }, { onConflict: "key" });
     }
 
     // Fetch updated settings
-    const { data } = await supabase.from("settings").select("key, value");
+    const { data } = await client.from("settings").select("key, value");
 
     const settings: Record<string, unknown> = {};
     if (Array.isArray(data)) {

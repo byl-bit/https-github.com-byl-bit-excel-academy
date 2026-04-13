@@ -1096,11 +1096,11 @@ export async function PUT(request: Request) {
           // Move back to results_pending as draft
           const { published_at, approved_at, approved_by, ...rest } =
             entry as any;
-          await db.from("results_pending").insert({
+          await db.from("results_pending").upsert({
             ...rest,
             status: "draft",
             updated_at: new Date().toISOString(),
-          });
+          }, { onConflict: 'student_id' });
           await db.from("results").delete().eq("student_id", key);
         }
       }

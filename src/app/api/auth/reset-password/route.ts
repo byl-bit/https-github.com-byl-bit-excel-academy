@@ -293,12 +293,15 @@ export async function POST(request: Request) {
         .eq("user_id", user.id)
         .eq("used", false);
 
+      // Hash the new password before storing it in the pending request for security
+      const hashedPendingPassword = await bcrypt.hash(String(newPassword), 10);
+
       // Create new request
       const { error: insertError } = await client
         .from("password_reset_requests")
         .insert({
           user_id: user.id,
-          token: newPassword, // Using token field to store new password temporarily
+          token: hashedPendingPassword, // Storing hash instead of plaintext
           expires_at: new Date(
             Date.now() + 7 * 24 * 60 * 60 * 1000,
           ).toISOString(), // 7 days

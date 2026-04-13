@@ -54,10 +54,11 @@ export default function StudentResultsPage() {
 
       // The API returns { published: {}, pending: {} } for admin/teachers
       // but returns { [studentId]: result } directly for students
-      let res = storedResults[user.id];
+      const studentDisplayId = user.studentId || user.student_id || '';
+      let res = storedResults[user.id] || storedResults[studentDisplayId];
       
       if (!res && storedResults.published) {
-        res = storedResults.published[user.id];
+        res = storedResults.published[user.id] || storedResults.published[studentDisplayId];
       }
       
       if (!res) {
@@ -68,8 +69,10 @@ export default function StudentResultsPage() {
           
         res = allResults.find(
           (r: any) =>
-            r.studentId === user.studentId ||
-            r.studentId === user.id
+            r.studentId === studentDisplayId ||
+            r.student_id === studentDisplayId ||
+            r.studentId === user.id ||
+            r.student_id === user.id
         );
       }
 

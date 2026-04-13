@@ -20,13 +20,12 @@ export default function HomeroomPage() {
 
   const isHomeroom = !!user?.grade && !!user?.section;
 
-  useEffect(() => {
+  const fetchData = async () => {
     if (!user || !isHomeroom) {
       setLoading(false);
       return;
     }
-
-    const fetchData = async () => {
+    try {
       try {
         const [usersRes, resultsRes, settingsRes] = await Promise.all([
           fetch(
@@ -71,6 +70,7 @@ export default function HomeroomPage() {
       }
     };
 
+  useEffect(() => {
     fetchData();
   }, [user, isHomeroom]);
 
@@ -352,7 +352,8 @@ export default function HomeroomPage() {
           subjects={allSubjects}
           classResults={results}
           user={user}
-          onRefresh={() => {}} // Read only, no refresh needed really
+          onRefresh={fetchData}
+          settings={settings}
           isHomeroomView={true}
         />
       </div>

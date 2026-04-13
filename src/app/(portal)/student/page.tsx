@@ -41,21 +41,25 @@ export default function StudentDashboard() {
     if (!user) return;
     try {
       // Parallelize requests and use specific student filters
+      const studentDisplayId = user.studentId || user.student_id || user.id;
       const [resRes, attRes] = await Promise.all([
-        fetch(`/api/results?studentId=${user.id}`, {
+        fetch(`/api/results`, {
           headers: { "x-actor-role": "student", "x-actor-id": user.id },
         }),
-        fetch(`/api/attendance?studentId=${user.id}`),
+        fetch(`/api/attendance?studentId=${studentDisplayId}`),
       ]);
 
       if (resRes.ok) {
         const data = await resRes.json();
-        // API now returns specific result for studentId if provided
-        let summary = data[user.id];
+        // Try lookup by internal UUID first, then by display studentId
+        let summary = data[user.id] || data[studentDisplayId];
         if (!summary) {
           summary = Object.values(data).find(
             (r: any) =>
-              r.studentId === user.studentId || r.studentId === user.id,
+              r.studentId === studentDisplayId ||
+              r.student_id === studentDisplayId ||
+              r.studentId === user.id ||
+              r.student_id === user.id,
           );
         }
         if (summary) setAcademicSummary(summary);

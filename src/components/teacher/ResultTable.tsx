@@ -266,8 +266,13 @@ export function ResultTable({
                 (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
             }
           });
-          // We must preserved existing manual sem1 and sem2 values from the DB or form fallback
-          const targetStudent = classResults.find(r => r.student_id === studentId) as any;
+          // We must preserve existing manual sem1 and sem2 values from the DB or form fallback
+          const targetStudent = classResults.find(r => {
+            const rr = r as unknown as Record<string, unknown>;
+            const rid = String(rr['student_id'] ?? rr['studentId'] ?? '');
+            const sStudentId = String(student.studentId || student.student_id || studentId);
+            return rid === sStudentId || rid === studentId || String(rr['id']) === studentId;
+          }) as any;
           const s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
           const s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
           
@@ -401,7 +406,12 @@ export function ResultTable({
               }
             });
             // We must preserve existing manual sem1 and sem2 values from the DB or form fallback
-            const targetStudent = classResults.find(r => r.student_id === sid) as any;
+            const targetStudent = classResults.find(r => {
+               const rr = r as unknown as Record<string, unknown>;
+               const rid = String(rr['student_id'] ?? rr['studentId'] ?? '');
+               const sStudentId = String(student.studentId || student.student_id || sid);
+               return rid === sStudentId || rid === sid || String(rr['id']) === sid;
+             }) as any;
             const s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
             const s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
 
@@ -507,25 +517,29 @@ export function ResultTable({
     }
   };
 
-  // Autosave logic
-  useEffect(() => {
-    const dirtyIds = Object.keys(tableMarks).filter((id) => {
-      // Check if current marks differ from what we last saved or loaded from classResults
-      // But a simpler way is to just save if it's currently being edited or just changed
-      return true;
-    });
+  // Autosave logic - only fires when user explicitly edits a row that is being actively edited
+  // We track a separate "dirty" flag to avoid continuous re-saving on every render
+  const [autosaveDirty, setAutosaveDirty] = useState(false);
 
-    if (dirtyIds.length === 0) return;
+  // Mark dirty when marks change from user input (handleMarkChange sets this)
+  useEffect(() => {
+    if (!autosaveDirty) return;
 
     const timer = setTimeout(() => {
-      // Only autosave rows that are not locked
-      const toSave = dirtyIds.filter((id) => {
+      // Only autosave rows that are actively being edited and not locked
+      const editingIds = Array.from(editingRows);
+      if (editingIds.length === 0) {
+        setAutosaveDirty(false);
+        return;
+      }
+
+      const toSave = editingIds.filter((id) => {
         const student = students.find(
           (s) => String(s.id || s.student_id || s.studentId) === id,
         );
         if (!student) return false;
         const { isLocked } = getRowInfo(student);
-        return !isLocked;
+        return !isLocked && tableMarks[id] && Object.keys(tableMarks[id]).length > 0;
       });
 
       if (toSave.length > 0) {
@@ -586,20 +600,23 @@ export function ResultTable({
           };
         });
 
-        fetch("/api/results", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-actor-role": String(user?.role || "teacher"),
-            "x-actor-id": String(user?.id || user?.teacherId || ""),
-          },
-          body: JSON.stringify(batch),
-        }).catch(console.error);
+        if (Object.keys(batch).length > 0) {
+          fetch("/api/results", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-actor-role": String(user?.role || "teacher"),
+              "x-actor-id": String(user?.id || user?.teacherId || ""),
+            },
+            body: JSON.stringify(batch),
+          }).catch(console.error);
+        }
       }
-    }, 2000);
+      setAutosaveDirty(false);
+    }, 3000);
 
     return () => clearTimeout(timer);
-  }, [tableMarks]);
+  }, [autosaveDirty]);
 
   const handleMarkChange = (
     studentId: string,
@@ -628,6 +645,9 @@ export function ResultTable({
         [key]: num,
       },
     }));
+
+    // Trigger autosave for actively editing rows
+    setAutosaveDirty(true);
 
     if (submitStatus[studentId] === "saved") {
       setSubmitStatus((prev) => ({ ...prev, [studentId]: "" }));
