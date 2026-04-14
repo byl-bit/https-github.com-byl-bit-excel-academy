@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Excel Academy | Student & Academic Portal",
+  title: "Excel Academy Portal | Student & Academic Results",
   description:
     "Official portal for Excel Academy. View student results, download academic materials, and stay updated with the latest school announcements.",
   icons: {
