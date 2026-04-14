@@ -22,6 +22,14 @@ export default function StudentResultsPage() {
   const [settings, setSettings] = useState<any>({});
   const [viewingBreakdownSub, setViewingBreakdownSub] = useState<any>(null);
 
+  const normalizeGrade = (g: any) => {
+    if (!g) return "all";
+    const str = String(g).toLowerCase();
+    if (str === "all" || str === "undefined") return "all";
+    const match = str.match(/\d+/);
+    return match ? match[0] : str;
+  };
+
   // Track if initial fetch has been done to prevent double-fetching
   const hasFetchedRef = useRef(false);
 
@@ -200,27 +208,31 @@ export default function StudentResultsPage() {
                       </tr>
                    </thead>
                    <tbody className="divide-y divide-slate-50">
-                      {result.subjects.map((sub, i) => (
-                        <tr key={i} className="hover:bg-cyan-50/30 transition-colors group">
-                           <td className="px-8 py-6 font-bold text-slate-800">{sub.name}</td>
-                           <td className="px-6 py-6 text-center font-bold text-slate-600">{sub.sem1 || "-"}</td>
-                           <td className="px-6 py-6 text-center font-bold text-slate-600">{sub.sem2 || "-"}</td>
-                           <td className="px-6 py-6 text-right font-black text-cyan-700">{(sub.marks || 0).toFixed(1)}</td>
-                           <td className="px-6 py-6 text-center">
-                              <span className={cn(
-                                "inline-block w-8 py-1 rounded-lg font-black text-xs",
-                                calculateGrade(sub.marks) === "F" ? "bg-red-50 text-red-500" : "bg-cyan-50 text-cyan-600"
-                              )}>
-                                 {calculateGrade(sub.marks)}
-                              </span>
-                           </td>
-                           <td className="px-8 py-6 text-center">
-                              <Button variant="ghost" size="sm" onClick={() => setViewingBreakdownSub(sub)} className="h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-cyan-600 hover:bg-white border border-transparent hover:border-cyan-100 transition-all">
-                                 <Eye className="h-3 w-3 mr-2" /> Detail
-                              </Button>
-                           </td>
-                        </tr>
-                      ))}
+                      {result.subjects.map((sub, i) => {
+                        const s1 = sub.sem1 || (sub.marks && !sub.sem2 ? sub.marks : 0);
+                        const s2 = sub.sem2 || 0;
+                        return (
+                          <tr key={i} className="hover:bg-cyan-50/30 transition-colors group">
+                             <td className="px-8 py-6 font-bold text-slate-800">{sub.name}</td>
+                             <td className="px-6 py-6 text-center font-bold text-slate-600">{s1 > 0 ? Number(s1).toFixed(1) : "-"}</td>
+                             <td className="px-6 py-6 text-center font-bold text-slate-600">{s2 > 0 ? Number(s2).toFixed(1) : "-"}</td>
+                             <td className="px-6 py-6 text-right font-black text-cyan-700">{(sub.marks || 0).toFixed(1)}</td>
+                             <td className="px-6 py-6 text-center">
+                                <span className={cn(
+                                  "inline-block w-8 py-1 rounded-lg font-black text-xs",
+                                  calculateGrade(sub.marks) === "F" ? "bg-red-50 text-red-500" : "bg-cyan-50 text-cyan-600"
+                                )}>
+                                   {calculateGrade(sub.marks)}
+                                </span>
+                             </td>
+                             <td className="px-8 py-6 text-center">
+                                <Button variant="ghost" size="sm" onClick={() => setViewingBreakdownSub(sub)} className="h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-cyan-600 hover:bg-white border border-transparent hover:border-cyan-100 transition-all">
+                                   <Eye className="h-3 w-3 mr-2" /> Detail
+                                </Button>
+                             </td>
+                          </tr>
+                        );
+                      })}
                    </tbody>
                 </table>
              </div>
@@ -236,7 +248,10 @@ export default function StudentResultsPage() {
           </DialogHeader>
           <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
              {["1", "2"].map(sem => {
-               const semAssessments = assessmentTypes.filter(t => t.semester === sem || t.semester === "all");
+               const semAssessments = assessmentTypes.filter(t => 
+                 (t.semester === sem || t.semester === "all") && 
+                 (normalizeGrade(t.grade) === "all" || normalizeGrade(t.grade) === normalizeGrade(user.grade))
+               );
                return (
                  <div key={sem} className="space-y-4">
                     <p className="text-[10px] font-black uppercase text-cyan-600 tracking-widest">Semester {sem}</p>

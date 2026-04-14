@@ -225,13 +225,29 @@ export async function GET(request: Request) {
         } else {
           // Merge
           const existingSubjects = found[studentIdKey].subjects || [];
-          const approvedNames = new Set(
-            existingSubjects.map((s: any) => s.name),
-          );
-          const newApproved = approvedSubjects.filter(
-            (s: any) => !approvedNames.has(s.name),
-          );
-          found[studentIdKey].subjects = [...existingSubjects, ...newApproved];
+          const existingSubMap = new Map<string, any>();
+          existingSubjects.forEach((s: any) => existingSubMap.set(s.name, s));
+          
+          approvedSubjects.forEach((newSub: any) => {
+            const existing = existingSubMap.get(newSub.name);
+            if (existing) {
+              // Merge if exists
+              existingSubMap.set(newSub.name, {
+                ...existing,
+                ...newSub,
+                sem1: newSub.sem1 || existing.sem1 || 0,
+                sem2: newSub.sem2 || existing.sem2 || 0,
+                marks: newSub.marks > existing.marks ? newSub.marks : existing.marks, // Take highest (usually average of both)
+                assessments: {
+                  ...(existing.assessments || {}),
+                  ...(newSub.assessments || {})
+                }
+              });
+            } else {
+              existingSubMap.set(newSub.name, newSub);
+            }
+          });
+          found[studentIdKey].subjects = Array.from(existingSubMap.values());
         }
       };
 

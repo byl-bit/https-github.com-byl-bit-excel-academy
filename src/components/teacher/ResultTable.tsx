@@ -257,31 +257,41 @@ export function ResultTable({
       const subjectsArr = subjects.map((s) => {
         if (isDynamic) {
           const assessments: Record<string, number> = {};
-          let subTotal = 0;
+          // Calculate subTotal for only the ACTIVE semester
+          let activeSubTotal = 0;
           gradeAssessmentTypes.forEach((type: AssessmentType) => {
             const val = marks[`${s}__${type.id}`];
             if (val !== undefined && typeof val === "number") {
-              assessments[type.id] = val;
-              subTotal +=
-                (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                // Ensure we only sum assessments for the current active semester
+                if (type.semester === activeSemester || !type.semester || type.semester === "all") {
+                    activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                }
             }
           });
-          // We must preserve existing manual sem1 and sem2 values from the DB or form fallback
+
           const targetStudent = classResults.find(r => {
             const rr = r as unknown as Record<string, unknown>;
             const rid = String(rr['student_id'] ?? rr['studentId'] ?? '');
             const sStudentId = String(student.studentId || student.student_id || studentId);
             return rid === sStudentId || rid === studentId || String(rr['id']) === studentId;
           }) as any;
-          const s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
-          const s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
           
+          let s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
+          let s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
+          
+          // Map activeSubTotal to the current active semester
+          if (activeSemester === "1") s1 = Math.round(activeSubTotal * 10) / 10;
+          if (activeSemester === "2") s2 = Math.round(activeSubTotal * 10) / 10;
+          
+          // Final annual marks is the average of both semesters
+          const finalMarks = (Number(s1) + Number(s2)) / (s1 > 0 && s2 > 0 ? 2 : 1);
+
           return {
             name: s,
             assessments,
             sem1: s1,
             sem2: s2,
-            marks: Math.round(subTotal * 10) / 10,
+            marks: Math.round(finalMarks * 10) / 10,
           };
         } else {
           const s1 = marks[`${s}_sem1`] || 0;
@@ -396,31 +406,40 @@ export function ResultTable({
         const subjectsArr = subjects.map((s) => {
           if (isDynamic) {
             const assessments: Record<string, number> = {};
-            let subTotal = 0;
+            // Calculate subTotal for only the ACTIVE semester
+            let activeSubTotal = 0;
             gradeAssessmentTypes.forEach((type: AssessmentType) => {
               const val = marks[`${s}__${type.id}`];
               if (val !== undefined && typeof val === "number") {
-                assessments[type.id] = val;
-                subTotal +=
-                  (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                // Ensure we only sum assessments for the current active semester
+                if (type.semester === activeSemester || !type.semester || type.semester === "all") {
+                    activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                }
               }
             });
-            // We must preserve existing manual sem1 and sem2 values from the DB or form fallback
+
             const targetStudent = classResults.find(r => {
                const rr = r as unknown as Record<string, unknown>;
                const rid = String(rr['student_id'] ?? rr['studentId'] ?? '');
                const sStudentId = String(student.studentId || student.student_id || sid);
                return rid === sStudentId || rid === sid || String(rr['id']) === sid;
              }) as any;
-            const s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
-            const s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
+            
+            let s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
+            let s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
+
+            // Map activeSubTotal to the current active semester
+            if (activeSemester === "1") s1 = Math.round(activeSubTotal * 10) / 10;
+            if (activeSemester === "2") s2 = Math.round(activeSubTotal * 10) / 10;
+            
+            const finalMarks = (Number(s1) + Number(s2)) / (s1 > 0 && s2 > 0 ? 2 : 1);
 
             return {
               name: s,
               assessments,
               sem1: s1,
               sem2: s2,
-              marks: Math.round(subTotal * 10) / 10,
+              marks: Math.round(finalMarks * 10) / 10,
             };
           } else {
             const s1 = marks[`${s}_sem1`] || 0;
@@ -558,20 +577,39 @@ export function ResultTable({
           const subjectsArr = subjects.map((s) => {
             if (isDynamic) {
               const assessments: Record<string, number> = {};
-              let subTotal = 0;
+              let activeSubTotal = 0;
               gradeAssessmentTypes.forEach((type: AssessmentType) => {
                 const val = marks[`${s}__${type.id}`];
                 if (val !== undefined && typeof val === "number") {
                   assessments[type.id] = val;
-                  subTotal +=
-                    (val / (Number(type.maxMarks) || 100)) *
-                    Number(type.weight);
+                  // Ensure we only sum assessments for the current active semester
+                  if (type.semester === activeSemester || !type.semester || type.semester === "all") {
+                    activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                  }
                 }
               });
+              const targetStudent = classResults.find(r => {
+                const rr = r as unknown as Record<string, unknown>;
+                const rid = String(rr['student_id'] ?? rr['studentId'] ?? '');
+                const sStudentId = String(student.studentId || student.student_id || sid);
+                return rid === sStudentId || rid === sid || String(rr['id']) === sid;
+              }) as any;
+
+              let s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
+              let s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
+
+              // Map activeSubTotal to the current active semester
+              if (activeSemester === "1") s1 = Math.round(activeSubTotal * 10) / 10;
+              if (activeSemester === "2") s2 = Math.round(activeSubTotal * 10) / 10;
+              
+              const finalMarks = (s1 + s2) / (s1 > 0 && s2 > 0 ? 2 : 1);
+
               return {
                 name: s,
                 assessments,
-                marks: Math.round(subTotal * 10) / 10,
+                sem1: s1,
+                sem2: s2,
+                marks: Math.round(finalMarks * 10) / 10,
               };
             } else {
               const s1 = marks[`${s}_sem1`] || 0;
