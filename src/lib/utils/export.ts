@@ -184,7 +184,7 @@ export const generateReportCardPDF = async (
     });
   };
 
-  // Header - Professional & Minimal
+  // Header - Institutional Branding
   if (settings?.letterheadUrl) {
     await addImage(settings.letterheadUrl, 15, 10, 180, 25);
   } else {
@@ -200,10 +200,10 @@ export const generateReportCardPDF = async (
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont("helvetica", "bold");
-    doc.text("ACADEMIC PERFORMANCE REPORT", pageWidth / 2, 30, { align: "center" });
+    doc.text("EXCEL ACADEMY", pageWidth / 2, 30, { align: "center" });
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text("OFFICIAL TRANSCRIPT OF RESULTS", pageWidth / 2, 38, { align: "center" });
+    doc.text("DETERMINED TO EXCEL!", pageWidth / 2, 38, { align: "center" });
   }
 
   // Large Border for the whole page

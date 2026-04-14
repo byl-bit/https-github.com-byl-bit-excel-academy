@@ -88,6 +88,9 @@ export function Navbar() {
             className="flex items-center space-x-2 sm:space-x-3 group hover-lift active:scale-95"
             onClick={() => setMobileMenuOpen(false)}
           >
+            <div className="h-10 w-10 sm:h-11 sm:w-11 relative transition-transform duration-300 rounded-full overflow-hidden border border-white/30 shadow-md bg-cyan-600 flex items-center justify-center">
+              <GraduationCap className="h-6 w-6 text-white" />
+            </div>
             <span className="font-bold text-base sm:text-xl tracking-tight text-cyan-400">
               Academy Portal
             </span>
