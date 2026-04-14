@@ -200,10 +200,17 @@ export const generateReportCardPDF = async (
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont("helvetica", "bold");
-    doc.text("EXCEL ACADEMY", pageWidth / 2, 30, { align: "center" });
+    doc.text("EXCEL ACADEMY", pageWidth / 2 + 10, 30, { align: "center" });
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text("DETERMINED TO EXCEL!", pageWidth / 2, 38, { align: "center" });
+    doc.text("DETERMINED TO EXCEL!", pageWidth / 2 + 10, 38, { align: "center" });
+
+    // Add Logo to Header
+    try {
+        await addImage("/excel-academy-logo.png", 25, 15, 25, 25);
+    } catch (e) {
+        console.warn("Header logo could not be loaded");
+    }
   }
 
   // Large Border for the whole page

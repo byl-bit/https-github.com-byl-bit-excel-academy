@@ -133,8 +133,8 @@ export default function StudentDashboard() {
                 </span>
               </h1>
               <p className="text-slate-500 text-lg font-semibold flex items-center justify-center md:justify-start gap-2.5 opacity-80 mt-4">
-                <div className="h-10 w-10 rounded-xl bg-white shadow-xs border border-slate-100 flex items-center justify-center">
-                  <GraduationCap className="h-5 w-5 text-cyan-500" />
+                <div className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center p-1">
+                  <img src="/excel-academy-logo.png" alt="Excel Academy Logo" className="h-full w-full object-contain" />
                 </div>
                 <span className="text-slate-700">{user.fullName} • <span className="text-cyan-600 font-bold text-sm uppercase">Grade {user.grade}-{user.section}</span></span>
               </p>

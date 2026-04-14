@@ -58,8 +58,8 @@ export function PortalSidebarLayout({
       <div className="p-6 shrink-0 flex items-center justify-between">
         <div className="flex items-center gap-3.5">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 relative hover:scale-105 transition-transform duration-300 rounded-2xl overflow-hidden bg-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-200">
-               <Shield className="h-6 w-6 text-white" />
+            <div className="h-12 w-12 relative hover:scale-105 transition-transform duration-300 rounded-2xl overflow-hidden bg-white flex items-center justify-center shadow-lg shadow-cyan-100 border border-slate-100 p-1.5">
+               <img src="/excel-academy-logo.png" alt="Logo" className="h-full w-full object-contain" />
             </div>
             <div className="flex flex-col justify-center">
               <h1 className="font-black text-lg tracking-tight text-slate-900 leading-none">
@@ -272,8 +272,8 @@ export function PortalSidebarLayout({
 
             {hideSidebar && (
               <div className="flex items-center gap-1.5 sm:gap-3 mr-2 sm:mr-4 shrink-0">
-                <div className="h-10 w-10 sm:h-11 sm:w-11 relative hover:scale-105 transition-transform duration-300 rounded-xl overflow-hidden bg-cyan-600 flex items-center justify-center shadow-md">
-                   <Shield className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 sm:h-11 sm:w-11 relative hover:scale-105 transition-transform duration-300 rounded-xl overflow-hidden bg-white flex items-center justify-center shadow-md border border-slate-100 p-1">
+                   <img src="/excel-academy-logo.png" alt="Logo" className="h-full w-full object-contain" />
                 </div>
                 <div className="flex flex-col justify-center pr-2">
                   <h1 className="font-black text-[11px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase leading-none">
