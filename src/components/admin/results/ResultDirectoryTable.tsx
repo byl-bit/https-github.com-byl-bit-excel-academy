@@ -223,14 +223,24 @@ export function ResultDirectoryTable({
                           </span>
                         </td>
                         <td className="py-5 px-6 text-center bg-slate-50/30 group-hover:bg-blue-50/50 transition-colors">
-                          <div className="font-black text-[18px] leading-none mb-1 text-slate-800">
-                            {r.average?.toFixed(1) || "0.0"}
-                            <span className="text-[10px] text-slate-400 ml-0.5">
-                              %
-                            </span>
-                          </div>
-                          <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                            Score: {r.total || 0}
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="font-black text-[18px] leading-none text-slate-800">
+                              {r.average?.toFixed(1) || "0.0"}
+                              <span className="text-[10px] text-slate-400 ml-0.5">
+                                %
+                              </span>
+                            </div>
+                            <div className="flex gap-2 mt-1">
+                              <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded text-[8px]">
+                                S1: {((r.subjects || []).reduce((acc, s) => acc + (s.sem1 || 0), 0) / (r.subjects?.length || 1)).toFixed(1)}%
+                              </span>
+                              <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded text-[8px]">
+                                S2: {((r.subjects || []).reduce((acc, s) => acc + (s.sem2 || 0), 0) / (r.subjects?.length || 1)).toFixed(1)}%
+                              </span>
+                            </div>
+                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                              Score: {r.total || 0}
+                            </div>
                           </div>
                         </td>
                         <td className="py-5 px-6 text-center">

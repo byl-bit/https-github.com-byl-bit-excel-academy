@@ -233,6 +233,8 @@ export function useAdminData() {
                       subjects: ((r["subjects"] || []) as any[]).map((s) => ({
                         name: s.name || s.subject || "",
                         marks: Number(s.marks || 0),
+                        sem1: Number(s.sem1 || 0),
+                        sem2: Number(s.sem2 || 0),
                         status: s.status || "published",
                         ...(s.assessments
                           ? { assessments: s.assessments }
@@ -274,6 +276,8 @@ export function useAdminData() {
                       subjects: ((r["subjects"] || []) as any[]).map((s) => ({
                         name: s.name || s.subject || "",
                         marks: Number(s.marks || 0),
+                        sem1: Number(s.sem1 || 0),
+                        sem2: Number(s.sem2 || 0),
                         status: s.status || "pending_admin",
                         ...(s.assessments
                           ? { assessments: s.assessments }

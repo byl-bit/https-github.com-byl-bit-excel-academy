@@ -809,10 +809,18 @@ export function ResultTable({
 
     const isLocalEditing = editingRows.has(sid);
 
+    // DEEP LOGIC: We relax locking if the teacher is switching to a semester that hasn't been "finalized" yet.
+    // If activeSemester is '2', and the overall status is 'pending' (likely from sem 1), we allow editing for sem 2.
+    const isSemesterLockBypassed = 
+      activeSemester === "2" && 
+      resStatus === "pending" && 
+      !isPublished;
+
     const isLocked =
       ((isPublished && !allowEditSubmitted) ||
         (isPendingAdmin && !allowEditSubmitted)) &&
       !isLocalEditing &&
+      !isSemesterLockBypassed &&
       resStatus !== "draft" &&
       resStatus !== "" &&
       (isHomeroomView || isSubjectLocked);
@@ -853,7 +861,18 @@ export function ResultTable({
               title="Active Semester"
               className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
               value={activeSemester}
-              onChange={(e) => setActiveSemester(e.target.value as any)}
+              onChange={async (e) => {
+                const nextSemester = e.target.value as any;
+                // Automatically save draft when switching semesters to ensure data integrity
+                if (editingRows.size > 0 || Object.keys(tableMarks).length > 0) {
+                    try {
+                        await handleSubmitRoster("subject-draft");
+                    } catch (err) {
+                        console.error("Auto-draft save failed:", err);
+                    }
+                }
+                setActiveSemester(nextSemester);
+              }}
             >
               <option value="1">1st Semester</option>
               <option value="2">2nd Semester</option>
