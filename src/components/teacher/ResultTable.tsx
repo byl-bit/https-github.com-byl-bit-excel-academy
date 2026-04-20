@@ -284,20 +284,21 @@ export function ResultTable({
           let s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
           let s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
           
-          // Map activeSubTotal to the current active semester
-          if (activeSemester === "1") s1 = Math.round(activeSubTotal * 10) / 10;
-          if (activeSemester === "2") s2 = Math.round(activeSubTotal * 10) / 10;
-          
-          // Final annual marks is the average of both semesters
-          const finalMarks = (Number(s1) + Number(s2)) / (s1 > 0 && s2 > 0 ? 2 : 1);
-
-          return {
+          // Build the subject object for submission - strictly isolated to active semester
+          const submissionSubject: Subject = {
             name: s,
             assessments,
-            sem1: s1,
-            sem2: s2,
-            marks: Math.round(finalMarks * 10) / 10,
           };
+
+          // Only include the mark field for the active semester to avoid overwriting the other
+          if (activeSemester === "1") {
+            submissionSubject.sem1 = Math.round(activeSubTotal * 10) / 10;
+          } else if (activeSemester === "2") {
+            submissionSubject.sem2 = Math.round(activeSubTotal * 10) / 10;
+          }
+
+          // We do not calculate final annual marks here; let the backend or 'average' view handle it
+          return submissionSubject;
         } else {
           const s1 = marks[`${s}_sem1`] || 0;
           const s2 = marks[`${s}_sem2`] || 0;
@@ -429,19 +430,20 @@ export function ResultTable({
             let s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
             let s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
 
-            // Map activeSubTotal to the current active semester
-            if (activeSemester === "1") s1 = Math.round(activeSubTotal * 10) / 10;
-            if (activeSemester === "2") s2 = Math.round(activeSubTotal * 10) / 10;
-            
-            const finalMarks = (Number(s1) + Number(s2)) / (s1 > 0 && s2 > 0 ? 2 : 1);
-
-            return {
+            // Build the subject object for submission - strictly isolated to active semester
+            const submissionSubject: Subject = {
               name: s,
               assessments,
-              sem1: s1,
-              sem2: s2,
-              marks: Math.round(finalMarks * 10) / 10,
             };
+
+            // Only include the mark field for the active semester to avoid overwriting the other
+            if (activeSemester === "1") {
+              submissionSubject.sem1 = Math.round(activeSubTotal * 10) / 10;
+            } else if (activeSemester === "2") {
+              submissionSubject.sem2 = Math.round(activeSubTotal * 10) / 10;
+            }
+
+            return submissionSubject;
           } else {
             const s1 = marks[`${s}_sem1`] || 0;
             const s2 = marks[`${s}_sem2`] || 0;
@@ -983,7 +985,7 @@ export function ResultTable({
                     }
                   })}
                   <th className="p-5 text-center font-black text-slate-900 bg-slate-100/50 text-[10px] uppercase tracking-[0.2em] min-w-[110px]">
-                    Aggregate
+                    Aggregate {activeSemester !== "average" ? `(Sem-${activeSemester})` : "(Annual)"}
                   </th>
                   {isHomeroomView && (
                     <th className="p-5 text-center font-black text-cyan-900 bg-cyan-50/50 text-[10px] uppercase tracking-[0.2em]">
