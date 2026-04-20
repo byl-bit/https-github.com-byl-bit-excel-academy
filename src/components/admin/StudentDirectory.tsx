@@ -647,11 +647,11 @@ export function StudentDirectory({
                         </div>
                         <div className="space-y-0.5">
                           <p className="font-bold text-slate-800 group-hover:text-cyan-700 transition-colors leading-tight">
-                            {student.firstName} {student.middleName}{" "}
-                            {student.lastName}
+                            {student?.firstName || "-"} {student?.middleName}{" "}
+                            {student?.lastName}
                           </p>
                           <p className="text-xs font-medium text-slate-400 tracking-tight">
-                            {student.email}
+                            {student?.email || "No email"}
                           </p>
                         </div>
                       </div>

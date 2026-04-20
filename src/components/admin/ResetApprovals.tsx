@@ -98,7 +98,7 @@ export function ResetApprovals({
                   </span>
                   <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1">
                     <Clock className="h-2.5 w-2.5" />
-                    {new Date(req.timestamp).toLocaleDateString()}
+                    {req?.timestamp ? new Date(req.timestamp).toLocaleDateString() : "-"}
                   </span>
                 </div>
               </div>
@@ -112,7 +112,7 @@ export function ResetApprovals({
                     <Mail className="h-2.5 w-2.5" /> Email
                   </p>
                   <p className="text-[11px] font-bold text-slate-700 truncate">
-                    {req.email || "N/A"}
+                    {req?.email || "N/A"}
                   </p>
                 </div>
 
@@ -143,9 +143,9 @@ export function ResetApprovals({
                   </p>
                   <p
                     className="text-[10px] font-medium text-slate-400 font-mono truncate max-w-[80px] ml-auto"
-                    title={req.userId}
+                    title={req?.userId || ""}
                   >
-                    {req.userId.split("-")[0]}...
+                    {req?.userId ? String(req.userId).split("-")[0] : "???"}...
                   </p>
                 </div>
 

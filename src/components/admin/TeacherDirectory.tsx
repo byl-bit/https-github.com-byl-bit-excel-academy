@@ -299,10 +299,10 @@ export function TeacherDirectory({
                         </div>
                         <div className="space-y-0.5">
                           <p className="font-bold text-slate-800 group-hover:text-teal-700 transition-colors leading-tight">
-                            {teacher.fullName || teacher.name}
+                            {teacher?.fullName || teacher?.name || "-"}
                           </p>
                           <p className="text-xs font-medium text-slate-400 tracking-tight">
-                            {teacher.email}
+                            {teacher?.email || "No email"}
                           </p>
                         </div>
                       </div>

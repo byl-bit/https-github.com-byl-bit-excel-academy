@@ -135,8 +135,8 @@ export function StudentProfileDialog({ student: initialStudent, isOpen, onClose 
                 value={gender === "M" ? "Male" : gender === "F" ? "Female" : "-"} 
                 icon={UsersIcon}
               />
-              <InfoItem label="Email" value={student.email || "N/A"} icon={AtSign} isCompact />
-              <InfoItem label="Member Since" value={student.createdAt ? new Date(student.createdAt).toLocaleDateString() : "-"} icon={Calendar} />
+              <InfoItem label="Email" value={student?.email || initialStudent?.email || "N/A"} icon={AtSign} isCompact />
+              <InfoItem label="Member Since" value={student?.createdAt ? new Date(student.createdAt).toLocaleDateString() : "-"} icon={Calendar} />
             </div>
           </section>
 

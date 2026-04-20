@@ -194,8 +194,8 @@ export default function AdminPage() {
       const studentId = `ST-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
       const newUser = {
         id: `user-${Date.now()}`,
-        name: app.studentName || app.familyFullName,
-        email: app.email,
+        name: app?.studentName || app?.familyFullName || "New Student",
+        email: app?.email || "",
         password: "password123",
         role: "student",
         status: "active",

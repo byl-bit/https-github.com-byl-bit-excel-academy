@@ -60,8 +60,8 @@ export default function ProfilePage() {
     }
     if (user) {
       setProfileData({
-        name: user.name || user.fullName || "",
-        email: user.email || "",
+        name: user?.name || user?.fullName || "",
+        email: user?.email || "",
       });
     }
   }, [isAuthenticated, user, loading, router]);
@@ -275,7 +275,7 @@ export default function ProfilePage() {
 
     // Verify current password first by attempting to authenticate with current credentials
     try {
-      const idCandidate = user.studentId || user.email || "";
+      const idCandidate = user?.studentId || user?.email || "";
       const verifyRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -557,7 +557,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-4 p-4 bg-slate-100/50 rounded-3xl border border-slate-100 group-hover:bg-white transition-colors">
                     <Mail className="h-5 w-5 text-slate-300" />
                     <span className="font-bold text-slate-700">
-                      {user.email || "No email set"}
+                      {user?.email || "No email set"}
                     </span>
                   </div>
                 )}

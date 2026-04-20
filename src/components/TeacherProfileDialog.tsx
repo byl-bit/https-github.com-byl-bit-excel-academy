@@ -68,11 +68,11 @@ export function TeacherProfileDialog({ teacher, isOpen, onClose }: TeacherProfil
                 </span>
                 <span className={cn(
                   "inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-sm ring-1 ring-inset",
-                  teacher.status === "active" 
+                  teacher?.status === "active" 
                     ? "bg-emerald-50 text-emerald-700 ring-emerald-100" 
                     : "bg-amber-50 text-amber-700 ring-amber-100"
                 )}>
-                  {teacher.status || "PENDING"} ACCOUNT
+                  {teacher?.status || "PENDING"} ACCOUNT
                 </span>
               </div>
             </div>
@@ -95,8 +95,8 @@ export function TeacherProfileDialog({ teacher, isOpen, onClose }: TeacherProfil
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-6">
               <InfoItem label="Legal Designation" value={fullName || "-"} icon={User} isPrimary />
               <InfoItem label="Official Gender" value={gender === "M" || gender === "Male" ? "Male" : gender === "F" || gender === "Female" ? "Female" : "-"} icon={User} />
-              <InfoItem label="Institutional Email" value={teacher.email || "N/A"} icon={AtSign} isCompact />
-              <InfoItem label="Date Appointed" value={teacher.createdAt ? new Date(teacher.createdAt).toLocaleDateString() : "-"} icon={Calendar} />
+              <InfoItem label="Institutional Email" value={teacher?.email || "N/A"} icon={AtSign} isCompact />
+              <InfoItem label="Date Appointed" value={teacher?.createdAt ? new Date(teacher.createdAt).toLocaleDateString() : "-"} icon={Calendar} />
             </div>
           </section>
 
@@ -112,8 +112,8 @@ export function TeacherProfileDialog({ teacher, isOpen, onClose }: TeacherProfil
             </div>
             
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 sm:gap-6">
-              <InfoItem label="Home Room" value={teacher.grade && teacher.section ? `Grade ${teacher.grade} - ${teacher.section}` : "Subject Teacher"} icon={Award} color="cyan" />
-              <InfoItem label="Access Role" value={teacher.role || "FACULTY"} icon={Briefcase} color="cyan" />
+              <InfoItem label="Home Room" value={teacher?.grade && teacher?.section ? `Grade ${teacher.grade} - ${teacher.section}` : "Subject Teacher"} icon={Award} color="cyan" />
+              <InfoItem label="Access Role" value={teacher?.role || "FACULTY"} icon={Briefcase} color="cyan" />
             </div>
           </section>
         </div>
