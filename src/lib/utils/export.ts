@@ -698,8 +698,8 @@ export const generateAppreciationLetter = async (
   const sealY = y + 10;
   doc.setDrawColor(180, 150, 50);
   doc.setLineWidth(0.5);
-  doc.circle(pageWidth - 45, sealY + 15, 18);
-  doc.circle(pageWidth - 45, sealY + 15, 16);
+  doc.circle(pageWidth - 45, sealY + 15, 18, "S");
+  doc.circle(pageWidth - 45, sealY + 15, 16, "S");
   
   doc.setFontSize(6);
   doc.setFont("helvetica", "bold");
