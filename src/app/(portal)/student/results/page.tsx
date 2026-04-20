@@ -249,7 +249,7 @@ export default function StudentResultsPage() {
           <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
              {["1", "2"].map(sem => {
                const semAssessments = assessmentTypes.filter(t => 
-                 (t.semester === sem || t.semester === "all") && 
+                 (t.semester === sem || t.semester === "all" || !t.semester) && 
                  (normalizeGrade(t.grade) === "all" || normalizeGrade(t.grade) === normalizeGrade(user.grade))
                );
                return (

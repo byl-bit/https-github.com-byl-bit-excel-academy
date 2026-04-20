@@ -82,6 +82,8 @@ export function ResultTable({
   };
 
   const [activeSemester, setActiveSemester] = useState<"1" | "2" | "average">("1");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const normalizeGrade = (g: any) => {
     if (!g) return "all";
@@ -418,9 +420,9 @@ export function ResultTable({
                 // Ensure we only sum assessments for the current active semester
                 if (type.semester === activeSemester || !type.semester || type.semester === "all") {
                     activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                    // Populate assessments ONLY if they belong to this semester context
+                    assessments[type.id] = val;
                 }
-                // Populate assessments
-                assessments[type.id] = val;
               }
             });
 
@@ -587,10 +589,11 @@ export function ResultTable({
               gradeAssessmentTypes.forEach((type: AssessmentType) => {
                 const val = marks[`${s}__${type.id}`];
                 if (val !== undefined && typeof val === "number") {
-                  assessments[type.id] = val;
                   // Ensure we only sum assessments for the current active semester
                   if (type.semester === activeSemester || !type.semester || type.semester === "all") {
                     activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                    // Only populate assessments that belong to this semester context
+                    assessments[type.id] = val;
                   }
                 }
               });
@@ -1121,6 +1124,7 @@ export function ResultTable({
                     const rollB = parseInt(String(b.rollNumber || "0"));
                     return rollA - rollB;
                   })
+                  .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
                   .map((student, index) => {
                     const {
                       sid,
@@ -1482,6 +1486,51 @@ export function ResultTable({
             </table>
           </div>
         </div>
+        
+        {/* Pagination Controls */}
+        {students.length > ITEMS_PER_PAGE && (
+          <div className="flex items-center justify-between p-6 bg-white border-t border-slate-100">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, students.length)} of {students.length} entries
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="h-8 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-slate-200"
+              >
+                Prev
+              </Button>
+              <div className="flex items-center gap-1 mx-2">
+                {Array.from({ length: Math.ceil(students.length / ITEMS_PER_PAGE) }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={cn(
+                      "h-8 w-8 rounded-xl text-[10px] font-black transition-all",
+                      currentPage === i + 1 
+                        ? "bg-cyan-600 text-white shadow-lg shadow-cyan-100" 
+                        : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                    )}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(Math.ceil(students.length / ITEMS_PER_PAGE), prev + 1))}
+                disabled={currentPage === Math.ceil(students.length / ITEMS_PER_PAGE)}
+                className="h-8 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-slate-200"
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <ConfirmDialog

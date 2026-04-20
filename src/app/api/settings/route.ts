@@ -22,11 +22,11 @@ export async function GET() {
 
   // Inject defaults into the object without blocking on database writes
   const defaultAssessments = [
-    { id: "test1", label: "Test", weight: 10, maxMarks: 100 },
-    { id: "mid", label: "Mid Exam", weight: 15, maxMarks: 100 },
-    { id: "test2", label: "test-2", weight: 10, maxMarks: 100 },
-    { id: "assignment", label: "Assignments", weight: 5, maxMarks: 100 },
-    { id: "final", label: "Final Exam", weight: 60, maxMarks: 100 },
+    { id: "test1", label: "Test", weight: 10, maxMarks: 100, semester: "all" },
+    { id: "mid", label: "Mid Exam", weight: 15, maxMarks: 100, semester: "all" },
+    { id: "test2", label: "test-2", weight: 10, maxMarks: 100, semester: "all" },
+    { id: "assignment", label: "Assignments", weight: 5, maxMarks: 100, semester: "all" },
+    { id: "final", label: "Final Exam", weight: 60, maxMarks: 100, semester: "all" },
   ];
 
   if (
