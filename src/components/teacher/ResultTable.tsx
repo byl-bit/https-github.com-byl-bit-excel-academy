@@ -125,7 +125,7 @@ export function ResultTable({
   // Dialog States
   const [confirmSubmit, setConfirmSubmit] = useState<{
     open: boolean;
-    level: "subject-draft" | "subject-pending" | "roster";
+    level: "subject-pending" | "roster";
     description: string;
   }>({ open: false, level: "subject-pending", description: "" });
   const [alert, setAlert] = useState<{
@@ -242,7 +242,6 @@ export function ResultTable({
     level:
       | "subject"
       | "roster"
-      | "subject-draft"
       | "subject-pending" = "subject",
   ) => {
     try {
@@ -337,11 +336,7 @@ export function ResultTable({
 
       if (response.ok) {
         setSubmitStatus((prev) => ({ ...prev, [studentId]: "saved" }));
-        success(
-          level === "subject-draft"
-            ? "Draft saved locally"
-            : "Marks submitted to Admin",
-        );
+        success("Marks submitted to Admin");
         onRefresh();
         setEditingRows((prev) => {
           const next = new Set(prev);
@@ -364,13 +359,11 @@ export function ResultTable({
   };
 
   const handleSubmitRoster = async (
-    level: "subject-draft" | "subject-pending" | "roster" = "subject-pending",
+    level: "subject-pending" | "roster" = "subject-pending",
   ) => {
     const msg =
-      level === "subject-draft"
-        ? "save these marks as a draft"
-        : level === "subject-pending"
-          ? "submit these marks to the Admin for approval"
+      level === "subject-pending"
+          ? `submit ${activeSemester === "1" ? "First Semester" : "Second Semester"} marks to the Admin for approval`
           : "submit the final class roster to the Admin (this will calculate ranks and publish results)";
 
     setConfirmSubmit({
@@ -387,7 +380,7 @@ export function ResultTable({
     setLoadingFull(true);
     try {
       const batch: Record<string, unknown> = {};
-      const subjectStatus = level === "subject-draft" ? "draft" : "pending";
+      const subjectStatus = "pending";
 
       // Mark all relevant rows as saving for UI feedback
       const affectedIds: string[] = [];
@@ -515,9 +508,9 @@ export function ResultTable({
         });
 
         success(
-          level === "subject-draft"
-            ? "Drafts saved successfully"
-            : "Final roster submitted successfully!",
+          level === "roster"
+            ? "Final roster submitted successfully!"
+            : `${activeSemester === "1" ? "First Semester" : "Second Semester"} marks submitted successfully!`,
         );
 
         setTimeout(() => {
@@ -548,121 +541,11 @@ export function ResultTable({
   // We track a separate "dirty" flag to avoid continuous re-saving on every render
   const [autosaveDirty, setAutosaveDirty] = useState(false);
 
-  // Mark dirty when marks change from user input (handleMarkChange sets this)
+  // Autosave logic removed as per requirement to disable draft saving
   useEffect(() => {
-    if (!autosaveDirty) return;
-
-    const timer = setTimeout(() => {
-      // Only autosave rows that are actively being edited and not locked
-      const editingIds = Array.from(editingRows);
-      if (editingIds.length === 0) {
+    if (autosaveDirty) {
         setAutosaveDirty(false);
-        return;
-      }
-
-      const toSave = editingIds.filter((id) => {
-        const student = students.find(
-          (s) => String(s.id || s.student_id || s.studentId) === id,
-        );
-        if (!student) return false;
-        const { isLocked } = getRowInfo(student);
-        return !isLocked && tableMarks[id] && Object.keys(tableMarks[id]).length > 0;
-      });
-
-      if (toSave.length > 0) {
-        // Batch autosave as draft
-        const batch: Record<string, any> = {};
-        toSave.forEach((sid) => {
-          const student = students.find(
-            (s) => String(s.id || s.student_id || s.studentId) === sid,
-          );
-          if (!student) return;
-
-          const { total, average } = calculateRowStats(sid);
-          const marks = tableMarks[sid] || {};
-          const isPass = average >= 35;
-
-          const subjectsArr = subjects.map((s) => {
-            if (isDynamic) {
-              const assessments: Record<string, number> = {};
-              let activeSubTotal = 0;
-              gradeAssessmentTypes.forEach((type: AssessmentType) => {
-                const val = marks[`${s}__${type.id}`];
-                if (val !== undefined && typeof val === "number") {
-                  // Ensure we only sum assessments for the current active semester
-                  if (type.semester === activeSemester || !type.semester || type.semester === "all") {
-                    activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
-                    // Only populate assessments that belong to this semester context
-                    assessments[type.id] = val;
-                  }
-                }
-              });
-              const targetStudent = classResults.find(r => {
-                const rr = r as unknown as Record<string, unknown>;
-                const rid = String(rr['student_id'] ?? rr['studentId'] ?? '');
-                const sStudentId = String(student.studentId || student.student_id || sid);
-                return rid === sStudentId || rid === sid || String(rr['id']) === sid;
-              }) as any;
-
-              let s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
-              let s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
-
-              // Map activeSubTotal to the current active semester
-              if (activeSemester === "1") s1 = Math.round(activeSubTotal * 10) / 10;
-              if (activeSemester === "2") s2 = Math.round(activeSubTotal * 10) / 10;
-              
-              const finalMarks = (s1 + s2) / (s1 > 0 && s2 > 0 ? 2 : 1);
-
-              return {
-                name: s,
-                assessments,
-                sem1: s1,
-                sem2: s2,
-                marks: Math.round(finalMarks * 10) / 10,
-              };
-            } else {
-              const s1 = marks[`${s}_sem1`] || 0;
-              const s2 = marks[`${s}_sem2`] || 0;
-              const sAvg = Math.round(((s1 + s2) / 2) * 10) / 10;
-              return { name: s, sem1: s1, sem2: s2, marks: sAvg };
-            }
-          });
-
-          batch[sid] = {
-            studentId: student.studentId || student.student_id || sid,
-            studentName: student.name || student.fullName || "",
-            grade: student.grade,
-            section: student.section,
-            gender:
-              normalizeGender(student.gender ?? student.sex ?? null) || null,
-            rollNumber: student.rollNumber || null,
-            subjects: subjectsArr,
-            total: total,
-            average: average,
-            rank: 0,
-            conduct: "Satisfactory",
-            result: isPass ? "PASS" : "FAIL",
-            promotedOrDetained: isPass ? "PROMOTED" : "DETAINED",
-            submissionLevel: "subject-draft",
-          };
-        });
-
-        if (Object.keys(batch).length > 0) {
-          fetch("/api/results", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-actor-role": String(user?.role || "teacher"),
-              "x-actor-id": String(user?.id || user?.teacherId || ""),
-            },
-            body: JSON.stringify(batch),
-          }).catch(console.error);
-        }
-      }
-      setAutosaveDirty(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    }
   }, [autosaveDirty]);
 
   const handleMarkChange = (
@@ -908,16 +791,8 @@ export function ResultTable({
               title="Active Semester"
               className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
               value={activeSemester}
-              onChange={async (e) => {
+              onChange={(e) => {
                 const nextSemester = e.target.value as any;
-                // Automatically save draft when switching semesters to ensure data integrity
-                if (editingRows.size > 0 || Object.keys(tableMarks).length > 0) {
-                    try {
-                        await handleSubmitRoster("subject-draft");
-                    } catch (err) {
-                        console.error("Auto-draft save failed:", err);
-                    }
-                }
                 setActiveSemester(nextSemester);
               }}
             >
@@ -974,23 +849,35 @@ export function ResultTable({
                   {editingRows.size > 0 ? "Finish Editing" : "Edit Marks"}
                 </Button>
               )}
-            {!isHomeroomView && (
-              <Button
-                onClick={() => handleSubmitRoster("subject-pending")}
-                disabled={loadingFull}
-                className={cn(
-                  "h-10 px-8 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105 active:scale-95",
-                  "bg-cyan-600 hover:bg-cyan-700 text-white",
-                  "shadow-lg shadow-cyan-500/20",
-                )}
-              >
-                {loadingFull ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Shield className="h-4 w-4" />
-                )}
-                Submit All
-              </Button>
+            {!isHomeroomView && activeSemester !== "average" && (
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    setActiveSemester("1");
+                    handleSubmitRoster("subject-pending");
+                  }}
+                  disabled={loadingFull}
+                  className={cn(
+                    "h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all",
+                    activeSemester === "1" ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20" : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                  )}
+                >
+                  Submit Sem-1
+                </Button>
+                <Button
+                  onClick={() => {
+                    setActiveSemester("2");
+                    handleSubmitRoster("subject-pending");
+                  }}
+                  disabled={loadingFull}
+                  className={cn(
+                    "h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all",
+                    activeSemester === "2" ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20" : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                  )}
+                >
+                  Submit Sem-2
+                </Button>
+              </div>
             )}
             <div className="h-6 w-px bg-slate-200 mx-1" />
             <Button
@@ -1457,10 +1344,6 @@ export function ResultTable({
                                   </>
                                 )}
                               </div>
-                            ) : isDraftHomeroom ? (
-                              <span className="text-[9px] font-black uppercase px-3 py-1 bg-slate-100 text-slate-600 rounded-lg border border-slate-200 tracking-[0.15em]">
-                                Draft
-                              </span>
                             ) : (
                               <Button
                                 size="sm"
