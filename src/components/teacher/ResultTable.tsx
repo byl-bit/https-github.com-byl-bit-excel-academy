@@ -280,7 +280,7 @@ export function ResultTable({
       const marks = tableMarks[studentId] || {};
       setSubmitStatus((prev) => ({ ...prev, [studentId]: "saving" }));
 
-      const { total, average } = calculateRowStats(studentId);
+      const { total, average, annualTotal, annualAverage } = calculateRowStats(studentId);
       // Professional precision handling: round to 1 decimal to match UI display
       const totalRounded = Math.round(total * 10) / 10;
       const avgRounded = Math.round(average * 10) / 10;
@@ -342,12 +342,12 @@ export function ResultTable({
         gender: normalizeGender(student.gender ?? student.sex ?? null) || null,
         rollNumber: student.rollNumber,
         subjects: subjectsArr,
-        total: totalRounded,
-        average: avgRounded,
+        total: Math.round(annualTotal * 10) / 10,
+        average: Math.round(annualAverage * 10) / 10,
         rank: 0,
         conduct: "Satisfactory",
-        result: isPass ? "PASS" : "FAIL",
-        promotedOrDetained: isPass ? "PROMOTED" : "DETAINED",
+        result: (Math.round(annualAverage * 10) / 10) >= 35 ? "PASS" : "FAIL",
+        promotedOrDetained: (Math.round(annualAverage * 10) / 10) >= 35 ? "PROMOTED" : "DETAINED",
         submissionLevel: level,
         actorId: user?.id || user?.teacherId,
       };
@@ -423,7 +423,7 @@ export function ResultTable({
         if (Object.keys(marks).length === 0) return;
 
         affectedIds.push(sid);
-        const { total, average } = calculateRowStats(sid);
+        const { total, average, annualTotal, annualAverage } = calculateRowStats(sid);
 
         // Preservation of decimal precision (1 decimal place)
         const totalRounded = Math.round(total * 10) / 10;
