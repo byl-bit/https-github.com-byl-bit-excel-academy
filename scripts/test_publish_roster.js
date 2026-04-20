@@ -17,7 +17,15 @@ async function run() {
       grade: '4',
       section: 'A'
     };
-    let res = await fetch(`${BASE}/api/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(teacher) });
+    let res = await fetch(`${BASE}/api/users`, { 
+      method: 'POST', 
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-actor-role': 'admin',
+        'x-actor-id': 'admin-001'
+      }, 
+      body: JSON.stringify(teacher) 
+    });
     let teacherId = teacher.id;
     if (res.ok) {
       try {
@@ -41,7 +49,15 @@ async function run() {
     // 2) Create two students in grade 4 section A
     const s1 = { id: `user-s1-${Date.now()}`, name: 'Student One', email: `s1.${Date.now()}@example.com`, password: 'password', role: 'student', status: 'active', studentId: 'ST-ROSTER-1', grade: '4', section: 'A' };
     const s2 = { id: `user-s2-${Date.now()}`, name: 'Student Two', email: `s2.${Date.now()}@example.com`, password: 'password', role: 'student', status: 'active', studentId: 'ST-ROSTER-2', grade: '4', section: 'A' };
-    res = await fetch(`${BASE}/api/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify([s1, s2]) });
+    res = await fetch(`${BASE}/api/users`, { 
+      method: 'POST', 
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-actor-role': 'admin',
+        'x-actor-id': 'admin-001'
+      }, 
+      body: JSON.stringify([s1, s2]) 
+    });
     if (!res.ok) {
       const txt = await res.text();
       throw new Error('Failed to create students: ' + txt);
@@ -49,7 +65,15 @@ async function run() {
 
     // 3) Create allocation for the teacher for grade 4 section A
     const alloc = { teacherId: teacherId, teacherName: teacher.name, grade: '4', section: 'A', subject: 'Mathematics' };
-    res = await fetch(`${BASE}/api/allocations`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(alloc) });
+    res = await fetch(`${BASE}/api/allocations`, { 
+      method: 'POST', 
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-actor-role': 'admin',
+        'x-actor-id': 'admin-001'
+      }, 
+      body: JSON.stringify(alloc) 
+    });
     if (!res.ok) {
       const txt = await res.text();
       throw new Error('Failed to create allocation: ' + txt);
