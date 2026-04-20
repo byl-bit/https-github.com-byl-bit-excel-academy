@@ -581,85 +581,163 @@ export const generateAppreciationLetter = async (
   result: PublishedResult,
   principalName: string = "Desalegn",
 ) => {
-
   const jsPDF = (await import("jspdf")).default;
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
-  // Border
-  doc.setDrawColor(30, 64, 175);
-  doc.setLineWidth(1);
+  const addImage = (
+    url: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+  ) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = () => {
+        try {
+          doc.addImage(img, "JPEG", x, y, w, h);
+          resolve(true);
+        } catch (e) {
+          resolve(false);
+        }
+      };
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  };
+
+  // --- Premium Background / Texture ---
+  // Subtle light cream background for a parchment feel
+  doc.setFillColor(252, 251, 247);
+  doc.rect(5, 5, pageWidth - 10, pageHeight - 10, "F");
+
+  // --- Sophisticated Double Border ---
+  // Outer Navy Border
+  doc.setDrawColor(15, 23, 42); // Navy
+  doc.setLineWidth(1.5);
   doc.rect(10, 10, pageWidth - 20, pageHeight - 20);
-  doc.setLineWidth(0.2);
-  doc.rect(12, 12, pageWidth - 24, pageHeight - 24);
+  
+  // Inner Gold Border
+  doc.setDrawColor(180, 150, 50); // Gold
+  doc.setLineWidth(0.5);
+  doc.rect(13, 13, pageWidth - 26, pageHeight - 26);
 
-  // Header
-  doc.setTextColor(30, 64, 175);
-  doc.setFontSize(28);
+  // Corner Ornaments (Simplified using rectangles)
+  const ornamentSize = 8;
+  doc.setFillColor(15, 23, 42);
+  doc.rect(10, 10, ornamentSize, ornamentSize, "F");
+  doc.rect(pageWidth - 10 - ornamentSize, 10, ornamentSize, ornamentSize, "F");
+  doc.rect(10, pageHeight - 10 - ornamentSize, ornamentSize, ornamentSize, "F");
+  doc.rect(pageWidth - 10 - ornamentSize, pageHeight - 10 - ornamentSize, ornamentSize, ornamentSize, "F");
+
+  // --- Header Branding ---
+  try {
+    await addImage("/excel-academy-logo.png", pageWidth / 2 - 15, 18, 30, 30);
+  } catch (e) {
+    // Fallback if logo fails
+  }
+
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(26);
   doc.setFont("helvetica", "bold");
-  doc.text("EXCEL ACADEMY", pageWidth / 2, 40, { align: "center" });
+  doc.text("EXCEL ACADEMY", pageWidth / 2, 58, { align: "center" });
 
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "italic");
-  doc.text("A Legacy of Excellence and Innovation", pageWidth / 2, 48, {
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  doc.text("SECONDARY SCHOOL • DETERMINED TO EXCEL", pageWidth / 2, 64, {
     align: "center",
   });
 
-  doc.setDrawColor(30, 64, 175);
-  doc.line(40, 55, pageWidth - 40, 55);
+  doc.setDrawColor(180, 150, 50);
+  doc.setLineWidth(0.8);
+  doc.line(60, 70, pageWidth - 60, 70);
 
-  // Title
-  doc.setFontSize(22);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(15, 23, 42);
-  doc.text("LETTER OF APPRECIATION", pageWidth / 2, 75, { align: "center" });
+  // --- Document Title ---
+  doc.setFontSize(20);
+  doc.setFont("times", "bolditalic");
+  doc.setTextColor(30, 64, 175); // Royal Blue
+  doc.text("Letter of Appreciation", pageWidth / 2, 85, { align: "center" });
 
-  // Date
-  doc.setFontSize(12);
+  // --- Date & Reference ---
+  doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 30, 90, {
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Date: ${new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}`, pageWidth - 35, 100, {
     align: "right",
   });
+  doc.text(`Ref: EA/ADM/2026/${result.studentId?.substring(0, 4) || "0001"}`, 35, 100);
 
-  // Content
+  // --- Salutation ---
   doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text(`To the esteemed ${result.studentName},`, 35, 115);
+
+  // --- Content Body ---
+  doc.setFontSize(12);
+  doc.setFont("times", "normal");
+  doc.setTextColor(30, 41, 59);
+  
   const content = [
-    `Dear ${result.studentName},`,
+    "It is with profound pride and admiration that the Office of the Director and the entire Academic Board of Excel Academy extend this commendation for your exceptional scholastic achievements during this academic session.",
     "",
-    "On behalf of the administration and faculty of Excel Academy, I am delighted to extend our warmest congratulations to you for your outstanding academic performance during this term.",
+    `Securing an aggregate average of ${(result.average ?? 0).toFixed(1)}% places you among the elite scholars of our institution. This accomplishment is a clear reflection of your unwavering commitment, intellectual rigor, and the high standard of discipline you maintain in your studies.`,
     "",
-    `Your remarkable average of ${(result.average ?? 0).toFixed(1)}% is a testament to your hard work, dedication, and intellectual curiosity. It is students like you who set the standard for excellence in our school community.`,
+    "We believe that such dedication is the foundation of future leadership and innovation. You have not only achieved personal success but have also served as an inspiration to your peers and a source of pride for your family.",
     "",
-    "We are proud of your achievements and look forward to your continued success. Continue to strive for greatness and remain as dedicated as you are today.",
+    "May this recognition serve as a catalyst for even greater milestones. Continue to pursue excellence with the same passion and integrity that has brought you to this place of honor.",
     "",
-    "Sincerely,",
+    "With highest regards,",
   ];
 
-  let y = 110;
+  let y = 125;
   content.forEach((line) => {
     if (line === "") {
-      y += 8;
+      y += 6;
     } else {
-      const splitLines = doc.splitTextToSize(line, pageWidth - 60);
-      doc.text(splitLines, 30, y);
-      y += splitLines.length * 8;
+      const splitLines = doc.splitTextToSize(line, pageWidth - 70);
+      doc.text(splitLines, 35, y, { align: "justify", maxWidth: pageWidth - 70 });
+      y += splitLines.length * 7;
     }
   });
 
-  // Signature
-  y += 20;
+  // --- Seal of Excellence ---
+  const sealY = y + 10;
+  doc.setDrawColor(180, 150, 50);
+  doc.setLineWidth(0.5);
+  doc.circle(pageWidth - 45, sealY + 15, 18);
+  doc.circle(pageWidth - 45, sealY + 15, 16);
+  
+  doc.setFontSize(6);
   doc.setFont("helvetica", "bold");
-  doc.text(principalName, 30, y);
-  doc.setFont("helvetica", "normal");
-  doc.text("School Director", 30, y + 7);
+  doc.setTextColor(180, 150, 50);
+  doc.text("EXCELLENCE • QUALITY • SUCCESS", pageWidth - 45, sealY + 10, { align: "center" });
+  doc.setFontSize(14);
+  doc.text("2026", pageWidth - 45, sealY + 18, { align: "center" });
+  doc.setFontSize(5);
+  doc.text("OFFICIAL SEAL", pageWidth - 45, sealY + 23, { align: "center" });
 
-  doc.text("Excel Academy Secondary School", 30, y + 14);
-
-  // Footer
+  // --- Signature Block ---
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text(principalName, 35, y + 25);
+  
   doc.setFontSize(10);
-  doc.setTextColor(100);
-  doc.text("Ad Astra Per Aspera", pageWidth / 2, pageHeight - 15, {
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  doc.text("School Director", 35, y + 31);
+  doc.text("Excel Academy Secondary School", 35, y + 37);
+
+  // --- Institutional Motto ---
+  doc.setFontSize(9);
+  doc.setFont("times", "italic");
+  doc.setTextColor(15, 23, 42);
+  doc.text("Ad Astra Per Aspera — To the Stars through Difficulties", pageWidth / 2, pageHeight - 15, {
     align: "center",
   });
 
