@@ -98,15 +98,15 @@ export function StudentProfileDialog({ student: initialStudent, isOpen, onClose 
               
               <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-1">
                 <span className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl bg-teal-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-lg shadow-teal-500/20">
-                  <Fingerprint className="h-3 sm:h-3.5 w-3 sm:w-3.5" /> {student.studentId || "PENDING"}
+                  <Fingerprint className="h-3 sm:h-3.5 w-3 sm:w-3.5" /> {student?.studentId || initialStudent?.studentId || "PENDING"}
                 </span>
                 <span className={cn(
                   "inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-sm ring-1 ring-inset",
-                  student.status === "active" 
+                  (student?.status || initialStudent?.status) === "active" 
                     ? "bg-emerald-50 text-emerald-700 ring-emerald-100" 
                     : "bg-amber-50 text-amber-700 ring-amber-100"
                 )}>
-                  {student.status || "PENDING"} ACCOUNT
+                  {student?.status || initialStudent?.status || "PENDING"} ACCOUNT
                 </span>
               </div>
             </div>
@@ -127,9 +127,9 @@ export function StudentProfileDialog({ student: initialStudent, isOpen, onClose 
             </div>
             
             <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              <InfoItem label="First Name" value={student.firstName || "-"} icon={User} />
-              <InfoItem label="Middle Name" value={student.middleName || "-"} icon={User} />
-              <InfoItem label="Last Name" value={student.lastName || "-"} icon={User} />
+              <InfoItem label="First Name" value={student?.firstName || initialStudent?.firstName || "-"} icon={User} />
+              <InfoItem label="Middle Name" value={student?.middleName || initialStudent?.middleName || "-"} icon={User} />
+              <InfoItem label="Last Name" value={student?.lastName || initialStudent?.lastName || "-"} icon={User} />
               <InfoItem 
                 label="Gender" 
                 value={gender === "M" ? "Male" : gender === "F" ? "Female" : "-"} 
@@ -152,9 +152,9 @@ export function StudentProfileDialog({ student: initialStudent, isOpen, onClose 
             </div>
             
             <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-              <InfoItem label="Level / Grade" value={`Grade ${student.grade || "UNSET"}`} icon={BookOpen} color="teal" />
-              <InfoItem label="Class Section" value={student.section || "NOT SET"} icon={MapPin} color="teal" />
-              <InfoItem label="Class Roll No" value={student.rollNumber || "PENDING"} icon={Hash} color="teal" />
+              <InfoItem label="Level / Grade" value={`Grade ${student?.grade || initialStudent?.grade || "UNSET"}`} icon={BookOpen} color="teal" />
+              <InfoItem label="Class Section" value={student?.section || initialStudent?.section || "NOT SET"} icon={MapPin} color="teal" />
+              <InfoItem label="Class Roll No" value={student?.rollNumber || (student as any)?.roll_number || initialStudent?.rollNumber || (initialStudent as any)?.roll_number || "PENDING"} icon={Hash} color="teal" />
             </div>
           </section>
         </div>

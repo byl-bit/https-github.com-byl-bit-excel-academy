@@ -268,14 +268,14 @@ export function AttendanceManager({ user, students }: AttendanceManagerProps) {
                             )}
                           >
                             <div className="col-span-1 font-black text-xs text-slate-400 group-hover:text-cyan-600 transition-colors">
-                              {student.rollNumber || "--"}
+                              {student?.rollNumber || "--"}
                             </div>
                             <div className="col-span-2 font-black text-[10px] text-slate-500 uppercase tabular-nums">
-                              {student.studentId || student.student_id || "PENDING"}
+                              {student?.studentId || student?.student_id || "PENDING"}
                             </div>
                             <div className="col-span-4 flex flex-col group-hover:translate-x-1 transition-transform">
                               <span className="font-black text-sm text-slate-800 tracking-tight truncate">
-                                {student.fullName || student.name}
+                                {student?.fullName || student?.name}
                               </span>
                               <button 
                                 onClick={(e) => {

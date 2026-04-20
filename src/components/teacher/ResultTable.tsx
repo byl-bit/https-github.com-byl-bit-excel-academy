@@ -1421,13 +1421,13 @@ export function ResultTable({
                                       onClick={() => {
                                         const resToGen = {
                                           studentId:
-                                            student.studentId ||
-                                            student.student_id ||
+                                            student?.studentId ||
+                                            student?.student_id ||
                                             sid,
                                           studentName:
-                                            student.name || student.fullName,
-                                          grade: student.grade,
-                                          section: student.section,
+                                            student?.name || student?.fullName,
+                                          grade: student?.grade,
+                                          section: student?.section,
                                           subjects:
                                             (
                                               getRowInfo(student)
