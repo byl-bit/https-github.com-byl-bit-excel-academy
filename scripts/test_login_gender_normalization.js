@@ -21,7 +21,15 @@ async function run() {
     };
 
     // Create user (POST /api/users)
-    let res = await fetch(`${BASE}/api/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify([user]) });
+    let res = await fetch(`${BASE}/api/users`, { 
+      method: 'POST', 
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-actor-role': 'admin',
+        'x-actor-id': 'admin-001'
+      }, 
+      body: JSON.stringify([user]) 
+    });
     if (!res.ok) {
       const txt = await res.text();
       throw new Error('Failed to create test user: ' + txt);
