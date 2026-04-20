@@ -26,12 +26,16 @@ export async function GET(request: Request) {
   const db = supabaseAdmin || supabase;
 
   try {
+    const includePhoto = searchParams.get("includePhoto") === "true" || !!id;
+    const selectFields = [
+      "id", "name", "email", "role", "status", "student_id", "teacher_id", 
+      "admin_id", "roll_number", "grade", "section", "gender", "created_at"
+    ];
+    if (includePhoto) selectFields.push("photo");
+
     let query = db
       .from("users")
-      .select(
-        "id, name, email, role, status, student_id, teacher_id, admin_id, roll_number, grade, section, gender, photo, created_at",
-        { count: "exact" },
-      );
+      .select(selectFields.join(", "), { count: "exact" });
 
     if (id) query = query.eq("id", id);
     if (roleId) query = query.eq("role", roleId);

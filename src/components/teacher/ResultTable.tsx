@@ -205,10 +205,12 @@ export function ResultTable({
           }
         });
         
-        // If we are in 'average' mode, the subTotal is the sum of both semesters (which should each be 100%)
-        // So we divide by 2 to get the annual average for that subject.
+        // If we are in 'average' mode, we need to handle the divisor correctly
         if (activeSemester === "average") {
-            subTotal = subTotal / 2;
+            const hasS1 = gradeAssessmentTypes.some(t => t.semester === "1" && marks[`${sub}__${t.id}`] !== undefined);
+            const hasS2 = gradeAssessmentTypes.some(t => t.semester === "2" && marks[`${sub}__${t.id}`] !== undefined);
+            const divisor = (hasS1 && hasS2) ? 2 : 1;
+            subTotal = subTotal / divisor;
         }
 
         return Math.round(subTotal * 10) / 10;
@@ -266,6 +268,8 @@ export function ResultTable({
                 if (type.semester === activeSemester || !type.semester || type.semester === "all") {
                     activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
                 }
+                // ALWAYS include the assessment in the payload so it persists in DB
+                assessments[type.id] = val;
             }
           });
 
@@ -415,6 +419,8 @@ export function ResultTable({
                 if (type.semester === activeSemester || !type.semester || type.semester === "all") {
                     activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
                 }
+                // Populate assessments
+                assessments[type.id] = val;
               }
             });
 

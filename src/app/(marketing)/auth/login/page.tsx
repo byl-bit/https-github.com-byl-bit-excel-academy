@@ -27,13 +27,26 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const router = useRouter();
 
   // Fix hydration mismatch by delaying interactive mount
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isClient && isAuthenticated && user) {
+      if (user.role === "admin") {
+        router.push("/admin");
+      } else if (user.role === "student") {
+        router.push("/student");
+      } else if (user.role === "teacher") {
+        router.push("/teacher");
+      }
+    }
+  }, [isClient, isAuthenticated, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -293,7 +306,7 @@ export default function LoginPage() {
             <div className="text-center space-y-3 w-full">
               <div className="flex items-center justify-center gap-2">
                 <div className="h-px bg-slate-100 flex-1" />
-                <span className="text-[8px] font-black text-slate-300 uppercase tracking-[0.3em]">
+                <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">
                   Account Recovery
                 </span>
                 <div className="h-px bg-slate-100 flex-1" />
@@ -315,7 +328,7 @@ export default function LoginPage() {
               </div>
 
               <div className="pt-2">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                   New Prospective Student?
                 </p>
                 <Link

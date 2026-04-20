@@ -471,28 +471,62 @@ export async function POST(request: Request) {
         if (!existingPending && studentUser)
           existingPending = pendingResults[String(studentUser.id)]; // DB uses student_id as key mainly
 
-        let mergedSubjects = [...processedSubjects];
+        const subMap = new Map<string, Subject>();
+        // 1. Start with existing subjects
         if (existingPending && Array.isArray(existingPending.subjects)) {
-          const subMap = new Map<string, Subject>();
-          // Deep merge: keep existing sub-fields if not in new
           existingPending.subjects.forEach((s: Subject) => subMap.set(s.name, s));
-          processedSubjects.forEach((s: Subject) => {
-            const existing = subMap.get(s.name);
-            if (existing) {
-              subMap.set(s.name, {
-                ...existing,
-                ...s,
-                assessments: {
-                  ...(existing.assessments || {}),
-                  ...(s.assessments || {}),
-                },
-              });
-            } else {
-              subMap.set(s.name, s);
-            }
-          });
-          mergedSubjects = Array.from(subMap.values());
         }
+
+        // 2. Merge incoming subjects
+        processedSubjects.forEach((s: Subject) => {
+          const existing = subMap.get(s.name);
+          if (existing) {
+            subMap.set(s.name, {
+              ...existing,
+              ...s,
+              assessments: {
+                ...(existing.assessments || {}),
+                ...(s.assessments || {}),
+              },
+            });
+          } else {
+            subMap.set(s.name, s);
+          }
+        });
+
+        const mergedSubjects = Array.from(subMap.values());
+
+        // 3. Recalculate marks from merged assessments
+        mergedSubjects.forEach((s: Subject) => {
+          if (s.assessments && assessmentTypes.length > 0) {
+            let totalMarks = 0;
+            let s1Total = 0;
+            let s2Total = 0;
+
+            for (const type of assessmentTypes) {
+              const val = (s.assessments || {})[String(type.id)];
+              if (val !== undefined && val !== null) {
+                const contribution = (Number(val) / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                totalMarks += contribution;
+                if (type.semester === "1") s1Total += contribution;
+                else if (type.semester === "2") s2Total += contribution;
+                else {
+                  // If type has no semester or 'all', it contributes to the annual average directly
+                  // but we might want to split it or handle it as 'both'.
+                  // For now, follow the logic that totalMarks is the direct sum.
+                }
+              }
+            }
+            s.marks = Math.round(totalMarks * 10) / 10;
+            if (s1Total > 0) s.sem1 = Math.round(s1Total * 10) / 10;
+            if (s2Total > 0) s.sem2 = Math.round(s2Total * 10) / 10;
+            
+            // Special annual average handling if both semesters are active
+            if (s1Total > 0 && s2Total > 0) {
+                s.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
+            }
+          }
+        });
 
         const totalMarks = mergedSubjects.reduce(
           (sum: number, s: Subject) => sum + (Number(s.marks) || 0),
