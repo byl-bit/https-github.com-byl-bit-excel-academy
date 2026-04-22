@@ -1,5 +1,4 @@
-import { NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 import { logActivity } from "@/lib/utils/activityLog";
 import { calculateRanks } from "@/lib/utils/excelCalculations";
 import {
@@ -7,22 +6,17 @@ import {
   calculatePromotionStatus,
   calculateConduct,
 } from "@/lib/utils/gradingLogic";
-import { normalizeGender } from "@/lib/utils";
+import { normalizeGender } from "@/lib/data-utils";
 import type {
-  User,
   PendingResult,
   PublishedResult,
-  Allocation,
   Subject,
   AssessmentType,
 } from "@/lib/types";
 
-export async function GET(request: Request) {
+export const GET = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
     const { searchParams } = new URL(request.url);
-    const role = request.headers.get("x-actor-role") || "";
-    const actorId = request.headers.get("x-actor-id") || "";
-    const db = supabaseAdmin || supabase;
     const gradeFilter = searchParams.get("grade");
     const sectionFilter = searchParams.get("section");
     const studentIdFilter = searchParams.get("studentId");
@@ -39,7 +33,7 @@ export async function GET(request: Request) {
     };
 
     // --- ADMIN / PUBLIC FLOW ---
-    if (role === "admin" || !role) {
+    if (actorRole === "admin" || actorRole === "guest") {
       const [publishedRes, pendingRes] = await Promise.all([
         buildQuery("results"),
         buildQuery("results_pending"),
@@ -55,19 +49,15 @@ export async function GET(request: Request) {
         pendingObj[String(r.student_id)] = r;
       });
 
-      return NextResponse.json({
+      return successResponse({
         published: publishedObj,
         pending: pendingObj,
       });
     }
 
     // --- TEACHER FLOW ---
-    if (role === "teacher") {
-      if (!actorId)
-        return NextResponse.json(
-          { error: "Teacher ID required" },
-          { status: 400 },
-        );
+    if (actorRole === "teacher") {
+      if (!actorId) return errorResponse("Teacher ID required", 400);
 
       // 1. Identify Teacher
       const { data: teacher } = await db
@@ -76,12 +66,9 @@ export async function GET(request: Request) {
         .or(`id.eq.${actorId},teacher_id.eq.${actorId}`)
         .single();
 
-      if (!teacher) {
-        return NextResponse.json({ published: {}, pending: {} });
-      }
+      if (!teacher) return successResponse({ published: {}, pending: {} });
 
       // 2. Get Allocations & Relevant Students
-      // Optimization: If grade/section provided, only fetch students for that class
       let userQuery = db
         .from("users")
         .select("id, student_id, name, grade, section, roll_number, gender")
@@ -93,42 +80,29 @@ export async function GET(request: Request) {
         db
           .from("allocations")
           .select("id, teacher_id, grade, section")
-          .or(
-            `teacher_id.eq.${teacher.id},teacher_id.eq.${teacher.teacher_id}`,
-          ),
+          .or(`teacher_id.eq.${teacher.id},teacher_id.eq.${teacher.teacher_id}`),
         userQuery,
         buildQuery("results"),
         buildQuery("results_pending"),
       ]);
 
       const allocations = allocRes.data || [];
-      const users = usersRes.data || []; // Only students likely
+      const users = usersRes.data || [];
       const published = pubRes.data || [];
       const pending = penRes.data || [];
 
       // Permission Logic
-      const teacherAllocations = allocations; // already filtered by teacher_id query above
       const isHomeroomOfClass = (g: string, s: string) =>
         String(teacher.grade) === g && String(teacher.section) === s;
       const isAllocated = (g: string, s: string) => {
-        if (
-          teacherAllocations.some(
-            (a: any) => String(a.grade) === g && String(a.section) === s,
-          )
-        )
-          return true;
+        if (allocations.some((a: any) => String(a.grade) === g && String(a.section) === s)) return true;
         if (isHomeroomOfClass(g, s)) return true;
         return false;
       };
 
       const resolveGradeSection = (entry: any) => {
-        if (entry.grade && entry.section)
-          return { grade: String(entry.grade), section: String(entry.section) };
-        // Fallback to finding student in the fetched subset of users
-        const s = users.find(
-          (u: any) =>
-            u.student_id === entry.student_id || u.id === entry.student_id,
-        );
+        if (entry.grade && entry.section) return { grade: String(entry.grade), section: String(entry.section) };
+        const s = users.find((u: any) => u.student_id === entry.student_id || u.id === entry.student_id);
         if (s) return { grade: String(s.grade), section: String(s.section) };
         return { grade: "", section: "" };
       };
@@ -150,63 +124,44 @@ export async function GET(request: Request) {
         }
       });
 
-      return NextResponse.json({
+      return successResponse({
         published: filteredPublished,
         pending: filteredPending,
       });
     }
 
     // --- STUDENT FLOW ---
-    if (role === "student") {
-      if (!actorId)
-        return NextResponse.json(
-          { error: "Student ID required" },
-          { status: 400 },
-        );
+    if (actorRole === "student") {
+      if (!actorId) return errorResponse("Student ID required", 400);
 
-      // 1. Identify Student
       const { data: student } = await db
         .from("users")
         .select("id, student_id, name")
         .or(`id.eq.${actorId},student_id.eq.${actorId}`)
         .single();
 
-      if (!student) return NextResponse.json({});
+      if (!student) return successResponse({});
 
-      // 2. Fetch Results specifically for this student
-      // We use 'or' to catch both results and pending results in parallel
       const [pubRes, penRes] = await Promise.all([
         db.from("results").select("*").eq("student_id", student.student_id),
-        db
-          .from("results_pending")
-          .select("*")
-          .eq("student_id", student.student_id),
+        db.from("results_pending").select("*").eq("student_id", student.student_id),
       ]);
 
       const published = pubRes.data || [];
       const pending = penRes.data || [];
-
       const found: Record<string, any> = {};
       const studentIdKey = String(student.id);
 
       const processEntry = (entry: any) => {
-        // Filter subjects
         const approvedSubjects = (entry.subjects || [])
-          .filter(
-            (s: Subject) => s.status === "published" || s.status === "approved",
-          )
+          .filter((s: Subject) => s.status === "published" || s.status === "approved")
           .map((s: Subject) => ({
             ...s,
             name: s.name || "",
             marks: Number(s.marks || 0),
             status: s.status || "published",
             assessments: s.assessments
-              ? Object.fromEntries(
-                  Object.entries(s.assessments).map(([k, v]) => [
-                    k,
-                    Number(v || 0),
-                  ]),
-                )
+              ? Object.fromEntries(Object.entries(s.assessments).map(([k, v]) => [k, Number(v || 0)]))
               : undefined,
           }));
 
@@ -223,7 +178,6 @@ export async function GET(request: Request) {
             promotedOrDetained: entry.promoted_or_detained || "",
           };
         } else {
-          // Merge
           const existingSubjects = found[studentIdKey].subjects || [];
           const existingSubMap = new Map<string, any>();
           existingSubjects.forEach((s: any) => existingSubMap.set(s.name, s));
@@ -231,17 +185,13 @@ export async function GET(request: Request) {
           approvedSubjects.forEach((newSub: any) => {
             const existing = existingSubMap.get(newSub.name);
             if (existing) {
-              // Merge if exists
               existingSubMap.set(newSub.name, {
                 ...existing,
                 ...newSub,
                 sem1: newSub.sem1 || existing.sem1 || 0,
                 sem2: newSub.sem2 || existing.sem2 || 0,
-                marks: newSub.marks > existing.marks ? newSub.marks : existing.marks, // Take highest (usually average of both)
-                assessments: {
-                  ...(existing.assessments || {}),
-                  ...(newSub.assessments || {})
-                }
+                marks: newSub.marks > existing.marks ? newSub.marks : existing.marks,
+                assessments: { ...(existing.assessments || {}), ...(newSub.assessments || {}) }
               });
             } else {
               existingSubMap.set(newSub.name, newSub);
@@ -254,31 +204,26 @@ export async function GET(request: Request) {
       published.forEach(processEntry);
       pending.forEach(processEntry);
 
-      return NextResponse.json(found);
+      return successResponse(found);
     }
 
-    return NextResponse.json({});
+    return successResponse({});
   } catch (err) {
     console.error("Error fetching results", err);
-    return NextResponse.json({}, { status: 500 });
+    return errorResponse("Failed to fetch results", 500);
   }
-}
+});
 
-export async function POST(request: Request) {
+
+export const POST = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
     const body = await request.json().catch(() => ({}));
-    const role = request.headers.get("x-actor-role") || "";
-    const actorId = request.headers.get("x-actor-id") || "";
 
-    if (!["admin", "teacher"].includes(role)) {
-      return NextResponse.json(
-        { error: "Unauthorized: role not allowed" },
-        { status: 403 },
-      );
+    if (!["admin", "teacher"].includes(actorRole)) {
+      return errorResponse("Unauthorized: role not allowed", 403);
     }
 
     const resultsObj = body && typeof body === "object" ? body : {};
-    const db = supabaseAdmin || supabase;
 
     // 1. Common Data: Settings (Small enough to fetch all)
     const { data: settingsArr } = await db
@@ -293,11 +238,8 @@ export async function POST(request: Request) {
 
     // 2. Identify keys to act upon
     const inputKeys = Object.keys(resultsObj);
-    if (inputKeys.length === 0)
-      return NextResponse.json(
-        { error: "No results provided" },
-        { status: 400 },
-      );
+      if (inputKeys.length === 0)
+      return errorResponse("No results provided", 400);
 
     // Extract student IDs (either from key or body) to optimize fetches
     const targetStudentIds = new Set<string>();
@@ -316,7 +258,7 @@ export async function POST(request: Request) {
     const targetIdsArray = Array.from(targetStudentIds);
 
     // --- TEACHER SUBMISSION FLOW ---
-    if (role === "teacher") {
+    if (actorRole === "teacher") {
       // A. Verify Teacher
       const { data: teacher } = await db
         .from("users")
@@ -325,10 +267,7 @@ export async function POST(request: Request) {
         .single();
 
       if (!teacher)
-        return NextResponse.json(
-          { error: "Unauthorized: teacher profile not found" },
-          { status: 403 },
-        );
+        return errorResponse("Unauthorized: teacher profile not found", 403);
 
       // B. Allocations
       const { data: allocations } = await db
@@ -399,15 +338,8 @@ export async function POST(request: Request) {
         );
 
         if (!resolvedGrade || !resolvedSection) {
-          // If we lack grade/section, we can't verify permissions. Skip or error.
-          // For robustness, if we found a user, we use their grade.
           if (!studentUser)
-            return NextResponse.json(
-              {
-                error: `Could not resolve grade/section for student ${inputId}`,
-              },
-              { status: 400 },
-            );
+            return errorResponse(`Could not resolve grade/section for student ${inputId}`, 400);
         }
 
         // Permission
@@ -421,18 +353,10 @@ export async function POST(request: Request) {
           String(teacher.section) === resolvedSection;
 
         if (!isSubjectTeacher && !isHomeRoomTeacher) {
-          return NextResponse.json(
-            {
-              error: `Permission denied for Class ${resolvedGrade}-${resolvedSection}`,
-            },
-            { status: 403 },
-          );
+          return errorResponse(`Permission denied for Class ${resolvedGrade}-${resolvedSection}`, 403);
         }
         if (submissionLevel === "roster" && !isHomeRoomTeacher) {
-          return NextResponse.json(
-            { error: "Only Home Room teachers can submit the final roster." },
-            { status: 403 },
-          );
+          return errorResponse("Only Home Room teachers can submit the final roster.", 403);
         }
 
         // Process (Logic preserved from original)
@@ -620,10 +544,7 @@ export async function POST(request: Request) {
           .from("results_pending")
           .insert(pendingArray);
         if (insError)
-          return NextResponse.json(
-            { error: `Failed to save results: ${insError.message}` },
-            { status: 500 },
-          );
+          return errorResponse(`Failed to save results: ${insError.message}`, 500);
 
         logActivity({
           userId: actorId,
@@ -637,7 +558,7 @@ export async function POST(request: Request) {
         });
       }
 
-      return NextResponse.json({
+      return successResponse({
         success: true,
         message: "Saved successfully",
         count: pendingArray.length,
@@ -645,7 +566,7 @@ export async function POST(request: Request) {
     }
 
     // --- ADMIN PUBLICATION FLOW ---
-    // Reuse similar optimized fetching
+    // ... logic remains same ...
     const { data: relevantUsers } = await db
       .from("users")
       .select("id, student_id, name, grade, section, gender, roll_number")
@@ -660,17 +581,12 @@ export async function POST(request: Request) {
       .from("results")
       .select("*")
       .in("student_id", targetIdsArray);
-    const currentResults: Record<string, any> = {};
-    (currentResultsArr || []).forEach(
-      (r: any) => (currentResults[String(r.student_id)] = r),
-    );
 
     const resultsToPublish: any[] = [];
     for (const key of inputKeys) {
       const resEntry = resultsObj[key];
       if (!resEntry) continue;
 
-      // ... Logic same as original, just mapping ...
       const studentId =
         resEntry.studentId || resEntry.student_id || String(key);
       const studentUser = users.find(
@@ -680,7 +596,6 @@ export async function POST(request: Request) {
           String(u.id).toLowerCase() === String(studentId).toLowerCase(),
       );
 
-      // Calculate details
       const avg = Number(resEntry.average || 0);
       const resStatus = calculatePassStatus(avg);
       const promo = calculatePromotionStatus(resStatus === "PASS");
@@ -729,11 +644,6 @@ export async function POST(request: Request) {
 
     for (const gs of Object.keys(classGroups)) {
       const classResults = classGroups[gs];
-      // Fetch ALL existing results for this class to rank correctly against them
-      // Optimization: We only need to fetch this class's results if we haven't already
-      // BUT simpler: merge with what we have.
-      // To do GLOBAL ranking properly, we actually need the entire class's results from DB.
-      // Let's fetch the class results:
       const [g, s] = gs.split("_");
       const { data: existingClassResults } = await db
         .from("results")
@@ -741,14 +651,12 @@ export async function POST(request: Request) {
         .eq("grade", g)
         .eq("section", s);
 
-      // Combined list for ranking
       const combinedRankInput = (existingClassResults || []).map((r: any) => ({
         studentId: r.student_id,
         total: r.total,
         average: r.average,
       }));
 
-      // Update/Add current batch
       classResults.forEach((newR) => {
         const idx = combinedRankInput.findIndex(
           (r) => r.studentId === newR.student_id,
@@ -780,38 +688,25 @@ export async function POST(request: Request) {
 
       if (insError) {
         console.error("Admin insert error:", insError);
-        return NextResponse.json(
-          { error: "Failed to publish results", details: insError.message },
-          { status: 500 },
-        );
+        return errorResponse("Failed to publish results", 500, insError.message);
       }
-
-      // Notifications logic preserved...
-      // (Simulated for brevity as logic is identical to original but optimized fetches)
     }
 
-    return NextResponse.json({ success: true, count: resultsToPublish.length });
+    return successResponse({ success: true, count: resultsToPublish.length });
   } catch (err: any) {
     console.error("Critical internal error in /api/results POST:", err);
-    return NextResponse.json(
-      {
-        error: "Internal Server Error",
-        message: err?.message || "Check server logs",
-      },
-      { status: 500 },
-    );
+    return errorResponse("Internal Server Error", 500, err?.message);
   }
-}
+});
 
-export async function PUT(request: Request) {
+
+export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
-    const role = request.headers.get("x-actor-role") || "";
-    const actorId = request.headers.get("x-actor-id") || "";
-    if (role !== "admin")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (actorRole !== "admin") {
+      return errorResponse("Unauthorized: admin only", 403);
+    }
 
-    const body = await request.json();
-    const db = supabaseAdmin || supabase;
+    const body = await request.json().catch(() => ({}));
 
     // Collect all target IDs to fetch only what's needed
     const targetIds = new Set<string>();
@@ -828,9 +723,8 @@ export async function PUT(request: Request) {
 
     const targetIdsArray = Array.from(targetIds);
 
-    // If no IDs targeted, we might not need to fetch anything, or just return success if it's an empty op
     if (targetIdsArray.length === 0) {
-      return NextResponse.json({
+      return successResponse({
         success: true,
         message: "No targets specified",
       });
@@ -989,22 +883,13 @@ export async function PUT(request: Request) {
           .in("student_id", studentIds);
         if (delError) {
           console.error("Approval delete error:", delError);
-          return NextResponse.json(
-            { error: "Failed to clear old results", details: delError.message },
-            { status: 500 },
-          );
+          return errorResponse("Failed to clear old results", 500, delError.message);
         }
 
         const { error: insError } = await db.from("results").insert(toPublish);
         if (insError) {
           console.error("Approval insert error:", insError);
-          return NextResponse.json(
-            {
-              error: "Failed to publish approved results",
-              details: insError.message,
-            },
-            { status: 500 },
-          );
+          return errorResponse("Failed to publish approved results", 500, insError.message);
         }
 
         // --- GLOBAL RANK RECALCULATION ---
@@ -1184,16 +1069,9 @@ export async function PUT(request: Request) {
       details: `${body.approve ? "Approved" : "Rejected"} results for ${body.approve?.length || body.reject?.length || 0} students`,
     });
 
-    return NextResponse.json({ success: true });
+    return successResponse({ success: true });
   } catch (e: any) {
     console.error("Results approval error:", e);
-    return NextResponse.json(
-      {
-        error: "Internal Server Error",
-        message: e?.message || "Check server logs",
-        details: e?.stack || undefined,
-      },
-      { status: 500 },
-    );
+    return errorResponse("Internal Server Error", 500, e?.message);
   }
-}
+});

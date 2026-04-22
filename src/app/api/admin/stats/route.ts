@@ -1,16 +1,11 @@
-import { NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 
-export async function GET(request: Request) {
-  const actorRole = request.headers.get("x-actor-role") || "";
+export const GET = withApiHandler(async (request, { db, actorRole }) => {
   if (actorRole !== "admin") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return errorResponse("Unauthorized", 403);
   }
 
-  const db = supabaseAdmin || supabase;
-
   try {
-    // Run counts in parallel for performance
     const [
       { count: totalStudents },
       { count: activeStudents },
@@ -23,70 +18,41 @@ export async function GET(request: Request) {
       { count: totalAnnouncements },
       { count: totalBooks },
     ] = await Promise.all([
-      db
-        .from("users")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "student"),
-      db
-        .from("users")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "student")
-        .eq("status", "active"),
-      db
-        .from("users")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "student")
-        .eq("status", "pending"),
-      db
-        .from("users")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "teacher"),
-      db
-        .from("users")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "teacher")
-        .eq("status", "active"),
-      db
-        .from("users")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "teacher")
-        .eq("status", "pending"),
+      db.from("users").select("*", { count: "exact", head: true }).eq("role", "student"),
+      db.from("users").select("*", { count: "exact", head: true }).eq("role", "student").eq("status", "active"),
+      db.from("users").select("*", { count: "exact", head: true }).eq("role", "student").eq("status", "pending"),
+      db.from("users").select("*", { count: "exact", head: true }).eq("role", "teacher"),
+      db.from("users").select("*", { count: "exact", head: true }).eq("role", "teacher").eq("status", "active"),
+      db.from("users").select("*", { count: "exact", head: true }).eq("role", "teacher").eq("status", "pending"),
       db.from("results").select("*", { count: "exact", head: true }),
       db.from("results_pending").select("*", { count: "exact", head: true }),
       db.from("announcements").select("*", { count: "exact", head: true }),
       db.from("books").select("*", { count: "exact", head: true }),
     ]);
 
-    // Get some aggregates for results (average pass rate etc)
-    // Note: For a very large database, we might want to cache this or use a more efficient query
     const { data: resultAggs } = await db.from("results").select("average");
 
     let topAverage = 0;
     let passRate = 0;
     if (resultAggs && resultAggs.length > 0) {
       topAverage = Math.max(...resultAggs.map((r) => r.average || 0));
-      passRate =
-        (resultAggs.filter((r) => (r.average || 0) >= 50).length /
-          resultAggs.length) *
-        100;
+      passRate = (resultAggs.filter((r) => (r.average || 0) >= 50).length / resultAggs.length) * 100;
     }
 
-    // Efficient count of students per grade and section
     const { data: usersForGrades } = await db
       .from("users")
       .select("grade, section")
       .eq("role", "student");
+      
     const studentsByGrade: Record<string, number> = {};
     const studentsBySection: Record<string, number> = {};
 
     (usersForGrades || []).forEach((u) => {
-      if (u.grade)
-        studentsByGrade[u.grade] = (studentsByGrade[u.grade] || 0) + 1;
-      if (u.section)
-        studentsBySection[u.section] = (studentsBySection[u.section] || 0) + 1;
+      if (u.grade) studentsByGrade[u.grade] = (studentsByGrade[u.grade] || 0) + 1;
+      if (u.section) studentsBySection[u.section] = (studentsBySection[u.section] || 0) + 1;
     });
 
-    return NextResponse.json({
+    return successResponse({
       totalStudents: totalStudents || 0,
       activeStudents: activeStudents || 0,
       pendingStudents: pendingStudents || 0,
@@ -105,9 +71,6 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Stats fetch error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch statistics" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to fetch statistics", 500);
   }
-}
+});

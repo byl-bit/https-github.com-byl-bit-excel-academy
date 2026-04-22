@@ -1,24 +1,23 @@
-import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 import bcrypt from "bcryptjs";
 import { logActivity } from "@/lib/utils/activityLog";
 
-export async function POST(request: Request) {
+export const POST = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
-    const role = request.headers.get("x-actor-role") || "";
-    const actorId = request.headers.get("x-actor-id") || "unknown";
-    if (role !== "admin")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (actorRole !== "admin") {
+      return errorResponse("Unauthorized", 403);
+    }
 
     const { userId, studentId, newPassword } = await request.json();
     const identifier = studentId || userId;
-    if (!identifier || !newPassword)
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    
+    if (!identifier || !newPassword) {
+      return errorResponse("Missing fields", 400);
+    }
 
     const hashed = await bcrypt.hash(String(newPassword), 10);
 
-    // Try by internal id first, then by student_id
-    const { data, error: updateError } = await supabase
+    const { data, error: updateError } = await db
       .from("users")
       .update({ password: hashed, updated_at: new Date().toISOString() })
       .or(`id.eq.${identifier},student_id.eq.${identifier}`)
@@ -27,10 +26,7 @@ export async function POST(request: Request) {
 
     if (updateError || !data) {
       console.error("Force reset error:", updateError);
-      return NextResponse.json(
-        { error: "Failed to update password" },
-        { status: 500 },
-      );
+      return errorResponse("Failed to update password", 500);
     }
 
     logActivity({
@@ -41,9 +37,9 @@ export async function POST(request: Request) {
       details: `Admin forced password reset for user ${identifier}`,
     });
 
-    return NextResponse.json({ success: true });
+    return successResponse({ success: true });
   } catch (e) {
     console.error("Force reset exception:", e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return errorResponse("Server error", 500);
   }
-}
+});

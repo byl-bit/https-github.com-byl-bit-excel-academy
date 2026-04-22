@@ -1,24 +1,27 @@
-import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 
-export async function GET() {
-  const { data, error } = await supabase
+export const GET = withApiHandler(async (request, { db, actorRole }) => {
+  if (actorRole !== "admin") {
+    return errorResponse("Unauthorized: admin only", 403);
+  }
+
+  const { data, error } = await db
     .from("admissions")
     .select("id, fullName, email, phone, grade, gender, status, submitted_at")
     .order("submitted_at", { ascending: false });
 
   if (error) {
     console.error("Supabase error fetching admissions:", error);
-    return NextResponse.json([]);
+    return successResponse([]);
   }
 
-  return NextResponse.json(data || []);
-}
+  return successResponse(data || []);
+});
 
-export async function POST(request: Request) {
+export const POST = withApiHandler(async (request, { db }) => {
   const body = await request.json();
 
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("admissions")
     .insert([body])
     .select()
@@ -26,40 +29,30 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error("Supabase error creating admission:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return errorResponse(error.message, 500);
   }
 
-  return NextResponse.json(data);
-}
+  return successResponse(data);
+});
 
-export async function DELETE(request: Request) {
-  const actorRole = request.headers.get("x-actor-role") || "";
+export const DELETE = withApiHandler(async (request, { db, actorRole }) => {
   if (actorRole !== "admin") {
-    return NextResponse.json(
-      { error: "Unauthorized: Admin role required" },
-      { status: 403 },
-    );
+    return errorResponse("Unauthorized: Admin role required", 403);
   }
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
   if (!id) {
-    return NextResponse.json(
-      { success: false, error: "ID required" },
-      { status: 400 },
-    );
+    return errorResponse("ID required", 400);
   }
 
-  const { error } = await supabase.from("admissions").delete().eq("id", id);
+  const { error } = await db.from("admissions").delete().eq("id", id);
 
   if (error) {
     console.error("Supabase error deleting admission:", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 },
-    );
+    return errorResponse(error.message, 500);
   }
 
-  return NextResponse.json({ success: true });
-}
+  return successResponse({ success: true });
+});

@@ -1,48 +1,36 @@
-import { NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 
-// Force dynamic to ensure we always get fresh data
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export const GET = withApiHandler(async (request, { db }) => {
   try {
-    const client = supabaseAdmin || supabase;
-
-    // Fetch all resources, newest first
-    const { data, error } = await client
+    const { data, error } = await db
       .from("resources")
       .select("*")
       .order("created_at", { ascending: false });
 
     if (error) {
       console.error("API: Error fetching resources:", error);
-      // Return empty array on error prevents crash
-      return NextResponse.json([]);
+      return successResponse([]);
     }
 
-    return new Response(JSON.stringify(data || []), {
+    return successResponse(data || [], {
       headers: {
-        "Content-Type": "application/json",
         "Cache-Control": "public, s-maxage=10, stale-while-revalidate=60",
       },
     });
   } catch (e) {
     console.error("API: Exception fetching resources:", e);
-    return NextResponse.json([]);
+    return successResponse([]);
   }
-}
+});
 
-export async function POST(req: Request) {
+export const POST = withApiHandler(async (request, { db, actorRole }) => {
   try {
-    const role = req.headers.get("x-actor-role") || "";
-    if (role !== "admin")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (actorRole !== "admin") return errorResponse("Unauthorized", 403);
 
-    const body = await req.json();
-    const client = supabaseAdmin || supabase;
-
-    // Simple insert
-    const { data, error } = await client
+    const body = await request.json();
+    const { data, error } = await db
       .from("resources")
       .insert([
         {
@@ -60,33 +48,28 @@ export async function POST(req: Request) {
 
     if (error) {
       console.error("API: Error creating resource:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return errorResponse(error.message, 500);
     }
 
-    return NextResponse.json(data);
+    return successResponse(data);
   } catch (e) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return errorResponse("Server error", 500);
   }
-}
+});
 
-export async function DELETE(req: Request) {
+export const DELETE = withApiHandler(async (request, { db, actorRole }) => {
   try {
-    const role = req.headers.get("x-actor-role") || "";
-    if (role !== "admin")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (actorRole !== "admin") return errorResponse("Unauthorized", 403);
 
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    if (!id)
-      return NextResponse.json({ error: "ID required" }, { status: 400 });
+    if (!id) return errorResponse("ID required", 400);
 
-    const client = supabaseAdmin || supabase;
-    const { error } = await client.from("resources").delete().eq("id", id);
-
-    if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ success: true });
+    const { error } = await db.from("resources").delete().eq("id", id);
+    if (error) return errorResponse(error.message, 500);
+    
+    return successResponse({ success: true });
   } catch (e) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return errorResponse("Server error", 500);
   }
-}
+});

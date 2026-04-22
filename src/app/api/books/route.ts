@@ -1,9 +1,7 @@
-import { NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 
 export const dynamic = "force-dynamic";
 
-// Helper to map DB snake_case to Frontend camelCase
 const mapToFrontend = (book: any) => ({
   id: book.id,
   title: book.title,
@@ -11,51 +9,42 @@ const mapToFrontend = (book: any) => ({
   grade: book.grade,
   subject: book.subject,
   description: book.description,
-  downloadUrl: book.file_url || book.download_url, // Support both naming conventions
+  downloadUrl: book.file_url || book.download_url,
   videoUrl: book.video_url,
   uploadedAt: book.created_at,
 });
 
-export async function GET(request: Request) {
+export const GET = withApiHandler(async (request, { db }) => {
   const { searchParams } = new URL(request.url);
   const limit = searchParams.get("limit");
   const grade = searchParams.get("grade");
   const subject = searchParams.get("subject");
 
-  // Use Admin client if available to bypass RLS policies
-  const client = supabaseAdmin || supabase;
-  let query = client
+  let query = db
     .from("books")
     .select("*")
     .order("created_at", { ascending: false });
 
   if (grade && grade !== "All") query = query.eq("grade", grade);
   if (subject && subject !== "All") query = query.eq("subject", subject);
-
   if (limit) query = query.limit(parseInt(limit));
 
   const { data, error } = await query;
 
   if (error) {
     console.error("Error fetching books from Supabase:", error);
-    // Fallback to empty to avoid crashing UI if table missing
-    return NextResponse.json([]);
+    return successResponse([]);
   }
 
-  return NextResponse.json(data.map(mapToFrontend));
-}
+  return successResponse(data.map(mapToFrontend));
+});
 
-export async function POST(req: Request) {
+export const POST = withApiHandler(async (request, { db, actorRole }) => {
   try {
-    const role = req.headers.get("x-actor-role") || "";
-    if (role !== "admin")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (actorRole !== "admin") return errorResponse("Unauthorized", 403);
 
-    const body = await req.json();
-
-    if (!body.title) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
-    }
+    const body = await request.json();
+    if (!body.title) return errorResponse("Title is required", 400);
 
     const dbPayload = {
       title: body.title,
@@ -67,8 +56,7 @@ export async function POST(req: Request) {
       video_url: body.videoUrl,
     };
 
-    const client = supabaseAdmin || supabase;
-    const { data, error } = await client
+    const { data, error } = await db
       .from("books")
       .insert([dbPayload])
       .select()
@@ -76,15 +64,11 @@ export async function POST(req: Request) {
 
     if (error) {
       console.error("Error adding book:", error);
-      return NextResponse.json(
-        { error: "Failed to save book to database" },
-        { status: 500 },
-      );
+      return errorResponse("Failed to save book to database", 500);
     }
 
-    // Create notification for all students
     try {
-      await client.from("notifications").insert({
+      await db.from("notifications").insert({
         type: "broadcast",
         category: "library",
         action: "New Resource Uploaded",
@@ -96,35 +80,26 @@ export async function POST(req: Request) {
       console.error("Failed to create notification for book:", nErr);
     }
 
-    return NextResponse.json(mapToFrontend(data));
+    return successResponse(mapToFrontend(data));
   } catch (e) {
-    return NextResponse.json(
-      { error: "Failed to process request" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to process request", 500);
   }
-}
+});
 
-export async function DELETE(req: Request) {
-  const role = req.headers.get("x-actor-role") || "";
-  if (role !== "admin")
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+export const DELETE = withApiHandler(async (request, { db, actorRole }) => {
+  if (actorRole !== "admin") return errorResponse("Unauthorized", 403);
 
-  const { searchParams } = new URL(req.url);
+  const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
-  if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+  if (!id) return errorResponse("Missing ID", 400);
 
-  const client = supabaseAdmin || supabase;
-  const { error } = await client.from("books").delete().eq("id", id);
+  const { error } = await db.from("books").delete().eq("id", id);
 
   if (error) {
     console.error("Error deleting book:", error);
-    return NextResponse.json(
-      { error: "Failed to delete book" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to delete book", 500);
   }
 
-  return NextResponse.json({ success: true });
-}
+  return successResponse({ success: true });
+});

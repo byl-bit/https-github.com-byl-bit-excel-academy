@@ -1,12 +1,11 @@
-import { NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 
-export async function GET() {
-  const { data, error } = await supabase.from("settings").select("key, value");
+export const GET = withApiHandler(async (request, { db }) => {
+  const { data, error } = await db.from("settings").select("key, value");
 
   if (error) {
     console.error("Supabase error fetching settings:", error);
-    return NextResponse.json({}, { status: 500 });
+    return errorResponse("Failed to fetch settings", 500);
   }
 
   // Convert to object format
@@ -20,7 +19,7 @@ export async function GET() {
     });
   }
 
-  // Inject defaults into the object without blocking on database writes
+  // Inject defaults
   const defaultAssessments = [
     { id: "test1", label: "Test", weight: 10, maxMarks: 100, semester: "all" },
     { id: "mid", label: "Mid Exam", weight: 15, maxMarks: 100, semester: "all" },
@@ -29,17 +28,13 @@ export async function GET() {
     { id: "final", label: "Final Exam", weight: 60, maxMarks: 100, semester: "all" },
   ];
 
-  if (
-    settings["assessmentTypes"] === undefined ||
-    settings["assessmentTypes"] === null
-  ) {
+  if (settings["assessmentTypes"] == null) {
     settings["assessmentTypes"] = defaultAssessments;
   }
   if (!settings["principalName"]) settings["principalName"] = "Desalegn";
   if (!settings["homeroomName"]) settings["homeroomName"] = "Class Teacher";
   if (settings["letterheadUrl"] === undefined) settings["letterheadUrl"] = "";
 
-  // Ensure boolean types are actually booleans
   const boolKeys = [
     "allowLibraryDownload",
     "allowTeacherEditAfterSubmission",
@@ -53,16 +48,18 @@ export async function GET() {
     }
   });
 
-  if (settings["allowLibraryDownload"] === undefined)
-    settings["allowLibraryDownload"] = false;
-  if (settings["allowTeacherEditAfterSubmission"] === undefined)
-    settings["allowTeacherEditAfterSubmission"] = false;
-  if (settings["reportCardDownload"] === undefined)
-    settings["reportCardDownload"] = true;
-  if (settings["certificateDownload"] === undefined)
-    settings["certificateDownload"] = true;
-  if (settings["maintenanceMode"] === undefined)
-    settings["maintenanceMode"] = false;
+  // Default booleans
+  const defaults: Record<string, boolean> = {
+    allowLibraryDownload: false,
+    allowTeacherEditAfterSubmission: false,
+    reportCardDownload: true,
+    certificateDownload: true,
+    maintenanceMode: false,
+  };
+
+  Object.keys(defaults).forEach(k => {
+    if (settings[k] === undefined) settings[k] = defaults[k];
+  });
 
   return new Response(JSON.stringify(settings), {
     headers: {
@@ -70,53 +67,35 @@ export async function GET() {
       "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
     },
   });
-}
+});
 
-export async function POST(request: Request) {
-  try {
-    const actorRole = request.headers.get("x-actor-role") || "";
-    if (actorRole !== "admin") {
-      return NextResponse.json(
-        { error: "Unauthorized: Admin role required" },
-        { status: 403 },
-      );
-    }
-
-    const body = await request.json();
-
-    if (typeof body !== "object" || body === null || Array.isArray(body)) {
-      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
-    }
-
-    // Use admin client to bypass RLS for settings management
-    const client = supabaseAdmin || supabase;
-
-    // Update each setting key
-    for (const [key, value] of Object.entries(
-      body as Record<string, unknown>,
-    )) {
-      await client
-        .from("settings")
-        .upsert({ key, value }, { onConflict: "key" });
-    }
-
-    // Fetch updated settings
-    const { data } = await client.from("settings").select("key, value");
-
-    const settings: Record<string, unknown> = {};
-    if (Array.isArray(data)) {
-      data.forEach((row: Record<string, unknown>) => {
-        const k = row["key"];
-        if (typeof k === "string") settings[k] = row["value"];
-      });
-    }
-
-    return NextResponse.json(settings);
-  } catch (errorUnknown) {
-    console.error("Settings update error:", errorUnknown);
-    return NextResponse.json(
-      { error: "Failed to update settings" },
-      { status: 500 },
-    );
+export const POST = withApiHandler(async (request, { db, actorRole }) => {
+  if (actorRole !== "admin") {
+    return errorResponse("Unauthorized: Admin role required", 403);
   }
-}
+
+  const body = await request.json();
+
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return errorResponse("Invalid payload", 400);
+  }
+
+  // Update each setting key
+  for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+    await db.from("settings").upsert({ key, value }, { onConflict: "key" });
+  }
+
+  // Fetch updated settings
+  const { data } = await db.from("settings").select("key, value");
+
+  const settings: Record<string, unknown> = {};
+  if (Array.isArray(data)) {
+    data.forEach((row: Record<string, unknown>) => {
+      const k = row["key"];
+      if (typeof k === "string") settings[k] = row["value"];
+    });
+  }
+
+  return successResponse(settings);
+});
+

@@ -1,21 +1,16 @@
-import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 import { promises as fs } from "fs";
 import path from "path";
 import { logActivity } from "@/lib/utils/activityLog";
 
-export async function POST(request: Request) {
+export const POST = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
-    const role = request.headers.get("x-actor-role") || "";
-    const actorId = request.headers.get("x-actor-id") || "unknown";
-
-    if (role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (actorRole !== "admin") {
+      return errorResponse("Unauthorized", 403);
     }
 
     console.info("Starting full system reset initiated by:", actorId);
 
-    // 1. Clear Supabase Tables
     const tablesToClear = [
       "results",
       "results_pending",
@@ -28,21 +23,19 @@ export async function POST(request: Request) {
     ];
 
     for (const table of tablesToClear) {
-      const { error } = await supabase
+      const { error } = await db
         .from(table)
         .delete()
         .neq("id", "00000000-0000-0000-0000-000000000000");
       if (error) console.error(`Error clearing table ${table}:`, error);
     }
 
-    // 2. Clear Users (Except Admins)
-    const { error: userError } = await supabase
+    const { error: userError } = await db
       .from("users")
       .delete()
       .neq("role", "admin");
     if (userError) console.error("Error clearing users:", userError);
 
-    // 3. Reset Settings & Assessment Types
     const defaultAssessments = [
       { id: "test1", label: "Test 1", weight: 10, maxMarks: 100 },
       { id: "mid", label: "Mid", weight: 30, maxMarks: 100 },
@@ -51,22 +44,18 @@ export async function POST(request: Request) {
       { id: "final", label: "Final Exam", weight: 40, maxMarks: 100 },
     ];
 
-    await supabase
-      .from("settings")
-      .upsert({ key: "assessmentTypes", value: defaultAssessments });
-    await supabase.from("settings").upsert({ key: "letterheadUrl", value: "" });
+    await db.from("settings").upsert({ key: "assessmentTypes", value: defaultAssessments });
+    await db.from("settings").upsert({ key: "letterheadUrl", value: "" });
 
-    // 4. Reset Subjects to Defaults
-    await supabase.from("subjects").delete().neq("name", "___");
+    await db.from("subjects").delete().neq("name", "___");
     const defaultSubjects = [
       { name: "Mathematics" },
       { name: "English" },
       { name: "Science" },
       { name: "Social Studies" },
     ];
-    await supabase.from("subjects").insert(defaultSubjects);
+    await db.from("subjects").insert(defaultSubjects);
 
-    // 5. Clear Library Books (JSON file)
     const BOOKS_FILE = path.join(process.cwd(), "data", "books.json");
     try {
       await fs.writeFile(BOOKS_FILE, "[]");
@@ -80,16 +69,15 @@ export async function POST(request: Request) {
       userName: "Admin",
       action: "FULL SYSTEM RESET",
       category: "system",
-      details:
-        "All data cleared. Settings reset to defaults. Admin accounts preserved.",
+      details: "All data cleared. Settings reset to defaults. Admin accounts preserved.",
     });
 
-    return NextResponse.json({
+    return successResponse({
       success: true,
       message: "System has been reset to defaults.",
     });
   } catch (e) {
     console.error("System reset failed:", e);
-    return NextResponse.json({ error: "Reset failed" }, { status: 500 });
+    return errorResponse("Reset failed", 500);
   }
-}
+});

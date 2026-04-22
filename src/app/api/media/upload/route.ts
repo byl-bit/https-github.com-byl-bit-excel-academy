@@ -1,14 +1,9 @@
-import { NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 
-export async function POST(request: Request) {
+export const POST = withApiHandler(async (request, { db, actorRole }) => {
   try {
-    const actorRole = request.headers.get("x-actor-role") || "";
     if (actorRole !== "admin") {
-      return NextResponse.json(
-        { error: "Unauthorized: Admin role required" },
-        { status: 403 },
-      );
+      return errorResponse("Unauthorized: Admin role required", 403);
     }
 
     const formData = await request.formData();
@@ -17,18 +12,16 @@ export async function POST(request: Request) {
     const customFileName = formData.get("fileName") as string | null;
 
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return errorResponse("No file uploaded", 400);
     }
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
 
-    // Better mime type detection
     const category = formData.get("category") as string | null;
     let mimeType = file.type;
     const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
 
-    // Fallback mime types if browser doesn't provide them
     if (!mimeType || mimeType === "application/octet-stream") {
       const mimeMap: Record<string, string> = {
         pdf: "application/pdf",
@@ -42,32 +35,11 @@ export async function POST(request: Request) {
     }
 
     const name = customFileName || `media-${Date.now()}.${ext}`;
-
-    // If a category is provided (like 'gallery'), prefix the filename
     const finalName = category ? `${category}/${name}` : name;
-
     let bucket = requestedBucket || "letterheads";
 
-    // Check if Supabase placeholder is used
-    if (
-      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder")
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
-        },
-        { status: 500 },
-      );
-    }
-
-    // Use admin client for upload if available, as these are admin-level uploads
-    const uploadClient = supabaseAdmin || supabase;
-
-    // Attempt upload to the preferred bucket
     console.log(`[Upload] Attempting upload to: ${bucket}, File: ${name}`);
-    let { data, error } = (await uploadClient.storage
+    let { data, error } = (await db.storage
       .from(bucket)
       .upload(finalName, buffer, {
         contentType: mimeType,
@@ -75,11 +47,7 @@ export async function POST(request: Request) {
       })) as any;
 
     if (error) {
-      console.warn(
-        `[Upload] First attempt failed for bucket ${bucket}: ${error.message}`,
-      );
-
-      // If bucket not found, try self-healing
+      console.warn(`[Upload] First attempt failed for bucket ${bucket}: ${error.message}`);
       if (
         error.message.includes("bucket not found") ||
         error.status === 400 ||
@@ -87,73 +55,30 @@ export async function POST(request: Request) {
         error.statusCode === "404"
       ) {
         try {
-          const adminClient = supabaseAdmin || supabase;
-          const { data: buckets, error: listError } =
-            await adminClient.storage.listBuckets();
-
-          if (listError) {
-            console.error("[Upload] listBuckets error:", listError);
-          }
-
+          const { data: buckets } = await db.storage.listBuckets();
           if (buckets && buckets.length > 0) {
             bucket = buckets[0].name;
-            console.log(
-              `[Upload] Self-healing: Found existing bucket "${bucket}". Retrying upload...`,
-            );
-
-            const retry = (await uploadClient.storage
-              .from(bucket)
-              .upload(finalName, buffer, {
+            console.log(`[Upload] Self-healing: Found existing bucket "${bucket}". Retrying upload...`);
+            const retry = (await db.storage.from(bucket).upload(finalName, buffer, {
                 contentType: mimeType,
                 upsert: true,
               })) as any;
             data = retry.data;
             error = retry.error;
           } else {
-            console.log(
-              `[Upload] Self-healing: No buckets found. Attempting to create "letterheads"...`,
-            );
-            if (!supabaseAdmin) {
-              console.error(
-                "[Upload] Self-healing: supabaseAdmin not available. Cannot create bucket.",
-              );
-              return NextResponse.json(
-                {
-                  error:
-                    "Storage bucket missing and auto-creation failed: SUPABASE_SERVICE_ROLE_KEY is not configured.",
-                },
-                { status: 500 },
-              );
-            }
-            const { error: createError } =
-              await supabaseAdmin.storage.createBucket("letterheads", {
-                public: true,
-              });
-
+            console.log(`[Upload] Self-healing: No buckets found. Attempting to create "letterheads"...`);
+            const { error: createError } = await db.storage.createBucket("letterheads", { public: true });
             if (!createError) {
               bucket = "letterheads";
-              console.log(
-                '[Upload] Self-healing: Bucket "letterheads" created. Retrying upload...',
-              );
-              const retry = (await uploadClient.storage
-                .from(bucket)
-                .upload(name, buffer, {
+              const retry = (await db.storage.from(bucket).upload(name, buffer, {
                   contentType: mimeType,
                   upsert: true,
                 })) as any;
               data = retry.data;
               error = retry.error;
             } else {
-              console.error(
-                "[Upload] Self-healing: Failed to create bucket:",
-                createError,
-              );
-              return NextResponse.json(
-                {
-                  error: `Storage bucket missing and auto-creation failed: ${createError.message}. Please create a public bucket manually in Supabase.`,
-                },
-                { status: 500 },
-              );
+              console.error("[Upload] Self-healing: Failed to create bucket:", createError);
+              return errorResponse(`Storage bucket missing and auto-creation failed: ${createError.message}`, 500);
             }
           }
         } catch (e: any) {
@@ -163,51 +88,32 @@ export async function POST(request: Request) {
     }
 
     if (error || !data) {
-      console.error(
-        `[Upload] Final upload failure:`,
-        error || "No data returned",
-      );
-      return NextResponse.json(
-        { error: error?.message || "Upload failed" },
-        { status: 500 },
-      );
+      console.error(`[Upload] Final upload failure:`, error || "No data returned");
+      return errorResponse(error?.message || "Upload failed", 500);
     }
 
-    // Defensive check before getPublicUrl
     if (!data.path) {
-      console.error("[Upload] Success but data.path is missing:", data);
-      return NextResponse.json(
-        { error: "Upload succeeded but file path is missing" },
-        { status: 500 },
-      );
+      return errorResponse("Upload succeeded but file path is missing", 500);
     }
 
-    const publicUrl = supabase.storage.from(bucket).getPublicUrl(data.path)
-      .data.publicUrl;
+    const publicUrl = db.storage.from(bucket).getPublicUrl(data.path).data.publicUrl;
     console.log(`[Upload] Success! URL: ${publicUrl}`);
 
-    return NextResponse.json({
+    return successResponse({
       url: publicUrl,
       key: finalName,
       bucket_used: bucket,
     });
   } catch (e: any) {
     console.error("[Upload] API Exception:", e);
-    return NextResponse.json(
-      { error: e.message || "Critical upload failure" },
-      { status: 500 },
-    );
+    return errorResponse(e.message || "Critical upload failure", 500);
   }
-}
+});
 
-export async function DELETE(request: Request) {
+export const DELETE = withApiHandler(async (request, { db, actorRole }) => {
   try {
-    const actorRole = request.headers.get("x-actor-role") || "";
     if (actorRole !== "admin") {
-      return NextResponse.json(
-        { error: "Unauthorized: Admin role required" },
-        { status: 403 },
-      );
+      return errorResponse("Unauthorized: Admin role required", 403);
     }
 
     const { searchParams } = new URL(request.url);
@@ -216,35 +122,24 @@ export async function DELETE(request: Request) {
     const requestedBucket = searchParams.get("bucket") || "letterheads";
 
     if (!id && !fileName) {
-      return NextResponse.json(
-        { error: "ID or fileName required for deletion" },
-        { status: 400 },
-      );
+      return errorResponse("ID or fileName required for deletion", 400);
     }
 
-    const client = supabaseAdmin || supabase;
     const pathToDelete = id || (fileName ? `gallery/${fileName}` : "");
-
-    if (!pathToDelete) {
-      return NextResponse.json({ error: "Invalid path" }, { status: 400 });
-    }
+    if (!pathToDelete) return errorResponse("Invalid path", 400);
 
     console.log(`[Delete] Attempting to delete from: ${requestedBucket}, Path: ${pathToDelete}`);
-    const { error } = await client.storage
-      .from(requestedBucket)
-      .remove([pathToDelete]);
+    const { error } = await db.storage.from(requestedBucket).remove([pathToDelete]);
 
     if (error) {
       console.error("[Delete] Supabase error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return errorResponse(error.message, 500);
     }
 
-    return NextResponse.json({ success: true });
+    return successResponse({ success: true });
   } catch (e: any) {
     console.error("[Delete] API Exception:", e);
-    return NextResponse.json(
-      { error: e.message || "Critical delete failure" },
-      { status: 500 },
-    );
+    return errorResponse(e.message || "Critical delete failure", 500);
   }
-}
+});
+

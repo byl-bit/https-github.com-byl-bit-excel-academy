@@ -2,35 +2,26 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/glass-card";
-import { StudentResult, User } from "@/lib/mockData";
+import { StudentResult } from "@/lib/mockData";
 import { useAuth } from "@/contexts/AuthContext";
-import { Download, AlertCircle, FileText, Award, Eye, X, BookOpen, Info, ShieldCheck } from "lucide-react";
+import { Download, AlertCircle, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { cn, normalizeGender } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { calculateGrade } from "@/lib/utils/gradingLogic";
 import { generateReportCardPDF } from "@/lib/utils/export";
+import { normalizeGrade, calculateAnnualAverage, calculateSemesterAverage } from "@/lib/data-utils";
+import { useSettings } from "@/hooks/useSettings";
+import { StatCard } from "@/components/StatCard";
 
 export default function StudentResultsPage() {
   const { user } = useAuth() as { user: any };
+  const { settings, loading: settingsLoading } = useSettings();
   const [result, setResult] = useState<StudentResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [reportCardEnabled, setReportCardEnabled] = useState(true);
-  const [certificateEnabled, setCertificateEnabled] = useState(true);
-  const [assessmentTypes, setAssessmentTypes] = useState<any[]>([]);
-  const [settings, setSettings] = useState<any>({});
   const [viewingBreakdownSub, setViewingBreakdownSub] = useState<any>(null);
 
-  const normalizeGrade = (g: any) => {
-    if (!g) return "all";
-    const str = String(g).toLowerCase();
-    if (str === "all" || str === "undefined") return "all";
-    const match = str.match(/\d+/);
-    return match ? match[0] : str;
-  };
-
-  // Track if initial fetch has been done to prevent double-fetching
+  // Track if initial fetch has been done
   const hasFetchedRef = useRef(false);
 
   const fetchResult = useCallback(async () => {
@@ -41,27 +32,12 @@ export default function StudentResultsPage() {
 
     try {
       setLoading(true);
-      const [rRes, sRes] = await Promise.all([
-        fetch("/api/results", {
-          headers: { "x-actor-role": "student", "x-actor-id": user.id || "" },
-        }),
-        fetch("/api/settings"),
-      ]);
+      const rRes = await fetch("/api/results", {
+        headers: { "x-actor-role": "student", "x-actor-id": user.id || "" },
+      });
 
       const storedResults = rRes.ok ? await rRes.json() : {};
-      const settingsData = sRes.ok ? await sRes.json() : {};
       
-      setSettings(settingsData);
-
-      if (settingsData.reportCardDownload !== undefined)
-        setReportCardEnabled(settingsData.reportCardDownload);
-      if (settingsData.certificateDownload !== undefined)
-        setCertificateEnabled(settingsData.certificateDownload);
-      if (settingsData.assessmentTypes)
-        setAssessmentTypes(settingsData.assessmentTypes);
-
-      // The API returns { published: {}, pending: {} } for admin/teachers
-      // but returns { [studentId]: result } directly for students
       const studentDisplayId = user.studentId || user.student_id || '';
       let res = storedResults[user.id] || storedResults[studentDisplayId];
       
@@ -70,7 +46,6 @@ export default function StudentResultsPage() {
       }
       
       if (!res) {
-        // Search through all values if direct lookup fails
         const allResults = storedResults.published 
           ? Object.values(storedResults.published) 
           : Object.values(storedResults);
@@ -93,18 +68,12 @@ export default function StudentResultsPage() {
           }),
         );
 
-        const total = approvedSubjects.reduce(
-          (sum: number, s: any) => sum + (s.marks || 0),
-          0,
-        );
-        const average =
-          approvedSubjects.length > 0 ? total / approvedSubjects.length : 0;
+        const annualAvg = calculateAnnualAverage(approvedSubjects);
 
         const normalized = {
           ...res,
           subjects: approvedSubjects,
-          total: Math.round(total * 10) / 10,
-          average: Math.round(average * 10) / 10,
+          average: annualAvg,
         } as unknown as StudentResult;
         setResult(normalized);
         setError("");
@@ -133,7 +102,10 @@ export default function StudentResultsPage() {
     await generateReportCardPDF(result, user, settings);
   };
 
-  if (loading) return <div className="text-center py-12">Loading results...</div>;
+  const reportCardEnabled = settings?.reportCardDownload !== false;
+  const assessmentTypes = settings?.assessmentTypes || [];
+
+  if (loading || settingsLoading) return <div className="text-center py-12">Loading results...</div>;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
@@ -159,39 +131,23 @@ export default function StudentResultsPage() {
       ) : result ? (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-             <div className="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-cyan-500/5 transition-all">
-                <p className="text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Semester 1 Average</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-slate-900">
-                    {(() => {
-                      const sum = (result.subjects || []).reduce((acc: number, s: any) => acc + (s.sem1 || (s.marks && !s.sem2 ? s.marks : 0)), 0);
-                      const avg = (result.subjects || []).length > 0 ? sum / (result.subjects || []).length : 0;
-                      return avg.toFixed(1);
-                    })()}
-                  </span>
-                  <span className="text-lg font-bold text-cyan-600">%</span>
-                </div>
-             </div>
-             <div className="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-cyan-500/5 transition-all">
-                <p className="text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Semester 2 Average</p>
-                <div className="flex items-baseline gap-1">
-                   <span className="text-4xl font-black text-slate-900">
-                      {(() => {
-                        const sum = (result.subjects || []).reduce((acc: number, s: any) => acc + (s.sem2 || 0), 0);
-                        const avg = (result.subjects || []).length > 0 ? sum / (result.subjects || []).length : 0;
-                        return avg.toFixed(1);
-                      })()}
-                   </span>
-                   <span className="text-lg font-bold text-cyan-600">%</span>
-                </div>
-             </div>
-             <div className="p-6 rounded-3xl bg-linear-to-br from-cyan-600 to-teal-700 shadow-2xl shadow-cyan-500/20 text-white">
-                <p className="text-[10px] font-black uppercase text-cyan-100 mb-2 tracking-widest opacity-80">Annual Performance</p>
-                <div className="flex items-baseline gap-1">
-                   <span className="text-4xl font-black">{result.average.toFixed(1)}</span>
-                   <span className="text-lg font-bold text-cyan-200">%</span>
-                </div>
-             </div>
+             <StatCard 
+               label="Semester 1 Average" 
+               value={calculateSemesterAverage(result.subjects, 1).toFixed(1)} 
+               unit="%" 
+             />
+             <StatCard 
+               label="Semester 2 Average" 
+               value={calculateSemesterAverage(result.subjects, 2).toFixed(1)} 
+               unit="%" 
+             />
+             <StatCard 
+               label="Annual Performance" 
+               value={result.average.toFixed(1)} 
+               unit="%" 
+               variant="vibrant"
+               description="Weighted Academic Year Total"
+             />
           </div>
 
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
@@ -248,7 +204,7 @@ export default function StudentResultsPage() {
           </DialogHeader>
           <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
              {["1", "2"].map(sem => {
-               const semAssessments = assessmentTypes.filter(t => 
+               const semAssessments = assessmentTypes.filter((t: any) => 
                  (t.semester === sem || t.semester === "all" || !t.semester) && 
                  (normalizeGrade(t.grade) === "all" || normalizeGrade(t.grade) === normalizeGrade(user.grade))
                );
@@ -256,7 +212,7 @@ export default function StudentResultsPage() {
                  <div key={sem} className="space-y-4">
                     <p className="text-[10px] font-black uppercase text-cyan-600 tracking-widest">Semester {sem}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                       {semAssessments.map(type => {
+                       {semAssessments.map((type: any) => {
                          const mark = viewingBreakdownSub?.assessments?.[type.id] ?? 0;
                          return (
                            <div key={type.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
@@ -280,3 +236,4 @@ export default function StudentResultsPage() {
     </div>
   );
 }
+

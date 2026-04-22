@@ -1,29 +1,22 @@
-import { NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 import { logActivity } from "@/lib/utils/activityLog";
 import bcrypt from "bcryptjs";
 
-export async function GET(request: Request) {
+export const GET = withApiHandler(async (request, { db, actorRole }) => {
   try {
-    const role = request.headers.get("x-actor-role") || "";
-    if (role !== "admin")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (actorRole !== "admin") {
+      return errorResponse("Unauthorized", 403);
+    }
 
-    const client = supabaseAdmin || supabase;
-
-    // Fetch reset requests with join attempt
-    let { data, error } = await client
+    let { data, error } = await db
       .from("password_reset_requests")
-      .select(
-        "id, user_id, token, expires_at, used, created_at, users(name, role, email, grade, section, roll_number, gender, photo, student_id, teacher_id)",
-      )
+      .select("id, user_id, token, expires_at, used, created_at, users(name, role, email, grade, section, roll_number, gender, photo, student_id, teacher_id)")
       .eq("used", false)
       .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching reset requests with join:", error);
-      // Fallback: Fetch requests without join
-      const { data: fallbackData, error: fbError } = await client
+      const { data: fallbackData, error: fbError } = await db
         .from("password_reset_requests")
         .select("id, user_id, token, expires_at, used, created_at")
         .eq("used", false)
@@ -31,31 +24,25 @@ export async function GET(request: Request) {
 
       if (fbError) {
         console.error("Fatal error fetching reset requests:", fbError);
-        return NextResponse.json([]);
+        return successResponse([]);
       }
       data = fallbackData as any;
     }
 
-    // ENHANCEMENT: If users data is missing for some records (join failure/missing relationship)
-    // manually fetch user information and stitch it together
     if (data && data.length > 0) {
       const requestsWithMissingUser = data.filter((r: any) => !r.users);
 
       if (requestsWithMissingUser.length > 0) {
-        console.info(
-          `[reset-requests] ${requestsWithMissingUser.length} records missing user data. Stitching manually...`,
-        );
+        console.info(`[reset-requests] ${requestsWithMissingUser.length} records missing user data. Stitching manually...`);
         const userIds = requestsWithMissingUser.map((r: any) => r.user_id);
 
-        const { data: users, error: userError } = await client
+        const { data: users, error: userError } = await db
           .from("users")
-          .select("*") // Get everything to ensure we don't miss anything due to naming discrepancies
+          .select("*")
           .in("id", userIds);
 
         if (!userError && users) {
-          console.info(
-            `[reset-requests] Manually fetched ${users.length} users for stitching.`,
-          );
+          console.info(`[reset-requests] Manually fetched ${users.length} users for stitching.`);
           const userMap = users.reduce((acc: any, u: any) => {
             acc[u.id] = u;
             return acc;
@@ -66,42 +53,29 @@ export async function GET(request: Request) {
             users: r.users || userMap[r.user_id] || null,
           }));
         } else if (userError) {
-          console.error(
-            "[reset-requests] Manual user fetch failed:",
-            userError,
-          );
+          console.error("[reset-requests] Manual user fetch failed:", userError);
         }
       }
     }
 
-    console.info(
-      `[reset-requests] Returning ${(data || []).length} requests (synchronized)`,
-    );
-    return NextResponse.json(data || []);
+    console.info(`[reset-requests] Returning ${(data || []).length} requests (synchronized)`);
+    return successResponse(data || []);
   } catch (e) {
     console.error("Reset requests GET error:", e);
-    return NextResponse.json(
-      { error: "Error processing requests" },
-      { status: 500 },
-    );
+    return errorResponse("Error processing requests", 500);
   }
-}
+});
 
-export async function POST(request: Request) {
+export const POST = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
-    const role = request.headers.get("x-actor-role") || "";
-    const actorId = request.headers.get("x-actor-id") || "";
-    if (role !== "admin")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (actorRole !== "admin") {
+      return errorResponse("Unauthorized", 403);
+    }
 
-    const client = supabaseAdmin || supabase;
     const { requestId, action } = await request.json();
-    console.log(
-      `[API] Processing reset request: ${requestId}, action: ${action}`,
-    );
+    console.log(`[API] Processing reset request: ${requestId}, action: ${action}`);
 
-    // Fetch the reset request with fallback for join
-    let { data: resetReq, error: fetchError } = await client
+    let { data: resetReq, error: fetchError } = await db
       .from("password_reset_requests")
       .select("id, user_id, token, expires_at, used, created_at, users(name)")
       .eq("id", requestId)
@@ -109,35 +83,26 @@ export async function POST(request: Request) {
 
     if (fetchError || !resetReq) {
       console.error("[API] Initial fetch failed, trying fallback:", fetchError);
-      const { data: fallbackReq, error: fbError } = await client
+      const { data: fallbackReq, error: fbError } = await db
         .from("password_reset_requests")
-        .select("id, user_id, token, expires_at, used, created_at") // No join
+        .select("id, user_id, token, expires_at, used, created_at")
         .eq("id", requestId)
         .single();
 
       if (fbError || !fallbackReq) {
         console.error("[API] Fallback fetch error:", fbError);
-        return NextResponse.json(
-          { error: "Reset request not found in system" },
-          { status: 404 },
-        );
+        return errorResponse("Reset request not found in system", 404);
       }
       resetReq = fallbackReq as any;
     }
 
     const currentReq = resetReq;
-    if (!currentReq)
-      return NextResponse.json(
-        { error: "Reset request not found" },
-        { status: 404 },
-      );
+    if (!currentReq) return errorResponse("Reset request not found", 404);
 
     if (action === "approve") {
-      // The token already contains the hashed password from the reset request
       const hashedPassword = currentReq.token;
 
-      // Update user password
-      const { error: updateError } = await client
+      const { error: updateError } = await db
         .from("users")
         .update({
           password: hashedPassword,
@@ -147,10 +112,7 @@ export async function POST(request: Request) {
 
       if (updateError) {
         console.error("Error approving password reset:", updateError);
-        return NextResponse.json(
-          { error: "Failed to update password" },
-          { status: 500 },
-        );
+        return errorResponse("Failed to update password", 500);
       }
 
       logActivity({
@@ -161,14 +123,11 @@ export async function POST(request: Request) {
         details: `Approved reset for user ${currentReq.user_id}`,
       });
 
-      // Create notification for admin action
       try {
         const reqAny = currentReq as any;
-        const userData = Array.isArray(reqAny.users)
-          ? reqAny.users[0]
-          : reqAny.users;
+        const userData = Array.isArray(reqAny.users) ? reqAny.users[0] : reqAny.users;
         const uName = userData?.name || "User";
-        await supabase.from("notifications").insert({
+        await db.from("notifications").insert({
           type: "account",
           category: "user",
           user_id: currentReq.user_id,
@@ -192,11 +151,9 @@ export async function POST(request: Request) {
 
       try {
         const reqAny = currentReq as any;
-        const userData = Array.isArray(reqAny.users)
-          ? reqAny.users[0]
-          : reqAny.users;
+        const userData = Array.isArray(reqAny.users) ? reqAny.users[0] : reqAny.users;
         const uName = userData?.name || "User";
-        await client.from("notifications").insert({
+        await db.from("notifications").insert({
           type: "account",
           category: "user",
           user_id: currentReq.user_id,
@@ -211,12 +168,11 @@ export async function POST(request: Request) {
       }
     }
 
-    // Mark request as used/delete it
-    await client.from("password_reset_requests").delete().eq("id", requestId);
+    await db.from("password_reset_requests").delete().eq("id", requestId);
 
-    return NextResponse.json({ success: true });
+    return successResponse({ success: true });
   } catch (e) {
     console.error("Admin reset request error:", e);
-    return NextResponse.json({ error: "Error" }, { status: 500 });
+    return errorResponse("Error", 500);
   }
-}
+});

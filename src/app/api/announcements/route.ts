@@ -1,20 +1,11 @@
-import { NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
+import { isRecord, getString } from "@/lib/data-utils";
 
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null;
-const getString = (o: Record<string, unknown>, k: string) => {
-  const v = o[k];
-  return typeof v === "string" ? v : undefined;
-};
-
-export async function GET(request: Request) {
+export const GET = withApiHandler(async (request, { db, actorRole }) => {
   const { searchParams } = new URL(request.url);
   const limit = searchParams.get("limit");
-  const role = request.headers.get("x-actor-role");
 
-  const client = supabaseAdmin || supabase;
-  let query = client
+  let query = db
     .from("announcements")
     .select(
       "id, title, content, date, type, urgency, image_url, media, target_audience, created_at",
@@ -26,10 +17,10 @@ export async function GET(request: Request) {
     if (!isNaN(parsedLimit)) query = query.limit(parsedLimit);
   }
 
-  if (role === "admin") {
+  if (actorRole === "admin") {
     // Admins see everything
-  } else if (role === "student" || role === "teacher") {
-    const targetAudienceValue = role === "student" ? "students" : "teachers";
+  } else if (actorRole === "student" || actorRole === "teacher") {
+    const targetAudienceValue = actorRole === "student" ? "students" : "teachers";
     // Match 'all', the specific role, OR null
     query = query.or(
       `target_audience.cs.{all},target_audience.cs.{${targetAudienceValue}},target_audience.is.null`,
@@ -43,7 +34,7 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error("Supabase error fetching announcements:", error);
-    return NextResponse.json([]);
+    return successResponse([]);
   }
 
   const mappedData = (data || [])
@@ -109,38 +100,27 @@ export async function GET(request: Request) {
     })
     .filter(Boolean);
 
-  return new Response(JSON.stringify(mappedData), {
+  return successResponse(mappedData, {
     headers: {
-      "Content-Type": "application/json",
       "Cache-Control": "public, s-maxage=10, stale-while-revalidate=50",
     },
   });
-}
+});
 
-export async function POST(request: Request) {
-  const role = request.headers.get("x-actor-role") || "";
-  if (role !== "admin") {
-    return NextResponse.json(
-      { error: "Unauthorized: admin role required" },
-      { status: 403 },
-    );
+export const POST = withApiHandler(async (request, { db, actorRole }) => {
+  if (actorRole !== "admin") {
+    return errorResponse("Unauthorized: admin role required", 403);
   }
 
   const bodyRaw = await request.json();
-  const client = supabaseAdmin || supabase;
 
   // Fast-path: Clear and return if empty
-  const { error: deleteError } = await client
+  const { error: deleteError } = await db
     .from("announcements")
     .delete()
     .neq("id", "00000000-0000-0000-0000-000000000000");
   if (deleteError) {
-    return NextResponse.json(
-      {
-        error: "Failed to clear existing announcements: " + deleteError.message,
-      },
-      { status: 500 },
-    );
+    return errorResponse("Failed to clear existing announcements: " + deleteError.message, 500);
   }
 
   if (Array.isArray(bodyRaw) && bodyRaw.length > 0) {
@@ -186,20 +166,17 @@ export async function POST(request: Request) {
       return payload;
     });
 
-    const { error: insertError } = await client
+    const { error: insertError } = await db
       .from("announcements")
       .insert(mappedAnnouncements);
     if (insertError) {
       console.error("Supabase error saving announcements:", insertError);
-      return NextResponse.json(
-        { error: "Failed to save: " + insertError.message },
-        { status: 500 },
-      );
+      return errorResponse("Failed to save: " + insertError.message, 500);
     }
 
     // Create notification for all students
     try {
-      await client.from("notifications").insert({
+      await db.from("notifications").insert({
         type: "broadcast",
         category: "announcement",
         action: "New Announcements Posted",
@@ -211,5 +188,6 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ success: true });
-}
+  return successResponse({ success: true });
+});
+

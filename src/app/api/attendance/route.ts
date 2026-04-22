@@ -1,31 +1,22 @@
-import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 
-export async function GET(request: Request) {
+export const GET = withApiHandler(async (request, { db, actorRole, actorId }) => {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get("date");
   const grade = searchParams.get("grade");
   const section = searchParams.get("section");
   const studentId = searchParams.get("studentId");
 
-  const role = request.headers.get("x-actor-role") || "";
-  const actorId = request.headers.get("x-actor-id") || "";
-
   const headers = {
-    "Content-Type": "application/json",
     "Cache-Control": "public, s-maxage=5, stale-while-revalidate=30",
   };
 
   if (studentId) {
-    // Unauthorized if student tries to view someone else
-    if (role === "student" && actorId !== studentId) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { 
-        status: 403, 
-        headers 
-      });
+    if (actorRole === "student" && actorId !== studentId) {
+      return errorResponse("Unauthorized", 403, undefined, headers);
     }
 
-    const { data: studentData, error: studentError } = await supabase
+    const { data: studentData, error: studentError } = await db
       .from("attendance")
       .select("id, student_id, date, status, marked_by")
       .eq("student_id", studentId)
@@ -33,25 +24,20 @@ export async function GET(request: Request) {
 
     if (studentError) {
       console.error("Supabase error fetching attendance:", studentError);
-      return new Response(JSON.stringify([]), { headers });
+      return successResponse([], { headers });
     }
 
-    return new Response(JSON.stringify(studentData || []), { headers });
+    return successResponse(studentData || [], { headers });
   } 
   
   if (date && grade && section) {
-    // Teacher/Admin check for class view
-    if (role !== "teacher" && role !== "admin") {
-       return new Response(JSON.stringify({ error: "Unauthorized: teacher or admin role required" }), { 
-         status: 403, 
-         headers 
-       });
+    if (actorRole !== "teacher" && actorRole !== "admin") {
+       return errorResponse("Unauthorized: teacher or admin role required", 403, undefined, headers);
     }
 
     const splitGrade = grade ? (grade.split(" ")[1] || grade) : "";
 
-    // First, get all students with matching grade and section
-    const { data: students, error: studentsError } = await supabase
+    const { data: students, error: studentsError } = await db
       .from("users")
       .select("id, student_id")
       .eq("role", "student")
@@ -61,20 +47,18 @@ export async function GET(request: Request) {
 
     if (studentsError) {
       console.error("Supabase error fetching students:", studentsError);
-      return new Response(JSON.stringify([]), { headers });
+      return successResponse([], { headers });
     }
 
     if (!students || students.length === 0) {
-      return new Response(JSON.stringify([]), { headers });
+      return successResponse([], { headers });
     }
 
-    // Get student IDs
-    const studentIds = (students || [])
+    const studentIds = students
       .map((s: any) => s.student_id || s.id)
       .filter(Boolean);
 
-    // Now fetch attendance records for these students on the specified date
-    const { data: classData, error: classError } = await supabase
+    const { data: classData, error: classError } = await db
       .from("attendance")
       .select("id, student_id, date, status, marked_by")
       .eq("date", date)
@@ -82,48 +66,35 @@ export async function GET(request: Request) {
 
     if (classError) {
       console.error("Supabase error fetching attendance:", classError);
-      return new Response(JSON.stringify([]), { headers });
+      return successResponse([], { headers });
     }
 
-    return new Response(JSON.stringify(classData || []), { headers });
+    return successResponse(classData || [], { headers });
   }
 
-  // Default: return empty array if no valid query params
-  return new Response(JSON.stringify([]), { headers });
-}
+  return successResponse([], { headers });
+});
 
-export async function POST(request: Request) {
+export const POST = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
-    const role = request.headers.get("x-actor-role") || "";
-    if (role !== "teacher" && role !== "admin") {
-      return NextResponse.json(
-        { error: "Unauthorized: teacher or admin role required" },
-        { status: 403 },
-      );
+    if (actorRole !== "teacher" && actorRole !== "admin") {
+      return errorResponse("Unauthorized: teacher or admin role required", 403);
     }
 
     const body = await request.json();
     const { date, grade, section, presentStudentIds, teacherId } = body;
 
     if (!date || !grade || !section || !Array.isArray(presentStudentIds)) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
+      return errorResponse("Missing required fields", 400);
     }
 
-    // Validate date format to ensure it's in YYYY-MM-DD format
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(date)) {
-      return NextResponse.json(
-        { error: "Invalid date format. Expected YYYY-MM-DD" },
-        { status: 400 },
-      );
+      return errorResponse("Invalid date format. Expected YYYY-MM-DD", 400);
     }
 
-    // Get all students with matching grade and section
     const splitGrade = grade.split(" ")[1] || grade;
-    const { data: students, error: studentsError } = await supabase
+    const { data: students, error: studentsError } = await db
       .from("users")
       .select("id, student_id")
       .eq("role", "student")
@@ -133,38 +104,32 @@ export async function POST(request: Request) {
 
     if (studentsError) {
       console.error("Supabase error fetching students:", studentsError);
-      return NextResponse.json(
-        { error: studentsError.message },
-        { status: 500 },
-      );
+      return errorResponse(studentsError.message, 500);
     }
 
     if (!students || students.length === 0) {
-      return NextResponse.json({
+      return successResponse({
         success: true,
         message: "No students found for this grade and section",
       });
     }
 
-    // Get all student IDs for this grade/section
     const allStudentIds = students
       .map((s) => s.student_id || s.id)
       .filter(Boolean) as string[];
 
     if (allStudentIds.length === 0) {
-      return NextResponse.json({
+      return successResponse({
         success: true,
         message: "No valid student IDs found",
       });
     }
 
-    // Filter to only include valid student IDs from the present list
     const validPresentStudentIds = presentStudentIds.filter((id) =>
       allStudentIds.includes(id),
     );
 
-    // Delete all existing attendance records for this date and class first
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await db
       .from("attendance")
       .delete()
       .eq("date", date)
@@ -172,55 +137,43 @@ export async function POST(request: Request) {
 
     if (deleteError) {
       console.error("Supabase error deleting attendance:", deleteError);
-      return NextResponse.json({ error: deleteError.message }, { status: 500 });
+      return errorResponse(deleteError.message, 500);
     }
 
-    // If there are present students, insert them
     if (validPresentStudentIds.length > 0) {
       const presentRecords = validPresentStudentIds.map((student_id) => ({
         student_id,
         date,
         status: "present",
-        marked_by: teacherId,
+        marked_by: teacherId || actorId,
       }));
 
-      const { error: insertError } = await supabase
+      const { error: insertError } = await db
         .from("attendance")
         .insert(presentRecords);
 
       if (insertError) {
         console.error("Supabase error saving attendance:", insertError);
-
-        // Try to insert records in smaller batches to avoid timeout
         const batchSize = 50;
         for (let i = 0; i < presentRecords.length; i += batchSize) {
           const batch = presentRecords.slice(i, i + batchSize);
-          const { error: batchError } = await supabase
+          const { error: batchError } = await db
             .from("attendance")
             .insert(batch);
 
           if (batchError) {
-            console.error(
-              `Batch insert error for records ${i}-${i + batchSize - 1}:`,
-              batchError,
-            );
-            return NextResponse.json(
-              {
-                error: `Failed to save attendance records: ${batchError.message}`,
-              },
-              { status: 500 },
-            );
+            console.error(`Batch insert error:`, batchError);
+            return errorResponse(`Failed to save attendance records: ${batchError.message}`, 500);
           }
         }
       }
     }
 
-    // Activity logging
     try {
       const { logActivity } = await import("@/lib/utils/activityLog");
       logActivity({
-        userId: teacherId || "teacher-001",
-        userName: "Teacher",
+        userId: teacherId || actorId || "teacher-001",
+        userName: actorRole === "admin" ? "Admin" : "Teacher",
         action: "Updated Attendance",
         category: "attendance",
         details: `Updated attendance for ${validPresentStudentIds.length} students present on ${date} (${grade}-${section})`,
@@ -229,12 +182,10 @@ export async function POST(request: Request) {
       console.error("Logging failed", le);
     }
 
-    return NextResponse.json({ success: true });
+    return successResponse({ success: true });
   } catch (error) {
     console.error("Unexpected error in attendance POST:", error);
-    return NextResponse.json(
-      { error: "Failed to save attendance" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to save attendance", 500);
   }
-}
+});
+

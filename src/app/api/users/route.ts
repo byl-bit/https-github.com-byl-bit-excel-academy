@@ -1,20 +1,9 @@
-import { NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
+import { getString, isRecord, normalizeGender } from "@/lib/data-utils";
+import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
-import { normalizeGender } from "@/lib/utils";
 
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null;
-const getString = (o: Record<string, unknown>, k: string) => {
-  const v = (o as any)[k];
-  // Coerce numbers (and booleans) to strings so numeric DB columns like roll_number are returned to the client
-  if (typeof v === "string") return v;
-  if (typeof v === "number") return String(v);
-  if (typeof v === "boolean") return String(v);
-  return undefined;
-};
-
-export async function GET(request: Request) {
+export const GET = withApiHandler(async (request, { db }) => {
   const { searchParams } = new URL(request.url);
   const roleId = searchParams.get("role");
   const grade = searchParams.get("grade");
@@ -22,8 +11,6 @@ export async function GET(request: Request) {
   const limitParam = searchParams.get("limit");
   const pageParam = searchParams.get("page");
   const id = searchParams.get("id");
-
-  const db = supabaseAdmin || supabase;
 
   try {
     const includePhoto = searchParams.get("includePhoto") === "true" || !!id;
@@ -58,10 +45,7 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error("Supabase error fetching users:", error);
-      return NextResponse.json(
-        { error: "Failed to fetch users" },
-        { status: 500 },
-      );
+      return errorResponse("Failed to fetch users", 500);
     }
 
     // Map DB snake_case to Frontend camelCase
@@ -107,30 +91,16 @@ export async function GET(request: Request) {
       };
     });
 
-    // Return simpler response if no pagination requested to maintain backward compatibility,
-    // OR return structured response?
-    // Existing clients expect Array. If I return { data, total }, it breaks them.
-    // So I must return Array, but pagination relies on headers or just "getting the slice you asked for".
-    // The user only asked for "performance", not "API contract change".
-    // Returning the array (slice) is correct behavior for `range`.
-
-    // If we want to expose 'total' for pagination UI, we usually wrap it.
-    // But let's stick to returning the array to avoid breaking the frontend.
-
-    return NextResponse.json(mappedUsers);
+    return successResponse(mappedUsers);
   } catch (errorUnknown) {
     console.error("Error fetching users:", errorUnknown);
-    return NextResponse.json(
-      { error: "Failed to fetch users" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to fetch users", 500);
   }
-}
+});
 
-export async function POST(request: Request) {
+
+export const POST = withApiHandler(async (request, { db, actorRole }) => {
   try {
-    const actorRole = request.headers.get("x-actor-role") || "";
-
     const body = await request.json();
 
     // Validate roll number range if provided
@@ -139,10 +109,7 @@ export async function POST(request: Request) {
     if (typeof rollVal !== "undefined" && rollVal !== "") {
       const rNum = Number(rollVal);
       if (isNaN(rNum) || rNum < 1 || rNum > 100) {
-        return NextResponse.json(
-          { error: "Roll number must be between 1 and 100" },
-          { status: 400 },
-        );
+        return errorResponse("Roll number must be between 1 and 100", 400);
       }
     }
 
@@ -152,10 +119,7 @@ export async function POST(request: Request) {
       !isBulk && isRecord(body) && getString(body, "status") === "active";
 
     if ((isBulk || hasStatusActive) && actorRole !== "admin") {
-      return NextResponse.json(
-        { error: "Unauthorized: Admin role required for bulk import or active status" },
-        { status: 403 }
-      );
+      return errorResponse("Unauthorized: Admin role required for bulk import or active status", 403);
     }
 
     // Helper to map keys (including student_id and roll_number)
@@ -219,7 +183,7 @@ export async function POST(request: Request) {
 
         // Execute ID/Email Check
         if (conditions.length > 0) {
-          const { data } = await supabase
+          const { data } = await db
             .from("users")
             .select("id")
             .or(conditions.join(","))
@@ -242,7 +206,7 @@ export async function POST(request: Request) {
             : undefined;
 
           if (roleVal === "student" && rollVal && gradeVal) {
-            const { data: identityMatch } = await supabase
+            const { data: identityMatch } = await db
               .from("users")
               .select("id")
               .eq("role", "student")
@@ -296,7 +260,7 @@ export async function POST(request: Request) {
         }
 
         // Insert new user
-        const { data: newUser, error } = await supabase
+        const { data: newUser, error } = await db
           .from("users")
           .insert([dbPayload])
           .select()
@@ -309,7 +273,7 @@ export async function POST(request: Request) {
         }
       }
 
-      return NextResponse.json({
+      return successResponse({
         success: true,
         count: addedUsers.length,
         added: addedUsers,
@@ -318,7 +282,7 @@ export async function POST(request: Request) {
     }
 
     // Single user creation
-    const { data: existingCheck } = await supabase
+    const { data: existingCheck } = await db
       .from("users")
       .select("id")
       .or(
@@ -327,27 +291,21 @@ export async function POST(request: Request) {
       .limit(1);
 
     if (existingCheck && existingCheck.length > 0) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 },
-      );
+      return errorResponse("User already exists", 400);
     }
 
     // Prevent duplicate student (same full name globally)
     if (getString(body, "role") === "student") {
       const nameVal = getString(body, "name") || getString(body, "fullName");
       if (nameVal) {
-        const { data: dup } = await supabase
+        const { data: dup } = await db
           .from("users")
           .select("id")
           .eq("role", "student")
           .ilike("name", nameVal)
           .limit(1);
         if (dup && dup.length > 0) {
-          return NextResponse.json(
-            { error: "A student with this name already exists." },
-            { status: 400 },
-          );
+          return errorResponse("A student with this name already exists.", 400);
         }
       }
     }
@@ -360,15 +318,11 @@ export async function POST(request: Request) {
         dbPayload.password = await bcrypt.hash(String(dbPayload.password), 10);
       } catch (hashErr) {
         console.error("Failed to hash password during create:", hashErr);
-        return NextResponse.json(
-          { error: "Failed to save user credentials" },
-          { status: 500 },
-        );
+        return errorResponse("Failed to save user credentials", 500);
       }
     }
 
-    const client = supabaseAdmin || supabase;
-    const { data: newUser, error } = await client
+    const { data: newUser, error } = await db
       .from("users")
       .insert([dbPayload])
       .select()
@@ -376,31 +330,22 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("Error creating user:", error);
-      // Return more details for debugging
-      return NextResponse.json(
-        { error: "Failed to save user", details: error.message },
-        { status: 500 },
-      );
+      return errorResponse("Failed to save user", 500, error.message);
     }
 
-    return NextResponse.json(newUser);
+    return successResponse(newUser);
   } catch (error) {
     console.error("Error creating user:", error);
-    return NextResponse.json(
-      { error: "Failed to create user" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to create user", 500);
   }
-}
+});
 
-export async function PUT(request: Request) {
+
+export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
-    const actorRole = request.headers.get("x-actor-role") || "";
-    const actorId = request.headers.get("x-actor-id") || "";
-
     const body = await request.json();
     if (!isRecord(body))
-      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+      return errorResponse("Invalid payload", 400);
 
     // Validate roll number range if provided in update
     const rollVal =
@@ -408,10 +353,7 @@ export async function PUT(request: Request) {
     if (typeof rollVal !== "undefined" && rollVal !== "") {
       const rNum = Number(rollVal);
       if (isNaN(rNum) || rNum < 1 || rNum > 100) {
-        return NextResponse.json(
-          { error: "Roll number must be between 1 and 100" },
-          { status: 400 },
-        );
+        return errorResponse("Roll number must be between 1 and 100", 400);
       }
     }
     // Allow identification by studentId as well as internal id
@@ -421,46 +363,38 @@ export async function PUT(request: Request) {
       const studentIdVal = String(
         (body as Record<string, unknown>)["studentId"],
       );
-      const { data: foundUser } = await supabase
+      const { data: foundUser } = await db
         .from("users")
         .select("id")
         .eq("student_id", studentIdVal)
         .limit(1)
         .single();
       if (!foundUser) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+        return errorResponse("User not found", 404);
       }
       id = (foundUser as any).id as string;
     }
 
     if (!id) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 },
-      );
+      return errorResponse("User ID is required", 400);
     }
 
     // Fetch the user to update
-    const { data: users, error: fetchError } = await supabase
+    const { data: users, error: fetchError } = await db
       .from("users")
       .select("id, name, status, role, grade, section, roll_number, student_id")
       .eq("id", id)
       .single();
 
     if (fetchError || !users) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return errorResponse("User not found", 404);
     }
 
     const targetUser = users as Record<string, unknown>;
 
     // Only admin or the user themselves may update
     if (actorRole !== "admin" && actorId !== id) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized: only admin or the user can modify this record",
-        },
-        { status: 403 },
-      );
+      return errorResponse("Unauthorized: only admin or the user can modify this record", 403);
     }
 
     // Detect Approval (status change from pending to active)
@@ -484,7 +418,7 @@ export async function PUT(request: Request) {
         (targetUser["roll_number"] as string);
 
       // Find an "imported" placeholder
-      const { data: placeholders } = await supabase
+      const { data: placeholders } = await db
         .from("users")
         .select("id, name, student_id, grade, section, roll_number")
         .eq("role", "student")
@@ -512,15 +446,15 @@ export async function PUT(request: Request) {
         };
 
         // Update the placeholder
-        await supabase
+        await db
           .from("users")
           .update(mergedUser)
           .eq("id", (placeholder as Record<string, unknown>).id);
 
         // Delete the temporary registration record
-        await supabase.from("users").delete().eq("id", id);
+        await db.from("users").delete().eq("id", id);
 
-        return NextResponse.json(mergedUser);
+        return successResponse(mergedUser);
       }
     }
 
@@ -543,17 +477,11 @@ export async function PUT(request: Request) {
           updatedData.password = h;
         } else {
           // Do not accept too short passwords
-          return NextResponse.json(
-            { error: "Password too short" },
-            { status: 400 },
-          );
+          return errorResponse("Password too short", 400);
         }
       } catch (hashErr) {
         console.error("Error hashing password during update:", hashErr);
-        return NextResponse.json(
-          { error: "Failed to hash password" },
-          { status: 500 },
-        );
+        return errorResponse("Failed to hash password", 500);
       }
     }
     // Prevent duplicate student on updates when roll number/fullname/grade/section changes
@@ -587,7 +515,7 @@ export async function PUT(request: Request) {
         updates["fullName"] ?? updates["name"] ?? targetUser["name"] ?? "",
       );
       if (checkRoll && checkGrade && checkName) {
-        const { data: dup } = await supabase
+        const { data: dup } = await db
           .from("users")
           .select("id")
           .eq("role", "student")
@@ -599,13 +527,7 @@ export async function PUT(request: Request) {
           .limit(1);
 
         if (dup && dup.length > 0) {
-          return NextResponse.json(
-            {
-              error:
-                "Another student with this name and roll number exists in that class.",
-            },
-            { status: 400 },
-          );
+          return errorResponse("Another student with this name and roll number exists in that class.", 400);
         }
       }
     }
@@ -623,7 +545,7 @@ export async function PUT(request: Request) {
     if (updates["teacherId"]) updatedData.teacher_id = updates["teacherId"];
     if (updates["rollNumber"]) updatedData.roll_number = updates["rollNumber"];
 
-    const { data: updatedUser, error: updateError } = await supabase
+    const { data: updatedUser, error: updateError } = await db
       .from("users")
       .update(updatedData)
       .eq("id", id)
@@ -632,10 +554,7 @@ export async function PUT(request: Request) {
 
     if (updateError) {
       console.error("Error updating user:", updateError);
-      return NextResponse.json(
-        { error: "Failed to update user" },
-        { status: 500 },
-      );
+      return errorResponse("Failed to update user", 500);
     }
 
     // Create server-side notifications for admin visibility when users change sensitive account data
@@ -674,55 +593,38 @@ export async function PUT(request: Request) {
 
       if (notifications.length > 0) {
         // Insert all notifications (non-blocking for user update success)
-        await supabase.from("notifications").insert(notifications);
+        await db.from("notifications").insert(notifications);
       }
     } catch (notifErr) {
       console.error("Failed to create notifications:", notifErr);
     }
 
-    return NextResponse.json(updatedUser);
+    return successResponse(updatedUser);
   } catch (errorUnknown) {
     console.error("Error updating user:", errorUnknown);
-    return NextResponse.json(
-      { error: "Failed to update user" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to update user", 500);
   }
-}
+});
 
-export async function DELETE(request: Request) {
+export const DELETE = withApiHandler(async (request, { db, actorRole }) => {
   try {
-    const actorRole = request.headers.get("x-actor-role") || "";
-
     if (actorRole !== "admin") {
-      return NextResponse.json(
-        { error: "Unauthorized: admin only" },
-        { status: 403 },
-      );
+      return errorResponse("Unauthorized: admin only", 403);
     }
 
     const { searchParams } = new URL(request.url);
     const param = searchParams.get("id") || searchParams.get("studentId");
 
     if (!param) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 },
-      );
+      return errorResponse("User ID is required", 400);
     }
-
-    // Helper to check if string is a UUID
-    const isUUID = (str: string) =>
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        str,
-      );
 
     let foundUser = null;
     let findErr = null;
 
     // 1. If it looks like a student ID, check that column first
     if (param.startsWith("ST-")) {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("users")
         .select("id, student_id")
         .eq("student_id", param)
@@ -734,7 +636,7 @@ export async function DELETE(request: Request) {
     // 2. If not found or doesn't look like ST- ID, try by internal ID
     if (!foundUser && !findErr) {
       // Always try internal 'id' column if it's not a student ID
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("users")
         .select("id, student_id")
         .eq("id", param)
@@ -745,50 +647,42 @@ export async function DELETE(request: Request) {
 
     if (findErr) {
       console.error("Error finding user for deletion:", findErr);
-      return NextResponse.json(
-        { error: "Database error finding user" },
-        { status: 500 },
-      );
+      return errorResponse("Database error finding user", 500);
     }
 
     if (!foundUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return errorResponse("User not found", 404);
     }
 
     const targetId = (foundUser as any).id as string;
     const studentId = (foundUser as any).student_id as string | undefined;
 
     // Delete user by internal id
-    const { error: deleteUserError } = await supabase
+    const { error: deleteUserError } = await db
       .from("users")
       .delete()
       .eq("id", targetId);
 
     if (deleteUserError) {
-      return NextResponse.json(
-        { error: "Failed to delete user" },
-        { status: 500 },
-      );
+      return errorResponse("Failed to delete user", 500);
     }
 
     // Remove associated results
     if (studentId) {
-      await supabase.from("results").delete().eq("student_id", studentId);
-      await supabase
+      await db.from("results").delete().eq("student_id", studentId);
+      await db
         .from("results_pending")
         .delete()
         .eq("student_id", studentId);
     }
 
-    return NextResponse.json({
+    return successResponse({
       success: true,
       message: "User and related results deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting user:", error);
-    return NextResponse.json(
-      { error: "Failed to delete user" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to delete user", 500);
   }
-}
+});
+
