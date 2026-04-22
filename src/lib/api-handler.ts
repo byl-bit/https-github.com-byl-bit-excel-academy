@@ -60,13 +60,15 @@ export function withApiHandler(handler: ApiHandler, options?: { adminOnly?: bool
 /**
  * Standard Success Response helper
  */
-export function successResponse(data: any, status = 200) {
-  return NextResponse.json(data, { status });
+export function successResponse(data: any, init?: number | ResponseInit) {
+  const options = typeof init === "number" ? { status: init } : init;
+  return NextResponse.json(data, options);
 }
 
 /**
  * Standard Error Response helper
  */
-export function errorResponse(message: string, status = 400, details?: any) {
-  return NextResponse.json({ error: message, details }, { status });
+export function errorResponse(message: string, init?: number | ResponseInit, details?: any) {
+  const options = typeof init === "number" ? { status: init } : (init || { status: 400 });
+  return NextResponse.json({ error: message, details }, options);
 }
