@@ -13,7 +13,7 @@ export const GET = withApiHandler(async (request, { db, actorRole, actorId }) =>
 
   if (studentId) {
     if (actorRole === "student" && actorId !== studentId) {
-      return errorResponse("Unauthorized", 403, undefined, headers);
+      return errorResponse("Unauthorized", { status: 403, headers });
     }
 
     const { data: studentData, error: studentError } = await db
@@ -32,7 +32,7 @@ export const GET = withApiHandler(async (request, { db, actorRole, actorId }) =>
   
   if (date && grade && section) {
     if (actorRole !== "teacher" && actorRole !== "admin") {
-       return errorResponse("Unauthorized: teacher or admin role required", 403, undefined, headers);
+       return errorResponse("Unauthorized: teacher or admin role required", { status: 403, headers });
     }
 
     const splitGrade = grade ? (grade.split(" ")[1] || grade) : "";
