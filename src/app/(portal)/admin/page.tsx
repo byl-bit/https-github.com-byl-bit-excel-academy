@@ -1043,14 +1043,14 @@ export default function AdminPage() {
     <div className="flex items-center gap-2">
       {menuGroups.map((group) => (
         <div key={group.label} className="relative group">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50/50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 font-bold text-sm transition-all shadow-sm ring-1 ring-blue-100/50 group-hover:bg-blue-100 group-hover:text-blue-800">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-50/50 text-cyan-700 hover:bg-cyan-100 hover:text-cyan-800 font-bold text-sm transition-all shadow-sm ring-1 ring-cyan-100/50 group-hover:bg-cyan-100 group-hover:text-cyan-800">
             <group.icon className="h-4 w-4" />
             <span>{group.label}</span>
             <Menu className="h-3 w-3 opacity-30 group-hover:rotate-180 transition-transform" />
           </button>
 
           <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50 overflow-hidden">
-            <div className="absolute inset-0 bg-linear-to-br from-blue-50/20 to-indigo-50/20 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-cyan-50/20 to-teal-50/20 pointer-events-none" />
             <div className="relative grid gap-1">
               {group.items.map((tabId) => {
                 const tab = tabs.find((t) => t.id === tabId);
@@ -1310,7 +1310,7 @@ export default function AdminPage() {
       user={user}
       navItems={navItems}
       headerContent={AdminHeaderMenus}
-      hideSidebar={true}
+      hideSidebar={false}
       notificationCount={
         admissions.length +
         users.filter((u) => u.status === "pending").length +

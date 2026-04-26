@@ -186,7 +186,7 @@ export default function TeacherLayout({
     <div className="flex items-center gap-4">
       {menuGroups.map((group) => (
         <div key={group.label} className="relative group">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50/50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 font-bold text-sm transition-all shadow-sm ring-1 ring-blue-100/50 group-hover:bg-blue-100 group-hover:text-blue-800">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-50/50 text-cyan-700 hover:bg-cyan-100 hover:text-cyan-800 font-bold text-sm transition-all shadow-sm ring-1 ring-cyan-100/50 group-hover:bg-cyan-100 group-hover:text-cyan-800">
             <group.icon className="h-4 w-4" />
             <span>{group.label}</span>
             <Menu className="h-3 w-3 opacity-30 group-hover:rotate-180 transition-transform" />
@@ -210,8 +210,8 @@ export default function TeacherLayout({
                     className={cn(
                       "flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-black transition-all group/item",
                       isActive
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                        : "text-slate-600 hover:bg-blue-50/50 hover:text-blue-700",
+                        ? "bg-cyan-600 text-white shadow-lg shadow-cyan-200"
+                        : "text-slate-600 hover:bg-cyan-50/50 hover:text-cyan-700",
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -220,7 +220,7 @@ export default function TeacherLayout({
                           "h-8 w-8 rounded-lg flex items-center justify-center transition-colors",
                           isActive
                             ? "bg-white/20"
-                            : "bg-slate-50 group-hover/item:bg-blue-100",
+                            : "bg-slate-50 group-hover/item:bg-cyan-100",
                         )}
                       >
                         <item.icon
@@ -228,11 +228,11 @@ export default function TeacherLayout({
                             "h-4 w-4",
                             isActive
                               ? "text-white"
-                              : "text-slate-500 group-hover/item:text-blue-600",
+                              : "text-slate-500 group-hover/item:text-cyan-600",
                           )}
                         />
                       </div>
-                      <span className="uppercase tracking-tight underline-offset-4 decoration-2 group-hover/item:underline decoration-blue-200/50">
+                      <span className="uppercase tracking-tight underline-offset-4 decoration-2 group-hover/item:underline decoration-cyan-200/50">
                         {item.label}
                       </span>
                     </div>
@@ -253,7 +253,7 @@ export default function TeacherLayout({
       user={user}
       navItems={navItems as any}
       headerContent={TeacherHeaderMenus}
-      hideSidebar={true}
+      hideSidebar={false}
       logout={logout}
       notificationCount={unreadCount}
     >
