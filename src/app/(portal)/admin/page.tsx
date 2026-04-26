@@ -1320,7 +1320,7 @@ export default function AdminPage() {
       user={user}
       navItems={navItems}
       headerContent={AdminHeaderMenus}
-      hideSidebar={true}
+      hideSidebar={false}
       notificationCount={
         admissions.length +
         users.filter((u) => u.status === "pending").length +

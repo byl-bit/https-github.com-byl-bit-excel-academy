@@ -117,7 +117,7 @@ export default function StudentLayout({
       user={user}
       navItems={navItems}
       headerContent={StudentHeaderMenus}
-      hideSidebar={true}
+      hideSidebar={false}
       notificationCount={unreadCount}
       logout={logout}
     >
