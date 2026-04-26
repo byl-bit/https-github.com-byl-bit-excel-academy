@@ -253,7 +253,7 @@ export default function TeacherLayout({
       user={user}
       navItems={navItems as any}
       headerContent={TeacherHeaderMenus}
-      hideSidebar={true}
+      hideSidebar={false}
       logout={logout}
       notificationCount={unreadCount}
     >
