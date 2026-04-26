@@ -362,7 +362,6 @@ export function useAdminData() {
           });
         }
 
-        setActivityLogs(getActivityLogs());
       } catch (e) {
         console.error("Failed to load admin data", e);
         setError("Failed to load system data. Please refresh.");
@@ -372,6 +371,11 @@ export function useAdminData() {
     },
     [user?.id],
   );
+
+  useEffect(() => {
+    // Background load activity logs to keep UI responsive
+    setActivityLogs(getActivityLogs());
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {

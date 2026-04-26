@@ -163,6 +163,18 @@ export function PortalSidebarLayout({
             );
           })}
       </nav>
+      
+      {/* Mobile-only Header Content Integration */}
+      {headerContent && (
+        <div className="lg:hidden px-4 py-4 space-y-3 border-t border-slate-100 bg-slate-50/50">
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] pl-3 mb-2">
+            Quick Actions
+          </p>
+          <div className="flex flex-col gap-2">
+            {headerContent}
+          </div>
+        </div>
+      )}
 
       {/* User Profile */}
       <div className="p-4 shrink-0">
@@ -254,10 +266,15 @@ export function PortalSidebarLayout({
       {/* Main Content */}
       <main
         className={cn(
-          "flex-1 min-h-screen flex flex-col transition-all duration-300",
+          "flex-1 min-h-screen flex flex-col transition-all duration-300 relative overflow-hidden",
           !hideSidebar && "lg:ml-72",
         )}
       >
+        {/* Professional Background Pattern */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden">
+           <img src="/excel-academy-logo.png" alt="" className="w-1/2 max-w-2xl grayscale rotate-12" />
+        </div>
+
         {/* Top Header (Mobile Toggle + Page Title) */}
         <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-3 sm:px-8 flex items-center justify-between shadow-sm">
           <div className="flex items-center min-w-0 shrink-0">

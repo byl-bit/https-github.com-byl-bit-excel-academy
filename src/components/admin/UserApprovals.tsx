@@ -437,65 +437,67 @@ export function UserApprovals({
                       key={res.key}
                       className="p-4 flex items-center justify-between transition-all duration-300 hover:bg-white group"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
-                          {res.studentName?.[0] || "R"}
-                        </div>
-                        <div className="space-y-1">
-                          <h4 className="font-bold text-slate-800 text-sm group-hover:text-emerald-700 transition-colors">
-                            {res.studentName}
-                          </h4>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs text-cyan-500 font-mono font-bold bg-cyan-50/50 px-2 py-0.5 rounded border border-cyan-100/50">
-                              {res.studentId}
-                            </span>
-                            <span className="text-xs font-bold text-emerald-600 uppercase tracking-tight">
-                              Average: {res.average.toFixed(1)}%
-                            </span>
-                            <span className="text-xs text-slate-400 font-bold uppercase tracking-tight">
-                              Grade {res.grade}
-                            </span>
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+                        <div className="flex items-center gap-4 self-start md:self-center">
+                          <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                            {res.studentName?.[0] || "R"}
                           </div>
-                          {/* Subject specific approvals */}
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {(res.subjects || [])
-                              .filter((s: any) => s.status === "pending_admin")
-                              .map((s: any) => (
-                                <Button
-                                  key={s.name}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 text-xs font-bold uppercase px-2 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white transition-all"
-                                  onClick={() =>
-                                    onApproveSubject?.(res.key, s.name)
-                                  }
-                                >
-                                  Approve {s.name}
-                                </Button>
-                              ))}
+                          <div className="space-y-1">
+                            <h4 className="font-bold text-slate-800 text-sm group-hover:text-emerald-700 transition-colors">
+                              {res.studentName}
+                            </h4>
+                            <div className="flex flex-wrap items-center gap-3">
+                              <span className="text-xs text-cyan-500 font-mono font-bold bg-cyan-50/50 px-2 py-0.5 rounded border border-cyan-100/50">
+                                {res.studentId}
+                              </span>
+                              <span className="text-xs font-bold text-emerald-600 uppercase tracking-tight">
+                                Avg: {res.average.toFixed(1)}%
+                              </span>
+                              <span className="text-xs text-slate-400 font-bold uppercase tracking-tight">
+                                Grade {res.grade}
+                              </span>
+                            </div>
+                            {/* Subject specific approvals */}
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {(res.subjects || [])
+                                .filter((s: any) => s.status === "pending_admin")
+                                .map((s: any) => (
+                                  <Button
+                                    key={s.name}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-[10px] font-bold uppercase px-2 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-600 hover:text-white transition-all"
+                                    onClick={() =>
+                                      onApproveSubject?.(res.key, s.name)
+                                    }
+                                  >
+                                    Approve {s.name}
+                                  </Button>
+                                ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100 font-bold rounded-xl h-9 px-4 transition-transform hover:scale-105 active:scale-95"
-                          onClick={() =>
-                            onApproveResult(res.key, res.studentName)
-                          }
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl h-9 px-4 font-bold"
-                          onClick={() =>
-                            onRejectResult(res.key, res.studentName)
-                          }
-                        >
-                          Reject
-                        </Button>
+                        <div className="flex gap-2 w-full md:w-auto">
+                          <Button
+                            size="sm"
+                            className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100 font-bold rounded-xl h-9 px-4 transition-transform hover:scale-105 active:scale-95"
+                            onClick={() =>
+                              onApproveResult(res.key, res.studentName)
+                            }
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="flex-1 md:flex-none text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl h-9 px-4 font-bold"
+                            onClick={() =>
+                              onRejectResult(res.key, res.studentName)
+                            }
+                          >
+                            Reject
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
