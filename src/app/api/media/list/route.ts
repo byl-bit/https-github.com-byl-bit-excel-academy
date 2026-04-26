@@ -2,12 +2,12 @@ import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handle
 
 export const GET = withApiHandler(async (request, { db, actorRole }) => {
   try {
-    if (actorRole !== "admin" && actorRole !== "teacher") {
-      return errorResponse("Unauthorized", 403);
-    }
-
     const { searchParams } = new URL(request.url);
     const prefix = searchParams.get("prefix") || "";
+
+    if (actorRole !== "admin" && actorRole !== "teacher" && !prefix.startsWith("gallery")) {
+      return errorResponse("Unauthorized", 403);
+    }
     
     let bucket = "letterheads";
 

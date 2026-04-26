@@ -41,7 +41,12 @@ export function GalleryManager() {
   const fetchImages = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/media/list?type=image&prefix=gallery/");
+      const res = await fetch("/api/media/list?type=image&prefix=gallery/", {
+        headers: {
+          "x-actor-role": "admin",
+          "x-actor-id": user?.id || "",
+        },
+      });
       const data = await res.json();
       if (Array.isArray(data)) {
         setImages(data);

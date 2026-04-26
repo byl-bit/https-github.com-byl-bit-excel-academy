@@ -70,7 +70,7 @@ export const POST = withApiHandler(async (request, { db, actorRole }) => {
             const { error: createError } = await db.storage.createBucket("letterheads", { public: true });
             if (!createError) {
               bucket = "letterheads";
-              const retry = (await db.storage.from(bucket).upload(name, buffer, {
+              const retry = (await db.storage.from(bucket).upload(finalName, buffer, {
                   contentType: mimeType,
                   upsert: true,
                 })) as any;

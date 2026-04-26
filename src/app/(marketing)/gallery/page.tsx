@@ -111,7 +111,7 @@ export default function GalleryPage() {
                   priority={idx < 4}
                   loading={idx < 4 ? undefined : "lazy"}
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-white font-black text-lg uppercase tracking-tight">
