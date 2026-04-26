@@ -19,6 +19,7 @@ import {
   Upload,
   FileCheck,
   Video,
+  X,
 } from "lucide-react";
 import { PaginationControls } from "@/components/PaginationControls";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -206,14 +207,10 @@ export function LibraryManager({
           </div>
           <div className="md:col-span-2 space-y-1">
             <Label>Resource Download Link or File</Label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 relative">
               <Input
                 placeholder="https://... (or upload file)"
-                value={
-                  newBook.downloadUrl.startsWith("data:")
-                    ? `File: ${newBook.fileName}`
-                    : newBook.downloadUrl
-                }
+                value={newBook.fileName ? `File Uploaded: ${newBook.fileName}` : newBook.downloadUrl}
                 onChange={(e) =>
                   setNewBook({
                     ...newBook,
@@ -222,8 +219,17 @@ export function LibraryManager({
                   })
                 }
                 className="flex-1"
-                disabled={newBook.downloadUrl.startsWith("data:")}
+                disabled={!!newBook.fileName}
               />
+              {newBook.downloadUrl && (
+                <button 
+                  onClick={() => setNewBook(prev => ({ ...prev, downloadUrl: "", fileName: "" }))}
+                  className="absolute right-[110px] top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors"
+                  title="Clear"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
               <input
                 type="file"
                 className="hidden"
@@ -232,18 +238,18 @@ export function LibraryManager({
               />
               <Button
                 variant="outline"
-                className="gap-2"
+                className="gap-2 w-[100px] shrink-0"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
               >
-                {newBook.downloadUrl.startsWith("data:") ? (
+                {newBook.downloadUrl ? (
                   <FileCheck className="h-4 w-4 text-green-500" />
                 ) : (
                   <Upload className="h-4 w-4" />
                 )}
                 {isUploading
                   ? "..."
-                  : newBook.downloadUrl.startsWith("data:")
+                  : newBook.downloadUrl
                     ? "Change"
                     : "Upload"}
               </Button>

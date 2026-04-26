@@ -314,8 +314,45 @@ export function PortalSidebarLayout({
             )}
           </div>
 
-          <div className="hidden lg:flex flex-1 justify-center px-4">
+          <div className="hidden lg:flex flex-1 justify-center px-4 overflow-x-auto">
             <div className="flex items-center gap-2 max-w-full">
+              {hideSidebar && (
+                <div className="flex items-center gap-1 mr-4 border-r border-slate-100 pr-4">
+                  {navItems.filter(i => i.show !== false).map((item, idx) => {
+                    const isActive = item.isActive !== undefined ? item.isActive : pathname === item.href;
+                    const navClass = cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all",
+                      isActive 
+                        ? "bg-cyan-50 text-cyan-600 shadow-xs" 
+                        : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                    );
+
+                    if (item.onClick) {
+                      return (
+                        <button
+                          key={item.label + idx}
+                          onClick={item.onClick}
+                          className={navClass}
+                        >
+                          <item.icon className="h-3.5 w-3.5" />
+                          {item.label}
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <Link
+                        key={item.label + idx}
+                        href={item.href || "#"}
+                        className={navClass}
+                      >
+                        <item.icon className="h-3.5 w-3.5" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
               {headerContent}
             </div>
           </div>

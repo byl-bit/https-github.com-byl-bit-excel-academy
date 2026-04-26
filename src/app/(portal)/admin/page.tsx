@@ -485,7 +485,11 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/resources", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-actor-role": "admin",
+          "x-actor-id": user?.id || "",
+        },
         body: JSON.stringify({
           title: book.title,
           author: book.author,
@@ -514,7 +518,13 @@ export default function AdminPage() {
   const handleDeleteBook = async (id: string) => {
     if (!confirm("Delete this resource?")) return;
     try {
-      const res = await fetch(`/api/resources?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/resources?id=${id}`, { 
+        method: "DELETE",
+        headers: {
+          "x-actor-role": "admin",
+          "x-actor-id": user?.id || "",
+        }
+      });
       if (res.ok) {
         logActivity({
           userId: user?.id || "",
@@ -1310,7 +1320,7 @@ export default function AdminPage() {
       user={user}
       navItems={navItems}
       headerContent={AdminHeaderMenus}
-      hideSidebar={false}
+      hideSidebar={true}
       notificationCount={
         admissions.length +
         users.filter((u) => u.status === "pending").length +
