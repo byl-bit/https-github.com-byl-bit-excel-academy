@@ -46,8 +46,6 @@ export function UserApprovals({
   onTabChange,
   refresh,
 }: UserApprovalsProps) {
-  // ... existing code ...
-  // Note: I will only replace the top part and then fix the JSX in a separate chunk to avoid huge context but wait, I can do multi-replace.
 
   const ITEMS_PER_PAGE = 5;
   const [pageAdmissions, setPageAdmissions] = useState(1);
@@ -213,175 +211,175 @@ export function UserApprovals({
               </p>
             </div>
           </div>
-        </div>
 
-        <div className="glass-panel rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-1">
-            {pendingStudents.length === 0 ? (
-              renderEmptyState("No pending students.")
-            ) : (
-              <div className="space-y-1">
-                {pendingStudents
-                  .slice(
-                    (pageStudents - 1) * ITEMS_PER_PAGE,
-                    pageStudents * ITEMS_PER_PAGE,
-                  )
-                  .map((user, idx) => (
-                    <div
-                      key={user.id}
-                      className="p-4 flex items-center justify-between transition-all duration-300 hover:bg-white group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">
-                          {(user.fullName || user.name)?.[0] || "S"}
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-800 text-sm group-hover:text-amber-700 transition-colors uppercase tracking-tight">
-                            {user.fullName || user.name}
-                          </h4>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
-                              {user.studentId}
-                            </span>
-                            <span className="text-xs text-slate-400 font-bold uppercase">
-                              G{user.grade}-{user.section}
-                            </span>
+          <div className="glass-panel rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-1">
+              {pendingStudents.length === 0 ? (
+                renderEmptyState("No pending students.")
+              ) : (
+                <div className="space-y-1">
+                  {pendingStudents
+                    .slice(
+                      (pageStudents - 1) * ITEMS_PER_PAGE,
+                      pageStudents * ITEMS_PER_PAGE,
+                    )
+                    .map((user, idx) => (
+                      <div
+                        key={user.id}
+                        className="p-4 flex items-center justify-between transition-all duration-300 hover:bg-white group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">
+                            {(user.fullName || user.name)?.[0] || "S"}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 text-sm group-hover:text-amber-700 transition-colors uppercase tracking-tight">
+                              {user.fullName || user.name}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs font-mono font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                                {user.studentId}
+                              </span>
+                              <span className="text-xs text-slate-400 font-bold uppercase">
+                                G{user.grade}-{user.section}
+                              </span>
+                            </div>
                           </div>
                         </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-emerald-600 hover:bg-emerald-50 rounded-lg"
+                            onClick={() => onApprove(user.id)}
+                            title="Approve"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-red-400 hover:bg-red-50 rounded-lg"
+                            onClick={() => onReject(user.id)}
+                            title="Reject"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-emerald-600 hover:bg-emerald-50 rounded-lg"
-                          onClick={() => onApprove(user.id)}
-                          title="Approve"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-red-400 hover:bg-red-50 rounded-lg"
-                          onClick={() => onReject(user.id)}
-                          title="Reject"
-                        >
-                          <XCircle className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
-          {pendingStudents.length > ITEMS_PER_PAGE && (
-            <div className="p-3 border-t border-slate-100 bg-slate-50/50">
-              <PaginationControls
-                currentPage={pageStudents}
-                totalItems={pendingStudents.length}
-                itemsPerPage={ITEMS_PER_PAGE}
-                onPageChange={setPageStudents}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Teachers */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3 px-1">
-          <div className="h-10 w-10 rounded-xl bg-teal-100 flex items-center justify-center shadow-inner">
-            <ShieldAlert className="h-5 w-5 text-teal-600" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-xl font-bold text-slate-800">
-                Teacher Accounts
-              </h3>
-              {pendingTeachers.length > 0 && (
-                <button
-                  onClick={() => onRejectAll && onRejectAll("teacher")}
-                  className="text-xs font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
-                >
-                  Reject All
-                </button>
+                    ))}
+                </div>
               )}
             </div>
-            <p className="text-xs text-slate-500 font-medium">
-              Faculty verifications.
-            </p>
-          </div>
-        </div>
-
-        <div className="glass-panel rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-1">
-            {pendingTeachers.length === 0 ? (
-              renderEmptyState("No pending teachers.")
-            ) : (
-              <div className="space-y-1">
-                {pendingTeachers
-                  .slice(
-                    (pageTeachers - 1) * ITEMS_PER_PAGE,
-                    pageTeachers * ITEMS_PER_PAGE,
-                  )
-                  .map((user, idx) => (
-                    <div
-                      key={user.id}
-                      className="p-4 flex items-center justify-between transition-all duration-300 hover:bg-white group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
-                          {(user.fullName || user.name)?.[0] || "T"}
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-800 text-sm group-hover:text-teal-700 transition-colors uppercase tracking-tight">
-                            {user.fullName || user.name}
-                          </h4>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs font-mono font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-100">
-                              {user.teacherId}
-                            </span>
-                            <span className="text-xs text-slate-400 font-bold uppercase">
-                              H: {user.grade}-{user.section}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-teal-600 hover:bg-teal-50 rounded-lg"
-                          onClick={() => onApprove(user.id)}
-                          title="Verify"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-red-400 hover:bg-red-50 rounded-lg"
-                          onClick={() => onReject(user.id)}
-                          title="Delete"
-                        >
-                          <XCircle className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+            {pendingStudents.length > ITEMS_PER_PAGE && (
+              <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+                <PaginationControls
+                  currentPage={pageStudents}
+                  totalItems={pendingStudents.length}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={setPageStudents}
+                />
               </div>
             )}
           </div>
-          {pendingTeachers.length > ITEMS_PER_PAGE && (
-            <div className="p-3 border-t border-slate-100 bg-slate-50/50">
-              <PaginationControls
-                currentPage={pageTeachers}
-                totalItems={pendingTeachers.length}
-                itemsPerPage={ITEMS_PER_PAGE}
-                onPageChange={setPageTeachers}
-              />
+        </div>
+
+        {/* Teachers */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 px-1">
+            <div className="h-10 w-10 rounded-xl bg-teal-100 flex items-center justify-center shadow-inner">
+              <ShieldAlert className="h-5 w-5 text-teal-600" />
             </div>
-          )}
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-bold text-slate-800">
+                  Teacher Accounts
+                </h3>
+                {pendingTeachers.length > 0 && (
+                  <button
+                    onClick={() => onRejectAll && onRejectAll("teacher")}
+                    className="text-xs font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                  >
+                    Reject All
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 font-medium">
+                Faculty verifications.
+              </p>
+            </div>
+          </div>
+
+          <div className="glass-panel rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-1">
+              {pendingTeachers.length === 0 ? (
+                renderEmptyState("No pending teachers.")
+              ) : (
+                <div className="space-y-1">
+                  {pendingTeachers
+                    .slice(
+                      (pageTeachers - 1) * ITEMS_PER_PAGE,
+                      pageTeachers * ITEMS_PER_PAGE,
+                    )
+                    .map((user, idx) => (
+                      <div
+                        key={user.id}
+                        className="p-4 flex items-center justify-between transition-all duration-300 hover:bg-white group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-400 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
+                            {(user.fullName || user.name)?.[0] || "T"}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 text-sm group-hover:text-teal-700 transition-colors uppercase tracking-tight">
+                              {user.fullName || user.name}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs font-mono font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-100">
+                                {user.teacherId}
+                              </span>
+                              <span className="text-xs text-slate-400 font-bold uppercase">
+                                H: {user.grade}-{user.section}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-teal-600 hover:bg-teal-50 rounded-lg"
+                            onClick={() => onApprove(user.id)}
+                            title="Verify"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-red-400 hover:bg-red-50 rounded-lg"
+                            onClick={() => onReject(user.id)}
+                            title="Delete"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+            {pendingTeachers.length > ITEMS_PER_PAGE && (
+              <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+                <PaginationControls
+                  currentPage={pageTeachers}
+                  totalItems={pendingTeachers.length}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={setPageTeachers}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

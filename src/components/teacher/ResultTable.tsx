@@ -796,21 +796,52 @@ export function ResultTable({
       <div className="space-y-6 animate-fade-in-up">
 
         {/* Professional Toolbar */}
-        <div className="card-premium p-6 flex flex-col md:flex-row justify-between items-center gap-6 border-none ring-1 ring-slate-200/50 shadow-xl bg-white/60">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-cyan-50 flex items-center justify-center shadow-inner ring-4 ring-cyan-50/50 transition-transform hover:rotate-6">
-              <FileSpreadsheet className="h-6 w-6 text-cyan-600" />
+        <div className="card-premium p-4 sm:p-6 flex flex-col gap-4 border-none ring-1 ring-slate-200/50 shadow-xl bg-white/60">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-cyan-50 flex items-center justify-center shadow-inner ring-4 ring-cyan-50/50 transition-transform hover:rotate-6">
+                <FileSpreadsheet className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-600" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-slate-900 uppercase tracking-tight">
+                  Academic Ledger
+                </h3>
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 hidden sm:block">
+                  Precision grading • Real-time synchronization
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">
-                Academic Ledger
-              </h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                Precision grading • Real-time synchronization
-              </p>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={exportDataCSV}
+                className="h-9 w-9 p-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
+                title="Export CSV"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={importFromCSV}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 w-9 p-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
+                  title="Import CSV"
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Semester controls row - wraps naturally on small screens */}
+          <div className="flex flex-wrap items-center gap-2">
             <select
               title="Active Semester"
               className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
@@ -863,14 +894,14 @@ export function ResultTable({
                     }
                   }}
                   className={cn(
-                    "h-9 px-4 text-xs font-bold transition-all flex items-center gap-2 shadow-sm rounded-lg border",
+                    "h-9 px-3 text-xs font-bold transition-all flex items-center gap-2 shadow-sm rounded-lg border",
                     editingRows.size > 0
                       ? "bg-cyan-600 text-white shadow-lg shadow-cyan-200"
                       : "border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-cyan-600",
                   )}
                 >
                   <Edit className="h-4 w-4" />
-                  {editingRows.size > 0 ? "Finish Editing" : "Edit Marks"}
+                  {editingRows.size > 0 ? "Finish" : "Edit"}
                 </Button>
               )}
             {!isHomeroomView && activeSemester !== "average" && (
@@ -882,7 +913,7 @@ export function ResultTable({
                   }}
                   disabled={loadingFull}
                   className={cn(
-                    "h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all",
+                    "h-10 px-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all",
                     activeSemester === "1" ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20" : "bg-slate-100 text-slate-400 hover:bg-slate-200"
                   )}
                 >
@@ -895,7 +926,7 @@ export function ResultTable({
                   }}
                   disabled={loadingFull}
                   className={cn(
-                    "h-10 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all",
+                    "h-10 px-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all",
                     activeSemester === "2" ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20" : "bg-slate-100 text-slate-400 hover:bg-slate-200"
                   )}
                 >
@@ -903,32 +934,6 @@ export function ResultTable({
                 </Button>
               </div>
             )}
-            <div className="h-6 w-px bg-slate-200 mx-1" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={exportDataCSV}
-              className="h-9 w-9 p-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
-              title="Export CSV"
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-            <div className="relative">
-              <input
-                type="file"
-                accept=".csv"
-                onChange={importFromCSV}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-9 w-9 p-0 text-slate-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
-                title="Import CSV"
-              >
-                <Upload className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
         </div>
 

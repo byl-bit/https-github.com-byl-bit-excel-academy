@@ -108,15 +108,15 @@ export default function StudentResultsPage() {
   if (loading || settingsLoading) return <div className="text-center py-12">Loading results...</div>;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="space-y-6 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">STUDENT PERFORMANCE</h1>
-          <p className="text-slate-500 font-bold text-sm tracking-wide">ACADEMIC YEAR: 2023 - 2024</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">STUDENT PERFORMANCE</h1>
+          <p className="text-slate-500 font-bold text-xs sm:text-sm tracking-wide mt-1">ACADEMIC YEAR: 2023 - 2024</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 w-full sm:w-auto">
           {reportCardEnabled && result && (
-            <Button onClick={downloadPDF} className="bg-cyan-600 hover:bg-cyan-700 text-white font-black text-xs uppercase tracking-widest px-6 h-12 rounded-xl shadow-xl shadow-cyan-500/20">
+            <Button onClick={downloadPDF} className="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 text-white font-black text-xs uppercase tracking-widest px-6 h-11 rounded-xl shadow-xl shadow-cyan-500/20">
               <Download className="h-4 w-4 mr-2" /> Download Report
             </Button>
           )}
@@ -150,7 +150,8 @@ export default function StudentResultsPage() {
              />
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+          {/* Desktop Table */}
+          <div className="hidden sm:block bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
              <div className="overflow-x-auto">
                 <table className="w-full text-left">
                    <thead>
@@ -165,20 +166,25 @@ export default function StudentResultsPage() {
                    </thead>
                    <tbody className="divide-y divide-slate-50">
                       {result.subjects.map((sub, i) => {
-                        const s1 = sub.sem1 || (sub.marks && !sub.sem2 ? sub.marks : 0);
-                        const s2 = sub.sem2 || 0;
+                        const s1 = Number(sub.sem1 || 0);
+                        const s2 = Number(sub.sem2 || 0);
+                        // Annual = average of s1+s2 if both exist, otherwise the one that exists
+                        const annual = (s1 > 0 && s2 > 0)
+                          ? Math.round(((s1 + s2) / 2) * 10) / 10
+                          : Number(sub.marks || s1 || s2 || 0);
+                        const gradeLetterInput = (s1 > 0 || s2 > 0) ? annual : Number(sub.marks || 0);
                         return (
                           <tr key={i} className="hover:bg-cyan-50/30 transition-colors group">
                              <td className="px-8 py-6 font-bold text-slate-800">{sub.name}</td>
-                             <td className="px-6 py-6 text-center font-bold text-slate-600">{s1 > 0 ? Number(s1).toFixed(1) : "-"}</td>
-                             <td className="px-6 py-6 text-center font-bold text-slate-600">{s2 > 0 ? Number(s2).toFixed(1) : "-"}</td>
-                             <td className="px-6 py-6 text-right font-black text-cyan-700">{(sub.marks || 0).toFixed(1)}</td>
+                             <td className="px-6 py-6 text-center font-bold text-slate-600">{s1 > 0 ? s1.toFixed(1) : "-"}</td>
+                             <td className="px-6 py-6 text-center font-bold text-slate-600">{s2 > 0 ? s2.toFixed(1) : "-"}</td>
+                             <td className="px-6 py-6 text-right font-black text-cyan-700">{annual > 0 ? annual.toFixed(1) : "-"}</td>
                              <td className="px-6 py-6 text-center">
                                 <span className={cn(
                                   "inline-block w-8 py-1 rounded-lg font-black text-xs",
-                                  calculateGrade(sub.marks) === "F" ? "bg-red-50 text-red-500" : "bg-cyan-50 text-cyan-600"
+                                  calculateGrade(gradeLetterInput) === "F" ? "bg-red-50 text-red-500" : "bg-cyan-50 text-cyan-600"
                                 )}>
-                                   {calculateGrade(sub.marks)}
+                                   {calculateGrade(gradeLetterInput)}
                                 </span>
                              </td>
                              <td className="px-8 py-6 text-center">
@@ -192,6 +198,47 @@ export default function StudentResultsPage() {
                    </tbody>
                 </table>
              </div>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="sm:hidden space-y-3">
+            {result.subjects.map((sub, i) => {
+              const s1 = Number(sub.sem1 || 0);
+              const s2 = Number(sub.sem2 || 0);
+              const annual = (s1 > 0 && s2 > 0)
+                ? Math.round(((s1 + s2) / 2) * 10) / 10
+                : Number(sub.marks || s1 || s2 || 0);
+              const gradeLetterInput = (s1 > 0 || s2 > 0) ? annual : Number(sub.marks || 0);
+              const grade = calculateGrade(gradeLetterInput);
+              return (
+                <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-black text-slate-800 text-sm">{sub.name}</h3>
+                    <span className={cn(
+                      "inline-block px-2.5 py-1 rounded-lg font-black text-xs",
+                      grade === "F" ? "bg-red-50 text-red-500" : "bg-cyan-50 text-cyan-600"
+                    )}>{grade}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-slate-50 rounded-xl p-2">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Sem 1</p>
+                      <p className="text-sm font-bold text-slate-700">{s1 > 0 ? s1.toFixed(1) : "-"}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-2">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Sem 2</p>
+                      <p className="text-sm font-bold text-slate-700">{s2 > 0 ? s2.toFixed(1) : "-"}</p>
+                    </div>
+                    <div className="bg-cyan-50 rounded-xl p-2">
+                      <p className="text-[9px] font-black text-cyan-500 uppercase tracking-wider mb-1">Annual</p>
+                      <p className="text-sm font-black text-cyan-700">{annual > 0 ? annual.toFixed(1) : "-"}</p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setViewingBreakdownSub(sub)} className="w-full mt-3 h-8 rounded-xl text-[10px] font-black uppercase tracking-widest text-cyan-600 hover:bg-cyan-50 border border-cyan-100">
+                    <Eye className="h-3 w-3 mr-1.5" /> View Breakdown
+                  </Button>
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : null}

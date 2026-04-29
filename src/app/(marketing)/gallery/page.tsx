@@ -153,18 +153,20 @@ export default function GalleryPage() {
             <ChevronLeft className="w-10 h-10" />
           </Button>
 
-          <div className="relative w-full h-[85vh] mx-12">
-            <NextImage
-              src={images[selectedImage].url}
-              alt={images[selectedImage].title || "School Life"}
-              fill
-              className="object-contain animate-zoom-in"
-            />
-            <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 text-center w-full">
-              <h3 className="text-white text-2xl font-black uppercase tracking-tight mb-2 drop-shadow-lg">
+          <div className="relative w-full h-[75vh] sm:h-[85vh] mx-4 sm:mx-12 flex flex-col">
+            <div className="relative flex-1">
+              <NextImage
+                src={images[selectedImage].url}
+                alt={images[selectedImage].title || "School Life"}
+                fill
+                className="object-contain animate-zoom-in"
+              />
+            </div>
+            <div className="py-4 text-center">
+              <h3 className="text-white text-lg sm:text-2xl font-black uppercase tracking-tight mb-1 drop-shadow-lg">
                 {images[selectedImage].title || "Excel Academy Moment"}
               </h3>
-              <p className="text-cyan-400 font-bold uppercase tracking-[0.2em] text-sm">
+              <p className="text-cyan-400 font-bold uppercase tracking-[0.2em] text-xs sm:text-sm">
                 Image {selectedImage + 1} of {images.length}
               </p>
             </div>

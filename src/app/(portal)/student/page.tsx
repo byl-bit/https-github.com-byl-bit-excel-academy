@@ -51,10 +51,15 @@ export default function StudentDashboard() {
 
       if (resRes.ok) {
         const data = await resRes.json();
-        // Try lookup by internal UUID first, then by display studentId
+        // The student API returns data keyed by internal user UUID
+        // But if the data has a 'published' wrapper (loaded in admin context), handle that too
         let summary = data[user.id] || data[studentDisplayId];
+        if (!summary && data.published) {
+          summary = data.published[user.id] || data.published[studentDisplayId];
+        }
         if (!summary) {
-          summary = Object.values(data).find(
+          const searchable = data.published ? Object.values(data.published) : Object.values(data);
+          summary = searchable.find(
             (r: any) =>
               r.studentId === studentDisplayId ||
               r.student_id === studentDisplayId ||
@@ -98,9 +103,9 @@ export default function StudentDashboard() {
         <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-cyan-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
         <div className="absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-teal-500 blur-[120px] opacity-10 group-hover:opacity-25 transition-opacity duration-1000"></div>
 
-        <div className="relative z-10 p-10 sm:p-14 flex flex-col md:flex-row items-center gap-10 md:gap-14">
+        <div className="relative z-10 p-6 sm:p-10 lg:p-14 flex flex-col md:flex-row items-center gap-6 md:gap-14">
           <div className="relative shrink-0 group/photo">
-            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2.5rem] border-4 border-white shadow-2xl overflow-hidden bg-slate-100 group-hover/photo:scale-105 transition-transform duration-500 ring-8 ring-cyan-50/50">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-[2.5rem] border-4 border-white shadow-2xl overflow-hidden bg-slate-100 group-hover/photo:scale-105 transition-transform duration-500 ring-8 ring-cyan-50/50">
               {user.photo ? (
                 <img
                   src={user.photo}
