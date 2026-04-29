@@ -452,11 +452,10 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
             const hasS1 = assessmentTypes.some(t => t.semester === "1" && (s.assessments || {})[String(t.id)] !== undefined);
             const hasS2 = assessmentTypes.some(t => t.semester === "2" && (s.assessments || {})[String(t.id)] !== undefined);
             if (hasS1 && hasS2) {
-                s.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
+              s.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
             } else {
-                s.marks = Math.round((s1Total + s2Total) * 10) / 10;
+              s.marks = Math.round((s1Total + s2Total) * 10) / 10;
             }
-          }
           }
         });
 
