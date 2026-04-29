@@ -154,6 +154,12 @@ export function Navbar() {
             >
               Gallery
             </Link>
+            <Link
+              href="/contact"
+              className="hover:text-cyan-400 transition-all py-2 border-b-2 border-transparent hover:border-cyan-400"
+            >
+              Contact Us
+            </Link>
           </div>
         </div>
 
@@ -275,6 +281,13 @@ export function Navbar() {
                 >
                   Gallery
                 </Link>
+                <Link
+                  href="/contact"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted font-semibold"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Contact Us
+                </Link>
                 <div className="border-t pt-4 mt-2">
                   <div className="flex items-center gap-3 p-3 text-slate-600">
                     <User className="h-5 w-5" />
@@ -323,6 +336,13 @@ export function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Gallery
+                </Link>
+                <Link
+                  href="/contact"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted font-semibold"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Contact Us
                 </Link>
                 <div className="border-t border-slate-100 pt-4 mt-2">
                   <Button

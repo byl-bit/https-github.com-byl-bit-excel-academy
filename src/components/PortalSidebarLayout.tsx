@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu, X, Shield, Bell, CheckCircle, Mail } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 interface NavItem {
   label: string;
@@ -164,17 +165,6 @@ export function PortalSidebarLayout({
           })}
       </nav>
       
-      {/* Mobile-only Header Content Integration */}
-      {headerContent && (
-        <div className="lg:hidden px-4 py-4 space-y-3 border-t border-slate-100 bg-slate-50/50">
-           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] pl-3 mb-2">
-            Quick Actions
-          </p>
-          <div className="flex flex-col gap-2">
-            {headerContent}
-          </div>
-        </div>
-      )}
 
       {/* User Profile */}
       <div className="p-4 shrink-0">
@@ -415,6 +405,7 @@ export function PortalSidebarLayout({
             {children}
           </div>
         </div>
+        <Footer />
       </main>
     </div>
   );
