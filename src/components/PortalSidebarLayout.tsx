@@ -62,13 +62,13 @@ export function PortalSidebarLayout({
             <div className="h-12 w-12 relative hover:scale-105 transition-transform duration-300 rounded-2xl overflow-hidden bg-white flex items-center justify-center shadow-lg shadow-cyan-100 border border-slate-100 p-1.5">
                <img src="/excel-academy-logo.png" alt="Logo" className="h-full w-full object-contain" />
             </div>
-            <div className="flex flex-col justify-center">
-              <h1 className="font-black text-lg tracking-tight text-slate-900 leading-tight">
+            <div className="flex flex-row items-center gap-2">
+              <h1 className="font-black text-xl tracking-tighter text-slate-900 leading-none">
                 EXCEL
               </h1>
-              <p className="text-[9px] font-black text-cyan-600 uppercase tracking-[0.2em] -mt-0.5 opacity-90">
+              <span className="text-[10px] font-black text-cyan-600 uppercase tracking-[0.15em] opacity-90 mt-0.5">
                 ACADEMY
-              </p>
+              </span>
             </div>
           </div>
         </div>
@@ -282,13 +282,13 @@ export function PortalSidebarLayout({
                 <div className="h-10 w-10 sm:h-11 sm:w-11 relative hover:scale-105 transition-transform duration-300 rounded-xl overflow-hidden bg-white flex items-center justify-center shadow-md border border-slate-100 p-1">
                    <img src="/excel-academy-logo.png" alt="Logo" className="h-full w-full object-contain" />
                 </div>
-                <div className="flex flex-col justify-center pr-2">
-                  <h1 className="font-black text-[11px] sm:text-base md:text-lg tracking-tighter text-slate-900 uppercase leading-tight">
+                <div className="flex flex-row items-center gap-1.5 pr-2">
+                  <h1 className="font-black text-sm sm:text-base md:text-xl tracking-tighter text-slate-900 uppercase leading-none">
                     Excel
                   </h1>
-                  <p className="text-[7px] sm:text-[9px] font-extrabold text-cyan-600 uppercase tracking-widest -mt-0.5 opacity-90">
+                  <span className="text-[10px] sm:text-xs font-black text-cyan-600 uppercase tracking-widest opacity-90 mt-0.5">
                     Academy
-                  </p>
+                  </span>
                 </div>
               </div>
             )}
