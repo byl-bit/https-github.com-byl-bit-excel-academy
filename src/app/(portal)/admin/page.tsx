@@ -29,6 +29,7 @@ import {
   X,
   Trophy,
   Image as ImageIcon,
+  Mail,
 } from "lucide-react";
 
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -1010,6 +1011,7 @@ export default function AdminPage() {
     { id: "activity", label: "Logs", icon: Clock },
     { id: "gallery", label: "Gallery", icon: ImageIcon },
     { id: "settings", label: "Settings", icon: Settings },
+    { id: "contact", label: "Contact Us", icon: Mail },
   ];
 
   const navItems = tabs.map((tab) => ({
@@ -1045,7 +1047,7 @@ export default function AdminPage() {
     {
       label: "System",
       icon: Settings,
-      items: ["settings", "notifications", "gallery"],
+      items: ["settings", "notifications", "gallery", "contact"],
     },
   ];
 

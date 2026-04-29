@@ -451,6 +451,12 @@ export function UserApprovals({
                               <span className="text-xs font-bold text-emerald-600 uppercase tracking-tight">
                                 Avg: {res.average.toFixed(1)}%
                               </span>
+                              <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">
+                                S1: {(res.subjects?.reduce((acc: number, s: any) => acc + (s.sem1 || 0), 0) / (res.subjects?.length || 1)).toFixed(1)}%
+                              </span>
+                              <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">
+                                S2: {(res.subjects?.reduce((acc: number, s: any) => acc + (s.sem2 || 0), 0) / (res.subjects?.length || 1)).toFixed(1)}%
+                              </span>
                               <span className="text-xs text-slate-400 font-bold uppercase tracking-tight">
                                 Grade {res.grade}
                               </span>

@@ -63,12 +63,9 @@ export function PortalSidebarLayout({
                <img src="/excel-academy-logo.png" alt="Logo" className="h-full w-full object-contain" />
             </div>
             <div className="flex flex-row items-center gap-2">
-              <h1 className="font-black text-xl tracking-tighter text-slate-900 leading-none">
-                EXCEL
+              <h1 className="font-black text-xl tracking-tighter text-slate-900 leading-none uppercase">
+                EXCEL ACADEMY
               </h1>
-              <span className="text-[10px] font-black text-cyan-600 uppercase tracking-[0.15em] opacity-90 mt-0.5">
-                ACADEMY
-              </span>
             </div>
           </div>
         </div>

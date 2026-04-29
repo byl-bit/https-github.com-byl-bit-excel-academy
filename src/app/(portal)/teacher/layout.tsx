@@ -15,6 +15,7 @@ import {
   Menu,
   User as UserIcon,
   Calendar,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -154,6 +155,13 @@ export default function TeacherLayout({
       show: true,
     },
     {
+      id: "contact",
+      href: "/contact",
+      label: "Contact Us",
+      icon: Mail,
+      show: true,
+    },
+    {
       id: "profile",
       href: "/teacher/profile",
       label: "My Profile",
@@ -166,7 +174,7 @@ export default function TeacherLayout({
     {
       label: "Home",
       icon: LayoutDashboard,
-      items: ["dashboard", "announcements", "notifications"],
+      items: ["dashboard", "announcements", "notifications", "contact"],
     },
     {
       label: "Academic",

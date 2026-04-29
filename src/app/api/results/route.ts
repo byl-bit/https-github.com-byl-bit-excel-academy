@@ -436,19 +436,27 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
                 else if (type.semester === "2") s2Total += contribution;
                 else {
                   // If type has no semester or 'all', it contributes to the annual average directly
-                  // but we might want to split it or handle it as 'both'.
-                  // For now, follow the logic that totalMarks is the direct sum.
+                  // For semester-specific totals, we treat these as present in both
+                  s1Total += contribution;
+                  s2Total += contribution;
                 }
               }
             }
             s.marks = Math.round(totalMarks * 10) / 10;
-            if (s1Total > 0) s.sem1 = Math.round(s1Total * 10) / 10;
-            if (s2Total > 0) s.sem2 = Math.round(s2Total * 10) / 10;
+            // Set sem1/sem2 if there's data, even if it's 0, to ensure the keys exist
+            s.sem1 = Math.round(s1Total * 10) / 10;
+            s.sem2 = Math.round(s2Total * 10) / 10;
             
-            // Special annual average handling if both semesters are active
-            if (s1Total > 0 && s2Total > 0) {
+            // Special annual average handling: if both semesters have data, marks is (S1+S2)/2
+            // Otherwise it's just the available semester
+            const hasS1 = assessmentTypes.some(t => t.semester === "1" && (s.assessments || {})[String(t.id)] !== undefined);
+            const hasS2 = assessmentTypes.some(t => t.semester === "2" && (s.assessments || {})[String(t.id)] !== undefined);
+            if (hasS1 && hasS2) {
                 s.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
+            } else {
+                s.marks = Math.round((s1Total + s2Total) * 10) / 10;
             }
+          }
           }
         });
 
@@ -791,22 +799,41 @@ export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) =>
                 approvedAt: new Date().toISOString(),
               } as Subject & Record<string, any>;
 
-              // Recalculate marks from assessments if applicable
+              // Recalculate marks from assessments if applicable to ensure synchronization
               if (
                 updatedSub.assessments &&
                 Array.isArray(assessmentTypes) &&
                 assessmentTypes.length > 0
               ) {
-                let calculatedTotal = 0;
+                let s1Total = 0;
+                let s2Total = 0;
+                let totalMarks = 0;
+
                 for (const type of assessmentTypes) {
                   const val = (updatedSub.assessments || {})[String(type.id)];
                   if (val !== undefined && val !== null) {
-                    calculatedTotal +=
-                      (Number(val) / (Number(type.maxMarks) || 100)) *
-                      Number(type.weight);
+                    const contribution = (Number(val) / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                    totalMarks += contribution;
+                    if (type.semester === "1") s1Total += contribution;
+                    else if (type.semester === "2") s2Total += contribution;
+                    else {
+                      s1Total += contribution;
+                      s2Total += contribution;
+                    }
                   }
                 }
-                updatedSub.marks = Math.round(calculatedTotal * 10) / 10;
+                
+                updatedSub.sem1 = Math.round(s1Total * 10) / 10;
+                updatedSub.sem2 = Math.round(s2Total * 10) / 10;
+                
+                const hasS1 = assessmentTypes.some(t => t.semester === "1" && (updatedSub.assessments || {})[String(t.id)] !== undefined);
+                const hasS2 = assessmentTypes.some(t => t.semester === "2" && (updatedSub.assessments || {})[String(t.id)] !== undefined);
+                
+                if (hasS1 && hasS2) {
+                  updatedSub.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
+                } else {
+                  updatedSub.marks = Math.round((s1Total + s2Total) * 10) / 10;
+                }
               }
               subMap.set(s.name, updatedSub);
             });
@@ -820,16 +847,35 @@ export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) =>
                 Array.isArray(assessmentTypes) &&
                 assessmentTypes.length > 0
               ) {
-                let calculatedTotal = 0;
+                let s1Total = 0;
+                let s2Total = 0;
+                let totalMarks = 0;
+
                 for (const type of assessmentTypes) {
                   const val = (subj.assessments || {})[String(type.id)];
                   if (val !== undefined && val !== null) {
-                    calculatedTotal +=
-                      (Number(val) / (Number(type.maxMarks) || 100)) *
-                      Number(type.weight);
+                    const contribution = (Number(val) / (Number(type.maxMarks) || 100)) * Number(type.weight);
+                    totalMarks += contribution;
+                    if (type.semester === "1") s1Total += contribution;
+                    else if (type.semester === "2") s2Total += contribution;
+                    else {
+                      s1Total += contribution;
+                      s2Total += contribution;
+                    }
                   }
                 }
-                subj.marks = Math.round(calculatedTotal * 10) / 10;
+                
+                subj.sem1 = Math.round(s1Total * 10) / 10;
+                subj.sem2 = Math.round(s2Total * 10) / 10;
+                
+                const hasS1 = assessmentTypes.some(t => t.semester === "1" && (subj.assessments || {})[String(t.id)] !== undefined);
+                const hasS2 = assessmentTypes.some(t => t.semester === "2" && (subj.assessments || {})[String(t.id)] !== undefined);
+                
+                if (hasS1 && hasS2) {
+                  subj.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
+                } else {
+                  subj.marks = Math.round((s1Total + s2Total) * 10) / 10;
+                }
               }
               subj.status = "published";
               subj.approvedBy = actorId;

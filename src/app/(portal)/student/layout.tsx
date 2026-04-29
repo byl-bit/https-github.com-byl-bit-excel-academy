@@ -15,6 +15,7 @@ import {
   X,
   GraduationCap,
   Bell,
+  Mail,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -76,6 +77,7 @@ export default function StudentLayout({
     { href: "/student/announcements", label: "News", icon: Calendar },
     { href: "/student/library", label: "Library", icon: BookOpen },
     { href: "/student/notifications", label: "Notifications", icon: Bell },
+    { href: "/contact", label: "Contact Us", icon: Mail },
     { href: "/student/profile", label: "My Profile", icon: User },
   ];
 

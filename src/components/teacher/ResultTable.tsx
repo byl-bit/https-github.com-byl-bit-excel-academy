@@ -188,78 +188,68 @@ export function ResultTable({
   const calculateRowStats = (studentId: string) => {
     const marks = tableMarks[studentId] || {};
     
-    // Always calculate Annual Stats for synchronization
-    const annualSubjectMarks = subjects.map((sub) => {
+    // Calculate Subject-wise S1, S2 and Annual marks
+    const processedSubjects = subjects.map((sub) => {
+      let s1 = 0;
+      let s2 = 0;
+      let hasS1 = false;
+      let hasS2 = false;
+
       if (isDynamic) {
-        let subTotal = 0;
-        // Include ALL assessment types for Annual calculation
         gradeAssessmentTypes.forEach((type: AssessmentType) => {
           const val = marks[`${sub}__${type.id}`];
           if (val !== undefined && typeof val === "number") {
             const contribution = (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
-            subTotal += contribution;
+            if (type.semester === "1") {
+              s1 += contribution;
+              hasS1 = true;
+            } else if (type.semester === "2") {
+              s2 += contribution;
+              hasS2 = true;
+            } else {
+              // If no semester specified, contribute to both or annual directly? 
+              // Typically these are annual assessments. We'll add them to both for now to ensure visibility.
+              s1 += contribution;
+              s2 += contribution;
+              hasS1 = true;
+              hasS2 = true;
+            }
           }
         });
-        
-        // Handle annual divisor logic
-        const hasS1 = gradeAssessmentTypes.some(t => t.semester === "1" && marks[`${sub}__${t.id}`] !== undefined);
-        const hasS2 = gradeAssessmentTypes.some(t => t.semester === "2" && marks[`${sub}__${t.id}`] !== undefined);
-        const divisor = (hasS1 && hasS2) ? 2 : 1;
-        
-        return Math.round((subTotal / divisor) * 10) / 10;
       } else {
-        const s1 = marks[`${sub}_sem1`] || 0;
-        const s2 = marks[`${sub}_sem2`] || 0;
-        const sAvg = (s1 + s2) / (s1 > 0 && s2 > 0 ? 2 : 1);
-        return Math.round(sAvg * 10) / 10;
+        s1 = marks[`${sub}_sem1`] || 0;
+        s2 = marks[`${sub}_sem2`] || 0;
+        hasS1 = marks[`${sub}_sem1`] !== undefined;
+        hasS2 = marks[`${sub}_sem2`] !== undefined;
       }
+
+      const divisor = (hasS1 && hasS2) ? 2 : 1;
+      const annualMarks = Math.round(((s1 + s2) / divisor) * 10) / 10;
+      
+      return {
+        name: sub,
+        s1: Math.round(s1 * 10) / 10,
+        s2: Math.round(s2 * 10) / 10,
+        annualMarks,
+        hasS1,
+        hasS2
+      };
     });
 
-    const annualTotal = excelSum(annualSubjectMarks);
+    const annualTotal = processedSubjects.reduce((sum, s) => sum + s.annualMarks, 0);
     const annualAverage = subjects.length > 0 ? annualTotal / subjects.length : 0;
 
-    // Calculate Semester-Specific stats for the UI Aggregate column
-    const semesterSubjectMarks = subjects.map((sub) => {
-      if (isDynamic) {
-        let subTotal = 0;
-        const targetTypes = gradeAssessmentTypes.filter((type: AssessmentType) => {
-          if (activeSemester === "average") return true; 
-          if (!type.semester || type.semester === "all") return true;
-          return type.semester === activeSemester;
-        });
-
-        targetTypes.forEach((type: AssessmentType) => {
-          const val = marks[`${sub}__${type.id}`];
-          if (val !== undefined && typeof val === "number") {
-            const contribution = (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
-            subTotal += contribution;
-          }
-        });
-        
-        if (activeSemester === "average") {
-            const hasS1 = gradeAssessmentTypes.some(t => t.semester === "1" && marks[`${sub}__${t.id}`] !== undefined);
-            const hasS2 = gradeAssessmentTypes.some(t => t.semester === "2" && marks[`${sub}__${t.id}`] !== undefined);
-            const divisor = (hasS1 && hasS2) ? 2 : 1;
-            subTotal = subTotal / divisor;
-        }
-
-        return Math.round(subTotal * 10) / 10;
-      } else {
-        const s1 = marks[`${sub}_sem1`] || 0;
-        const s2 = marks[`${sub}_sem2`] || 0;
-        
-        if (activeSemester === "1") return s1;
-        if (activeSemester === "2") return s2;
-        
-        const sAvg = (s1 + s2) / (s1 > 0 && s2 > 0 ? 2 : 1);
-        return Math.round(sAvg * 10) / 10;
-      }
+    // Current view stats (based on activeSemester)
+    const currentSubjectMarks = processedSubjects.map(s => {
+      if (activeSemester === "1") return s.s1;
+      if (activeSemester === "2") return s.s2;
+      return s.annualMarks;
     });
 
-    const total = excelSum(semesterSubjectMarks);
+    const total = currentSubjectMarks.reduce((sum, m) => sum + m, 0);
     const average = subjects.length > 0 ? total / subjects.length : 0;
 
-    return { total, average, annualTotal, annualAverage, subjectMarks: semesterSubjectMarks };
+    return { total, average, annualTotal, annualAverage, subjectMarks: currentSubjectMarks, processedSubjects };
   };
 
   const isHomeRoom =
@@ -268,10 +258,7 @@ export function ResultTable({
 
   const handleSubmitRow = async (
     studentId: string,
-    level:
-      | "subject"
-      | "roster"
-      | "subject-pending" = "subject",
+    level: "subject" | "roster" | "subject-pending" = "subject",
   ) => {
     try {
       const student = students.find((s) => s.id === studentId);
@@ -280,59 +267,7 @@ export function ResultTable({
       const marks = tableMarks[studentId] || {};
       setSubmitStatus((prev) => ({ ...prev, [studentId]: "saving" }));
 
-      const { total, average, annualTotal, annualAverage } = calculateRowStats(studentId);
-      // Professional precision handling: round to 1 decimal to match UI display
-      const totalRounded = Math.round(total * 10) / 10;
-      const avgRounded = Math.round(average * 10) / 10;
-      const isPass = avgRounded >= 35;
-
-      const subjectsArr = subjects.map((s) => {
-        if (isDynamic) {
-          const assessments: Record<string, number> = {};
-          // Calculate subTotal for only the ACTIVE semester
-          let activeSubTotal = 0;
-          gradeAssessmentTypes.forEach((type: AssessmentType) => {
-            const val = marks[`${s}__${type.id}`];
-            if (val !== undefined && typeof val === "number") {
-                // Ensure we only sum assessments for the current active semester
-                if (type.semester === activeSemester || !type.semester || type.semester === "all") {
-                    activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
-                }
-                // ALWAYS include the assessment in the payload so it persists in DB
-                assessments[type.id] = val;
-            }
-          });
-
-          const targetStudent = classResults.find(r => {
-            const rr = r as unknown as Record<string, unknown>;
-            const rid = String(rr['student_id'] ?? rr['studentId'] ?? '');
-            const sStudentId = String(student.studentId || student.student_id || studentId);
-            return rid === sStudentId || rid === studentId || String(rr['id']) === studentId;
-          }) as any;
-          
-          let s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
-          let s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
-          
-          // Build the subject object for submission - synchronized with all currently entered data
-          const submissionSubject: Subject = {
-            name: s,
-            assessments, // This now contains all assessments from the state, not just active sem
-            sem1: Math.round(s1 * 10) / 10,
-            sem2: Math.round(s2 * 10) / 10,
-          };
-
-          // Final annual marks is the average based on available semester totals
-          const finalMarks = (Number(s1) + Number(s2)) / (s1 > 0 && s2 > 0 ? 2 : 1);
-          submissionSubject.marks = Math.round(finalMarks * 10) / 10;
-
-          return submissionSubject;
-        } else {
-          const s1 = marks[`${s}_sem1`] || 0;
-          const s2 = marks[`${s}_sem2`] || 0;
-          const sAvg = Math.round(((s1 + s2) / 2) * 10) / 10;
-          return { name: s, sem1: s1, sem2: s2, marks: sAvg };
-        }
-      });
+      const { processedSubjects, annualAverage, annualTotal } = calculateRowStats(studentId);
 
       const resultObj = {
         studentId: student.studentId || student.student_id || studentId,
@@ -341,13 +276,23 @@ export function ResultTable({
         section: student.section,
         gender: normalizeGender(student.gender ?? student.sex ?? null) || null,
         rollNumber: student.rollNumber,
-        subjects: subjectsArr,
+        subjects: processedSubjects.map(ps => ({
+          name: ps.name,
+          marks: ps.annualMarks,
+          sem1: ps.s1,
+          sem2: ps.s2,
+          assessments: Object.fromEntries(
+            gradeAssessmentTypes
+              .filter(t => marks[`${ps.name}__${t.id}`] !== undefined)
+              .map(t => [t.id, marks[`${ps.name}__${t.id}`]])
+          )
+        })),
         total: Math.round(annualTotal * 10) / 10,
         average: Math.round(annualAverage * 10) / 10,
         rank: 0,
-        conduct: "Satisfactory",
-        result: (Math.round(annualAverage * 10) / 10) >= 35 ? "PASS" : "FAIL",
-        promotedOrDetained: (Math.round(annualAverage * 10) / 10) >= 35 ? "PROMOTED" : "DETAINED",
+        conduct: calculateConduct(annualAverage),
+        result: calculatePassStatus(annualAverage),
+        promotedOrDetained: calculatePromotionStatus(calculatePassStatus(annualAverage) === "PASS"),
         submissionLevel: level,
         actorId: user?.id || user?.teacherId,
       };
@@ -423,59 +368,7 @@ export function ResultTable({
         if (Object.keys(marks).length === 0) return;
 
         affectedIds.push(sid);
-        const { total, average, annualTotal, annualAverage } = calculateRowStats(sid);
-
-        // Preservation of decimal precision (1 decimal place)
-        const totalRounded = Math.round(total * 10) / 10;
-        const avgRounded = Math.round(average * 10) / 10;
-        const isPass = avgRounded >= 35;
-
-        const subjectsArr = subjects.map((s) => {
-          if (isDynamic) {
-            const assessments: Record<string, number> = {};
-            // Calculate subTotal for only the ACTIVE semester
-            let activeSubTotal = 0;
-            gradeAssessmentTypes.forEach((type: AssessmentType) => {
-              const val = marks[`${s}__${type.id}`];
-              if (val !== undefined && typeof val === "number") {
-                // Ensure we only sum assessments for the current active semester
-                if (type.semester === activeSemester || !type.semester || type.semester === "all") {
-                    activeSubTotal += (val / (Number(type.maxMarks) || 100)) * Number(type.weight);
-                    // Populate assessments ONLY if they belong to this semester context
-                    assessments[type.id] = val;
-                }
-              }
-            });
-
-            const targetStudent = classResults.find(r => {
-               const rr = r as unknown as Record<string, unknown>;
-               const rid = String(rr['student_id'] ?? rr['studentId'] ?? '');
-               const sStudentId = String(student.studentId || student.student_id || sid);
-               return rid === sStudentId || rid === sid || String(rr['id']) === sid;
-             }) as any;
-            
-            let s1 = marks[`${s}_sem1`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem1) || 0;
-            let s2 = marks[`${s}_sem2`] || (targetStudent?.subjects?.find((ss: any) => ss.name === s)?.sem2) || 0;
-
-            // Build the subject object for submission - synchronized with all currently entered data
-            const submissionSubject: Subject = {
-              name: s,
-              assessments,
-              sem1: Math.round(s1 * 10) / 10,
-              sem2: Math.round(s2 * 10) / 10,
-            };
-
-            const finalMarks = (Number(s1) + Number(s2)) / (s1 > 0 && s2 > 0 ? 2 : 1);
-            submissionSubject.marks = Math.round(finalMarks * 10) / 10;
-
-            return submissionSubject;
-          } else {
-            const s1 = marks[`${s}_sem1`] || 0;
-            const s2 = marks[`${s}_sem2`] || 0;
-            const sAvg = Math.round(((s1 + s2) / 2) * 10) / 10;
-            return { name: s, sem1: s1, sem2: s2, marks: sAvg };
-          }
-        });
+        const { processedSubjects, annualAverage, annualTotal } = calculateRowStats(sid);
 
         batch[sid] = {
           studentId: student.studentId || student.student_id || sid,
@@ -484,9 +377,19 @@ export function ResultTable({
           section: student.section,
           gender: normalizeGender(student.gender ?? student.sex ?? null) || null,
           rollNumber: student.rollNumber || null,
-          subjects: subjectsArr,
-          total: Math.round(annualTotal * 10) / 10, // Use annual total for synchronization
-          average: Math.round(annualAverage * 10) / 10, // Use annual average for synchronization
+          subjects: processedSubjects.map(ps => ({
+            name: ps.name,
+            marks: ps.annualMarks,
+            sem1: ps.s1,
+            sem2: ps.s2,
+            assessments: Object.fromEntries(
+              gradeAssessmentTypes
+                .filter(t => marks[`${ps.name}__${t.id}`] !== undefined)
+                .map(t => [t.id, marks[`${ps.name}__${t.id}`]])
+            )
+          })),
+          total: Math.round(annualTotal * 10) / 10,
+          average: Math.round(annualAverage * 10) / 10,
           rank: 0,
           conduct: calculateConduct(annualAverage),
           result: calculatePassStatus(annualAverage),
