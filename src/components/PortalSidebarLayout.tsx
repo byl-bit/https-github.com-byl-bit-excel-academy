@@ -405,11 +405,7 @@ export function PortalSidebarLayout({
             {children}
           </div>
         </div>
-        {role !== "admin" && (
-          <div className="lg:hidden">
-            <Footer />
-          </div>
-        )}
+        <Footer />
       </main>
     </div>
   );
