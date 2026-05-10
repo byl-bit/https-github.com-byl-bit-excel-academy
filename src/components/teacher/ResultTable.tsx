@@ -692,6 +692,7 @@ export function ResultTable({
       isLocalEditing,
       allowEditSubmitted,
       isGrade12,
+      adminNote: (existingResult as any)?.admin_note || (existingResult as any)?.adminNote || null,
     };
   };
   return (
@@ -986,6 +987,12 @@ export function ResultTable({
                               <Eye className="h-3 w-3" />
                               View profile
                             </button>
+                            {getRowInfo(student).adminNote && (
+                              <div className="mt-2 p-2 bg-amber-50 border border-amber-100 rounded-lg text-[9px] font-bold text-amber-700 animate-pulse">
+                                <AlertCircle className="h-3 w-3 inline mr-1" />
+                                Admin Note: {getRowInfo(student).adminNote}
+                              </div>
+                            )}
                           </div>
                         </td>
 

@@ -310,7 +310,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleApprovePendingResult = async (key: string, name: string) => {
+  const handleApprovePendingResult = async (key: string, name: string, note?: string) => {
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -320,7 +320,10 @@ export default function AdminPage() {
       const res = await fetch("/api/results", {
         method: "PUT",
         headers,
-        body: JSON.stringify({ approve: [key] }),
+        body: JSON.stringify({ 
+          approve: [key],
+          notes: note ? { [key]: note } : undefined
+        }),
       });
       if (res.ok) {
         logActivity({
@@ -393,7 +396,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleRejectPendingResult = async (key: string, name: string) => {
+  const handleRejectPendingResult = async (key: string, name: string, note?: string) => {
     if (!confirm(`Reject results for ${name}?`)) return;
     try {
       const headers: Record<string, string> = {
@@ -404,7 +407,10 @@ export default function AdminPage() {
       const res = await fetch("/api/results", {
         method: "PUT",
         headers,
-        body: JSON.stringify({ reject: [key] }),
+        body: JSON.stringify({ 
+          reject: [key],
+          notes: note ? { [key]: note } : undefined
+        }),
       });
       if (res.ok) {
         logActivity({

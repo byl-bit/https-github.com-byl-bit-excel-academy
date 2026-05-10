@@ -240,6 +240,21 @@ export default function StudentResultsPage() {
               );
             })}
           </div>
+
+          {/* Admin Feedback */}
+          {result.adminNote && (
+            <div className="bg-amber-50/50 rounded-3xl border border-amber-100 p-6 sm:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <AlertCircle className="h-5 w-5" />
+                </div>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Feedback from Administration</h3>
+              </div>
+              <p className="text-slate-700 font-bold text-sm sm:text-base leading-relaxed italic">
+                "{result.adminNote}"
+              </p>
+            </div>
+          )}
         </div>
       ) : null}
 

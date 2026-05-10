@@ -176,6 +176,7 @@ export const GET = withApiHandler(async (request, { db, actorRole, actorId }) =>
             total: Number(entry.total || 0),
             average: Number(entry.average || 0),
             promotedOrDetained: entry.promoted_or_detained || "",
+            adminNote: entry.admin_note || null,
           };
         } else {
           const existingSubjects = found[studentIdKey].subjects || [];
@@ -509,6 +510,7 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
           submitted_by: actorId,
           submitted_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          admin_note: resEntry.adminNote || resEntry.admin_note || null,
         });
         processedStudentIds.add(actualStudentId);
       }
@@ -728,6 +730,8 @@ export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) =>
     if (body.approveSubject && body.approveSubject.studentKey)
       targetIds.add(body.approveSubject.studentKey);
 
+    const notes = body.notes || {};
+
     const targetIdsArray = Array.from(targetIds);
 
     if (targetIdsArray.length === 0) {
@@ -910,6 +914,7 @@ export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) =>
             result: entry.result || null,
             promoted_or_detained:
               entry.promoted_or_detained || entry.promotedOrDetained || null,
+            admin_note: notes[key] || entry.admin_note || entry.adminNote || null,
             status: "published",
             submission_level:
               entry.submission_level || entry.submissionLevel || null,
@@ -1061,7 +1066,11 @@ export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) =>
       // Move back to draft status in pending table
       await db
         .from("results_pending")
-        .update({ status: "draft", updated_at: new Date().toISOString() })
+        .update({ 
+          status: "draft", 
+          updated_at: new Date().toISOString(),
+          admin_note: body.reject.length === 1 ? (notes[body.reject[0]] || null) : null
+        })
         .in("student_id", body.reject);
 
       // ALSO delete from the public results table so it disappears from the student portal

@@ -40,10 +40,10 @@ export interface ResultsManagerProps {
   subjects: string[];
   settings?: Record<string, unknown>;
   onPublish: (result: Record<string, unknown>) => void;
-  onApprovePending: (key: string, name: string) => void;
+  onApprovePending: (key: string, name: string, note?: string) => void;
   onApproveSubject: (studentKey: string, subjectName: string) => void;
   onApproveMany: (keys: string[], teacherName: string) => void;
-  onRejectPending: (key: string, name: string) => void;
+  onRejectPending: (key: string, name: string, note?: string) => void;
   onDeletePublished: (id: string) => void;
   onRefresh?: () => void;
   onUnlock?: (id: string) => void;

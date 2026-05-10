@@ -49,6 +49,8 @@ export interface PendingResult {
   updated_at?: string;
   id?: string;
   gender?: string | null;
+  admin_note?: string | null;
+  adminNote?: string | null;
 }
 
 export interface PublishedResult extends PendingResult {
