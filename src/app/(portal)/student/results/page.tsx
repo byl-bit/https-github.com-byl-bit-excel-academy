@@ -74,6 +74,7 @@ export default function StudentResultsPage() {
           ...res,
           subjects: approvedSubjects,
           average: annualAvg,
+          adminNote: (res as any).adminNote || (res as any).admin_note || null,
         } as unknown as StudentResult;
         setResult(normalized);
         setError("");

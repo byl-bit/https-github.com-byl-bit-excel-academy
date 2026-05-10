@@ -68,6 +68,8 @@ export interface StudentResult {
   remarks?: string; // tailored remarks
   rollNumber?: string;
   gender?: string;
+  adminNote?: string | null;
+  admin_note?: string | null;
 }
 
 export interface Announcement {
