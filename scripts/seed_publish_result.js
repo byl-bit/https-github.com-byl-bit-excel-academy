@@ -24,7 +24,11 @@ async function run() {
     console.log('Creating test student...');
     let res = await fetch(`${BASE}/api/users`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-actor-role': 'admin',
+        'x-actor-id': 'admin-001'
+      },
       body: JSON.stringify(student)
     });
     if (!res.ok) {

@@ -457,6 +457,14 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
             } else {
               s.marks = Math.round((s1Total + s2Total) * 10) / 10;
             }
+          } else {
+            // Non-dynamic (standard) grading robust recalculation
+            const s1 = typeof s.sem1 === "number" && !isNaN(s.sem1) ? s.sem1 : 0;
+            const s2 = typeof s.sem2 === "number" && !isNaN(s.sem2) ? s.sem2 : 0;
+            const hasS1 = typeof s.sem1 === "number" && !isNaN(s.sem1);
+            const hasS2 = typeof s.sem2 === "number" && !isNaN(s.sem2);
+            const divisor = (hasS1 && hasS2) ? 2 : 1;
+            s.marks = Math.round(((s1 + s2) / divisor) * 10) / 10;
           }
         });
 

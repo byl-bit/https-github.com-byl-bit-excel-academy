@@ -169,8 +169,12 @@ export function ResultTable({
             marksMap[studentId] = {};
             const rSubjects = r["subjects"] as Subject[] | undefined;
             (rSubjects || []).forEach((sub: Subject) => {
-              marksMap[studentId][`${sub.name}_sem1`] = sub.sem1 || 0;
-              marksMap[studentId][`${sub.name}_sem2`] = sub.sem2 || 0;
+              if (sub.sem1 !== undefined && sub.sem1 !== null) {
+                marksMap[studentId][`${sub.name}_sem1`] = sub.sem1;
+              }
+              if (sub.sem2 !== undefined && sub.sem2 !== null) {
+                marksMap[studentId][`${sub.name}_sem2`] = sub.sem2;
+              }
               if (isDynamic && sub.assessments) {
                 Object.keys(sub.assessments).forEach((typeId) => {
                   marksMap[studentId][`${sub.name}__${typeId}`] = sub
@@ -217,10 +221,12 @@ export function ResultTable({
           }
         });
       } else {
-        s1 = marks[`${sub}_sem1`] || 0;
-        s2 = marks[`${sub}_sem2`] || 0;
-        hasS1 = marks[`${sub}_sem1`] !== undefined;
-        hasS2 = marks[`${sub}_sem2`] !== undefined;
+        const valS1 = marks[`${sub}_sem1`];
+        const valS2 = marks[`${sub}_sem2`];
+        hasS1 = valS1 !== undefined && valS1 !== null;
+        hasS2 = valS2 !== undefined && valS2 !== null;
+        s1 = hasS1 ? valS1 : 0;
+        s2 = hasS2 ? valS2 : 0;
       }
 
       const divisor = (hasS1 && hasS2) ? 2 : 1;
@@ -522,18 +528,13 @@ export function ResultTable({
       const marks = tableMarks[sid] || {};
       const { total, average } = calculateRowStats(sid);
       
-      const subjectsArr = subjects.map(s => {
-        const s1 = marks[`${s}_sem1`];
-        const s2 = marks[`${s}_sem2`];
-        const annual = marks[`${s}_marks`] || ((Number(s1||0) + Number(s2||0))/2);
-        
-        return {
-          name: s,
-          sem1: s1,
-          sem2: s2,
-          marks: annual
-        };
-      });
+      const { processedSubjects } = calculateRowStats(sid);
+      const subjectsArr = processedSubjects.map(ps => ({
+        name: ps.name,
+        sem1: ps.hasS1 ? ps.s1 : "",
+        sem2: ps.hasS2 ? ps.s2 : "",
+        marks: ps.annualMarks
+      }));
 
       return {
         ...student,
