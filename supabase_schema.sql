@@ -87,11 +87,17 @@ CREATE TABLE results_pending (
     result TEXT,
     promoted_or_detained TEXT,
     status TEXT DEFAULT 'pending',
+    admin_note TEXT,
     submission_level TEXT,
     submitted_by TEXT,
     submitted_at TIMESTAMP DEFAULT NOW(),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
+
+
+
+
+
 );
 
 CREATE INDEX idx_results_pending_student_id ON results_pending(student_id);

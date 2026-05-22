@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS results_pending (
     submission_level TEXT,
     submitted_by TEXT,
     submitted_at TIMESTAMPTZ DEFAULT NOW(),
+    admin_note TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
