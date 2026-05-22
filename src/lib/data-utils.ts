@@ -79,3 +79,13 @@ export function calculateSemesterAverage(subjects: any[], semester: 1 | 2): numb
   
   return total / subjects.length;
 }
+
+/**
+ * Check if a string is a valid UUID.
+ */
+export function isValidUUID(id: unknown): boolean {
+  if (typeof id !== "string") return false;
+  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  return uuidRegex.test(id);
+}
+

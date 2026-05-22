@@ -6,7 +6,7 @@ import {
   calculatePromotionStatus,
   calculateConduct,
 } from "@/lib/utils/gradingLogic";
-import { normalizeGender } from "@/lib/data-utils";
+import { normalizeGender, isValidUUID } from "@/lib/data-utils";
 import type {
   PendingResult,
   PublishedResult,
@@ -60,11 +60,14 @@ export const GET = withApiHandler(async (request, { db, actorRole, actorId }) =>
       if (!actorId) return errorResponse("Teacher ID required", 400);
 
       // 1. Identify Teacher
-      const { data: teacher } = await db
+      const teacherQuery = db
         .from("users")
-        .select("id, teacher_id, grade, section, name")
-        .or(`id.eq.${actorId},teacher_id.eq.${actorId}`)
-        .single();
+        .select("id, teacher_id, grade, section, name");
+      const { data: teacher } = await (
+        isValidUUID(actorId)
+          ? teacherQuery.or(`id.eq.${actorId},teacher_id.eq.${actorId}`)
+          : teacherQuery.eq("teacher_id", actorId)
+      ).single();
 
       if (!teacher) return successResponse({ published: {}, pending: {} });
 
@@ -134,11 +137,14 @@ export const GET = withApiHandler(async (request, { db, actorRole, actorId }) =>
     if (actorRole === "student") {
       if (!actorId) return errorResponse("Student ID required", 400);
 
-      const { data: student } = await db
+      const studentQuery = db
         .from("users")
-        .select("id, student_id, name")
-        .or(`id.eq.${actorId},student_id.eq.${actorId}`)
-        .single();
+        .select("id, student_id, name");
+      const { data: student } = await (
+        isValidUUID(actorId)
+          ? studentQuery.or(`id.eq.${actorId},student_id.eq.${actorId}`)
+          : studentQuery.eq("student_id", actorId)
+      ).single();
 
       if (!student) return successResponse({});
 
@@ -260,12 +266,14 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
 
     // --- TEACHER SUBMISSION FLOW ---
     if (actorRole === "teacher") {
-      // A. Verify Teacher
-      const { data: teacher } = await db
+      const teacherQuery = db
         .from("users")
-        .select("id, teacher_id, grade, section, name")
-        .or(`id.eq.${actorId},teacher_id.eq.${actorId}`)
-        .single();
+        .select("id, teacher_id, grade, section, name");
+      const { data: teacher } = await (
+        isValidUUID(actorId)
+          ? teacherQuery.or(`id.eq.${actorId},teacher_id.eq.${actorId}`)
+          : teacherQuery.eq("teacher_id", actorId)
+      ).single();
 
       if (!teacher)
         return errorResponse("Unauthorized: teacher profile not found", 403);
@@ -280,13 +288,23 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
       // We fetch users matching the target IDs to resolve names/grades
       // Using 'or' to match either id or student_id column is a bit complex with a large list,
       // but for a class submission (~50 students), it's fine.
-      // Optimized: Fetch users where student_id IN list OR id IN list
-      const { data: relevantUsers } = await db
+      const uuids = targetIdsArray.filter(isValidUUID);
+      const nonUuids = targetIdsArray.filter((id) => !isValidUUID(id));
+      let relevantUsersQuery = db
         .from("users")
-        .select("id, student_id, name, grade, section, gender, roll_number")
-        .or(
-          `student_id.in.(${targetIdsArray.join(",")}),id.in.(${targetIdsArray.join(",")})`,
-        );
+        .select("id, student_id, name, grade, section, gender, roll_number");
+      const clauses = [];
+      if (nonUuids.length > 0) {
+        clauses.push(`student_id.in.(${nonUuids.join(",")})`);
+      }
+      if (uuids.length > 0) {
+        clauses.push(`id.in.(${uuids.join(",")})`);
+      }
+      const { data: relevantUsers } = await (
+        clauses.length > 0
+          ? relevantUsersQuery.or(clauses.join(","))
+          : relevantUsersQuery.eq("id", "00000000-0000-0000-0000-000000000000")
+      );
 
       const users = relevantUsers || [];
 
@@ -584,12 +602,23 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
 
     // --- ADMIN PUBLICATION FLOW ---
     // ... logic remains same ...
-    const { data: relevantUsers } = await db
+    const uuids = targetIdsArray.filter(isValidUUID);
+    const nonUuids = targetIdsArray.filter((id) => !isValidUUID(id));
+    let relevantUsersQuery = db
       .from("users")
-      .select("id, student_id, name, grade, section, gender, roll_number")
-      .or(
-        `student_id.in.(${targetIdsArray.join(",")}),id.in.(${targetIdsArray.join(",")})`,
-      );
+      .select("id, student_id, name, grade, section, gender, roll_number");
+    const clauses = [];
+    if (nonUuids.length > 0) {
+      clauses.push(`student_id.in.(${nonUuids.join(",")})`);
+    }
+    if (uuids.length > 0) {
+      clauses.push(`id.in.(${uuids.join(",")})`);
+    }
+    const { data: relevantUsers } = await (
+      clauses.length > 0
+        ? relevantUsersQuery.or(clauses.join(","))
+        : relevantUsersQuery.eq("id", "00000000-0000-0000-0000-000000000000")
+    );
 
     const users = relevantUsers || [];
 
@@ -922,7 +951,6 @@ export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) =>
             result: entry.result || null,
             promoted_or_detained:
               entry.promoted_or_detained || entry.promotedOrDetained || null,
-            admin_note: notes[key] || entry.admin_note || entry.adminNote || null,
             status: "published",
             submission_level:
               entry.submission_level || entry.submissionLevel || null,
@@ -1044,11 +1072,14 @@ export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) =>
 
           // Notify student of individual subject approval
           try {
-            const { data: studentUser } = await db
+            const studentUserQuery = db
               .from("users")
-              .select("id, name")
-              .or(`student_id.eq.${studentKey},id.eq.${studentKey}`)
-              .single();
+              .select("id, name");
+            const { data: studentUser } = await (
+              isValidUUID(studentKey)
+                ? studentUserQuery.or(`student_id.eq.${studentKey},id.eq.${studentKey}`)
+                : studentUserQuery.eq("student_id", studentKey)
+            ).single();
 
             if (studentUser) {
               await db.from("notifications").insert({

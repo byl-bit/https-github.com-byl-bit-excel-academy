@@ -1,6 +1,7 @@
 import { withApiHandler, successResponse, errorResponse } from "@/lib/api-handler";
 import bcrypt from "bcryptjs";
 import { logActivity } from "@/lib/utils/activityLog";
+import { isValidUUID } from "@/lib/data-utils";
 
 export const POST = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
@@ -17,10 +18,15 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
 
     const hashed = await bcrypt.hash(String(newPassword), 10);
 
-    const { data, error: updateError } = await db
+    const updateQuery = db
       .from("users")
-      .update({ password: hashed, updated_at: new Date().toISOString() })
-      .or(`id.eq.${identifier},student_id.eq.${identifier}`)
+      .update({ password: hashed, updated_at: new Date().toISOString() });
+
+    const { data, error: updateError } = await (
+      isValidUUID(identifier)
+        ? updateQuery.or(`id.eq.${identifier},student_id.eq.${identifier}`)
+        : updateQuery.eq("student_id", identifier)
+    )
       .select()
       .single();
 
