@@ -22,11 +22,22 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
       .from("users")
       .update({ password: hashed, updated_at: new Date().toISOString() });
 
-    const { data, error: updateError } = await (
-      isValidUUID(identifier)
-        ? updateQuery.or(`id.eq.${identifier},student_id.eq.${identifier}`)
-        : updateQuery.eq("student_id", identifier)
-    )
+    let query = updateQuery;
+    if (isValidUUID(identifier)) {
+      query = query.or(`id.eq.${identifier},student_id.eq.${identifier},teacher_id.eq.${identifier},admin_id.eq.${identifier}`);
+    } else {
+      if (identifier.startsWith("ST-")) {
+        query = query.eq("student_id", identifier);
+      } else if (identifier.startsWith("TE-")) {
+        query = query.eq("teacher_id", identifier);
+      } else if (identifier.startsWith("AD-")) {
+        query = query.eq("admin_id", identifier);
+      } else {
+        query = query.or(`student_id.eq.${identifier},teacher_id.eq.${identifier},admin_id.eq.${identifier}`);
+      }
+    }
+
+    const { data, error: updateError } = await query
       .select()
       .single();
 

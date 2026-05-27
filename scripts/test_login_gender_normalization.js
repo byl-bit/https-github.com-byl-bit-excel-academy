@@ -55,10 +55,10 @@ async function run() {
     }
 
     console.log('PASS: login gender normalization test succeeded');
-    process.exit(0);
+    setTimeout(() => process.exit(0), 100);
   } catch (err) {
     console.error('FAIL:', err);
-    process.exit(1);
+    setTimeout(() => process.exit(1), 100);
   }
 }
 

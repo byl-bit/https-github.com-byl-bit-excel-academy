@@ -34,17 +34,17 @@
       console.log('Login response body:', loginData);
       if (loginRes.ok) {
         console.log('Admin reset and login verification SUCCESS');
-        process.exit(0);
+        setTimeout(() => process.exit(0), 100);
       } else {
         console.error('Login verification failed');
-        process.exit(2);
+        setTimeout(() => process.exit(2), 100);
       }
     } else {
       console.error('Reset failed, see response above');
-      process.exit(1);
+      setTimeout(() => process.exit(1), 100);
     }
   } catch (err) {
     console.error('Test script error:', err);
-    process.exit(3);
+    setTimeout(() => process.exit(3), 100);
   }
 })();

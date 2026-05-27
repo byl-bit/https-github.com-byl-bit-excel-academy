@@ -35,10 +35,10 @@ async function run() {
     if (!Array.isArray(found.media) || found.media.length !== 2) throw new Error('Media array not preserved or length mismatch');
     if (found.media[0].type !== 'image' || found.media[1].type !== 'video') throw new Error('Media types not preserved');
     console.log('PASS: announcements media test succeeded');
-    process.exit(0);
+    setTimeout(() => process.exit(0), 100);
   } catch (err) {
     console.error('FAIL:', err);
-    process.exit(1);
+    setTimeout(() => process.exit(1), 100);
   }
 }
 

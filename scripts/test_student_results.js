@@ -34,7 +34,7 @@ async function run() {
       const keys = Object.keys(pub);
       if (keys.length === 0) {
         console.error('FAIL: No published students found in admin view');
-        process.exit(2);
+        setTimeout(() => process.exit(2), 100);
       }
       targetStudent = keys[0];
       console.log(`Using published student ${targetStudent} from admin view`);
@@ -47,7 +47,7 @@ async function run() {
 
     if (!results || Object.keys(results).length === 0) {
       console.error(`FAIL: No published results found for ${targetStudent}`);
-      process.exit(2);
+      setTimeout(() => process.exit(2), 100);
     }
 
     // Ensure subjects contain assessments object (if assessmentTypes exist)
@@ -58,15 +58,15 @@ async function run() {
       const hasAssessments = subjects.some(s => s.assessments && Object.keys(s.assessments).length > 0);
       if (!hasAssessments) {
         console.error('FAIL: Subjects do not contain assessments even though assessmentTypes exist.');
-        process.exit(3);
+        setTimeout(() => process.exit(3), 100);
       }
     }
 
     console.log('PASS: Student results and settings look correct.');
-    process.exit(0);
+    setTimeout(() => process.exit(0), 100);
   } catch (err) {
     console.error('Error:', err);
-    process.exit(1);
+    setTimeout(() => process.exit(1), 100);
   }
 }
 
