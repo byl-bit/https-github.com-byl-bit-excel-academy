@@ -1,8 +1,14 @@
+try {
+  require('dotenv').config({ path: '.env.local' });
+} catch (e) {}
+try {
+  require('dotenv').config();
+} catch (e) {}
 const { createClient } = require('@supabase/supabase-js');
 
 async function run() {
   try {
-    const url = process.env.SUPABASE_URL;
+    const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !key) {
       console.error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set');
@@ -17,6 +23,7 @@ async function run() {
     await supabase.from('results_pending').delete().neq('student_id', '');
     await supabase.from('allocations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('users').delete().neq('id', 'admin-001');
+    await supabase.from('settings').delete().eq('key', 'resultConfig');
 
     // Reset settings to minimal known state
     const defaultAssessments = [

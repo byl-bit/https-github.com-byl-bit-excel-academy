@@ -160,10 +160,10 @@ async function run() {
     }
 
     console.log('PASS: publish-roster integration test succeeded');
-    setTimeout(() => process.exit(0), 100);
+    setTimeout(() => process.exit(0), 500);
   } catch (err) {
     console.error('FAIL:', err);
-    setTimeout(() => process.exit(1), 100);
+    setTimeout(() => process.exit(1), 500);
   }
 }
 
