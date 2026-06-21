@@ -59,6 +59,87 @@ export function SettingsManager({
     Array<{ name: string; url: string }>
   >([]);
 
+  const [resultConfigForm, setResultConfigForm] = useState({
+    semester: "1" as "1" | "2",
+    label: "",
+    maxMarks: 50,
+  });
+
+  const handleAddResultConfig = () => {
+    if (!resultConfigForm.label.trim()) return;
+
+    const currentConfig = settings?.resultConfig || {};
+    const semester = resultConfigForm.semester;
+    const semesterList = [...(currentConfig[semester] || [])];
+
+    const labelLower = resultConfigForm.label.trim().toLowerCase();
+    const exists = semesterList.some((c: any) => c.label.toLowerCase() === labelLower);
+    if (exists) {
+      setAlert({
+        open: true,
+        title: "Duplicate Component",
+        description: `A component with label "${resultConfigForm.label}" already exists for Semester ${semester}.`,
+        variant: "error",
+      });
+      return;
+    }
+
+    const newComponent = {
+      id: `comp-${labelLower.replace(/[^a-z0-9]/g, "")}-${Date.now()}`,
+      label: resultConfigForm.label.trim(),
+      maxMarks: resultConfigForm.maxMarks,
+    };
+
+    const newSemesterList = [...semesterList, newComponent];
+    const newResultConfig = {
+      ...currentConfig,
+      [semester]: newSemesterList,
+    };
+
+    onUpdateSettings("resultConfig", newResultConfig);
+    setResultConfigForm({
+      ...resultConfigForm,
+      label: "",
+      maxMarks: 50,
+    });
+  };
+
+  const handleDeleteResultConfig = (semester: "1" | "2", componentId: string) => {
+    const currentConfig = settings?.resultConfig || {};
+    const semesterList = currentConfig[semester] || [];
+    const compToDelete = semesterList.find((c: any) => c.id === componentId);
+    if (!compToDelete) return;
+
+    setConfirmAction({
+      open: true,
+      title: "Delete Component Config",
+      description: `Are you sure you want to delete component "${compToDelete.label}" for Semester ${semester}? This will affect grading inputs for teachers.`,
+      variant: "destructive",
+      onConfirm: () => {
+        const newSemesterList = semesterList.filter((c: any) => c.id !== componentId);
+        const newResultConfig = {
+          ...currentConfig,
+          [semester]: newSemesterList,
+        };
+        onUpdateSettings("resultConfig", newResultConfig);
+        setConfirmAction((prev) => ({ ...prev, open: false }));
+      },
+    });
+  };
+
+  const handleClearResultConfig = () => {
+    setConfirmAction({
+      open: true,
+      title: "Clear Result Configuration",
+      description: "Are you sure you want to clear ALL result configurations? This will revert the system to standard 100-mark inputs.",
+      variant: "destructive",
+      onConfirm: () => {
+        onUpdateSettings("resultConfig", { "1": [], "2": [] });
+        setConfirmAction((prev) => ({ ...prev, open: false }));
+      },
+    });
+  };
+
   // Dialog States
   const [confirmAction, setConfirmAction] = useState<{
     open: boolean;
@@ -478,6 +559,136 @@ export function SettingsManager({
                 No assessment types defined yet.
               </div>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Result Configuration */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5 text-indigo-600" />
+              Result Configuration
+            </CardTitle>
+            {((settings?.resultConfig?.["1"] || []).length > 0 || (settings?.resultConfig?.["2"] || []).length > 0) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-2 h-8"
+                onClick={handleClearResultConfig}
+              >
+                <Trash2 className="h-3 w-3" />
+                Clear All
+              </Button>
+            )}
+          </div>
+          <CardDescription>
+            Configure Semester 1 & 2 grading sub-components (Total max marks for each must equal 100).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-2 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+            <div className="flex gap-2">
+              <div className="flex-1 space-y-1">
+                <Label className="text-xs font-bold text-slate-600">Semester</Label>
+                <select
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={resultConfigForm.semester}
+                  onChange={(e) => setResultConfigForm({ ...resultConfigForm, semester: e.target.value as "1" | "2" })}
+                >
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                </select>
+              </div>
+              <div className="flex-[2] space-y-1">
+                <Label className="text-xs font-bold text-slate-600">Component Label</Label>
+                <Input
+                  placeholder="e.g. Test 1, Final Exam"
+                  value={resultConfigForm.label}
+                  onChange={(e) =>
+                    setResultConfigForm({
+                      ...resultConfigForm,
+                      label: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="w-24 space-y-1">
+                <Label className="text-xs font-bold text-slate-600">Max Marks</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={resultConfigForm.maxMarks}
+                  onChange={(e) =>
+                    setResultConfigForm({
+                      ...resultConfigForm,
+                      maxMarks: Math.min(100, Math.max(1, Number(e.target.value) || 0)),
+                    })
+                  }
+                />
+              </div>
+              <div className="pt-5 flex items-end">
+                <Button
+                  onClick={handleAddResultConfig}
+                  disabled={!resultConfigForm.label.trim()}
+                  className="h-9"
+                >
+                  Add
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6 pt-2">
+            {(["1", "2"] as const).map((sem) => {
+              const semConfig = settings?.resultConfig?.[sem] || [];
+              const semTotal = semConfig.reduce((acc: number, curr: any) => acc + (Number(curr.maxMarks) || 0), 0);
+              const isInvalid = semTotal !== 100;
+
+              return (
+                <div key={sem} className="space-y-2 border-l-4 border-indigo-100 pl-4 py-1">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      Semester {sem} Configuration
+                    </span>
+                    <span className={cn(
+                      "text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider",
+                      isInvalid ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    )}>
+                      Total Max: {semTotal}/100 {isInvalid ? "⚠️ Must equal 100" : "✅ Valid"}
+                    </span>
+                  </div>
+                  {semConfig.map((comp: any) => (
+                    <div
+                      key={comp.id}
+                      className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border text-sm"
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="font-bold text-slate-700">{comp.label}</span>
+                        <span className="text-xs text-muted-foreground bg-white px-2 py-0.5 rounded-md border font-black">
+                          Max Marks: {comp.maxMarks}
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:bg-red-50"
+                        onClick={() => handleDeleteResultConfig(sem, comp.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {semConfig.length === 0 && (
+                    <div className="text-xs text-slate-400 italic py-1">
+                      No components configured. Falls back to single 100-mark input.
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

@@ -14,6 +14,98 @@ import type {
   AssessmentType,
 } from "@/lib/types";
 
+const recalculateSubjectMarks = (s: Subject, settings: any, assessmentTypes: AssessmentType[]) => {
+  const sem1Config = settings?.resultConfig?.["1"] || [];
+  const sem2Config = settings?.resultConfig?.["2"] || [];
+
+  if (sem1Config.length > 0 || sem2Config.length > 0) {
+    let s1Total = 0;
+    let hasS1 = false;
+    if (sem1Config.length > 0) {
+      let hasAll = true;
+      let sum = 0;
+      sem1Config.forEach((comp: any) => {
+        const val = (s.assessments || {})[String(comp.id)];
+        if (val !== undefined && val !== null) {
+          sum += Number(val);
+        } else {
+          hasAll = false;
+        }
+      });
+      s1Total = sum;
+      hasS1 = hasAll && sem1Config.length > 0;
+    } else {
+      const valS1 = (s.assessments || {})[`${s.name}_sem1`] !== undefined 
+        ? (s.assessments || {})[`${s.name}_sem1`] 
+        : s.sem1;
+      hasS1 = valS1 !== undefined && valS1 !== null;
+      s1Total = hasS1 ? Number(valS1) : 0;
+    }
+
+    let s2Total = 0;
+    let hasS2 = false;
+    if (sem2Config.length > 0) {
+      let hasAll = true;
+      let sum = 0;
+      sem2Config.forEach((comp: any) => {
+        const val = (s.assessments || {})[String(comp.id)];
+        if (val !== undefined && val !== null) {
+          sum += Number(val);
+        } else {
+          hasAll = false;
+        }
+      });
+      s2Total = sum;
+      hasS2 = hasAll && sem2Config.length > 0;
+    } else {
+      const valS2 = (s.assessments || {})[`${s.name}_sem2`] !== undefined 
+        ? (s.assessments || {})[`${s.name}_sem2`] 
+        : s.sem2;
+      hasS2 = valS2 !== undefined && valS2 !== null;
+      s2Total = hasS2 ? Number(valS2) : 0;
+    }
+
+    s.sem1 = Math.round(s1Total * 10) / 10;
+    s.sem2 = Math.round(s2Total * 10) / 10;
+    const divisor = (hasS1 && hasS2) ? 2 : 1;
+    s.marks = Math.round(((s.sem1 + s.sem2) / divisor) * 10) / 10;
+  } else if (s.assessments && Array.isArray(assessmentTypes) && assessmentTypes.length > 0) {
+    let s1Total = 0;
+    let s2Total = 0;
+    let totalMarks = 0;
+
+    for (const type of assessmentTypes) {
+      const val = (s.assessments || {})[String(type.id)];
+      if (val !== undefined && val !== null) {
+        const contribution = (Number(val) / (Number(type.maxMarks) || 100)) * Number(type.weight);
+        totalMarks += contribution;
+        if (type.semester === "1") s1Total += contribution;
+        else if (type.semester === "2") s2Total += contribution;
+        else {
+          s1Total += contribution;
+          s2Total += contribution;
+        }
+      }
+    }
+    s.sem1 = Math.round(s1Total * 10) / 10;
+    s.sem2 = Math.round(s2Total * 10) / 10;
+    const hasS1 = assessmentTypes.some(t => t.semester === "1" && (s.assessments || {})[String(t.id)] !== undefined);
+    const hasS2 = assessmentTypes.some(t => t.semester === "2" && (s.assessments || {})[String(t.id)] !== undefined);
+    if (hasS1 && hasS2) {
+      s.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
+    } else {
+      s.marks = Math.round((s1Total + s2Total) * 10) / 10;
+    }
+  } else {
+    const s1 = typeof s.sem1 === "number" && !isNaN(s.sem1) ? s.sem1 : 0;
+    const s2 = typeof s.sem2 === "number" && !isNaN(s.sem2) ? s.sem2 : 0;
+    const hasS1 = typeof s.sem1 === "number" && !isNaN(s.sem1);
+    const hasS2 = typeof s.sem2 === "number" && !isNaN(s.sem2);
+    const divisor = (hasS1 && hasS2) ? 2 : 1;
+    s.marks = Math.round(((s1 + s2) / divisor) * 10) / 10;
+  }
+};
+
 export const GET = withApiHandler(async (request, { db, actorRole, actorId }) => {
   try {
     const { searchParams } = new URL(request.url);
@@ -441,49 +533,7 @@ export const POST = withApiHandler(async (request, { db, actorRole, actorId }) =
 
         // 3. Recalculate marks from merged assessments
         mergedSubjects.forEach((s: Subject) => {
-          if (s.assessments && assessmentTypes.length > 0) {
-            let totalMarks = 0;
-            let s1Total = 0;
-            let s2Total = 0;
-
-            for (const type of assessmentTypes) {
-              const val = (s.assessments || {})[String(type.id)];
-              if (val !== undefined && val !== null) {
-                const contribution = (Number(val) / (Number(type.maxMarks) || 100)) * Number(type.weight);
-                totalMarks += contribution;
-                if (type.semester === "1") s1Total += contribution;
-                else if (type.semester === "2") s2Total += contribution;
-                else {
-                  // If type has no semester or 'all', it contributes to the annual average directly
-                  // For semester-specific totals, we treat these as present in both
-                  s1Total += contribution;
-                  s2Total += contribution;
-                }
-              }
-            }
-            s.marks = Math.round(totalMarks * 10) / 10;
-            // Set sem1/sem2 if there's data, even if it's 0, to ensure the keys exist
-            s.sem1 = Math.round(s1Total * 10) / 10;
-            s.sem2 = Math.round(s2Total * 10) / 10;
-            
-            // Special annual average handling: if both semesters have data, marks is (S1+S2)/2
-            // Otherwise it's just the available semester
-            const hasS1 = assessmentTypes.some(t => t.semester === "1" && (s.assessments || {})[String(t.id)] !== undefined);
-            const hasS2 = assessmentTypes.some(t => t.semester === "2" && (s.assessments || {})[String(t.id)] !== undefined);
-            if (hasS1 && hasS2) {
-              s.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
-            } else {
-              s.marks = Math.round((s1Total + s2Total) * 10) / 10;
-            }
-          } else {
-            // Non-dynamic (standard) grading robust recalculation
-            const s1 = typeof s.sem1 === "number" && !isNaN(s.sem1) ? s.sem1 : 0;
-            const s2 = typeof s.sem2 === "number" && !isNaN(s.sem2) ? s.sem2 : 0;
-            const hasS1 = typeof s.sem1 === "number" && !isNaN(s.sem1);
-            const hasS2 = typeof s.sem2 === "number" && !isNaN(s.sem2);
-            const divisor = (hasS1 && hasS2) ? 2 : 1;
-            s.marks = Math.round(((s1 + s2) / divisor) * 10) / 10;
-          }
+          recalculateSubjectMarks(s, settings, assessmentTypes);
         });
 
         const totalMarks = mergedSubjects.reduce(
@@ -840,41 +890,7 @@ export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) =>
               } as Subject & Record<string, any>;
 
               // Recalculate marks from assessments if applicable to ensure synchronization
-              if (
-                updatedSub.assessments &&
-                Array.isArray(assessmentTypes) &&
-                assessmentTypes.length > 0
-              ) {
-                let s1Total = 0;
-                let s2Total = 0;
-                let totalMarks = 0;
-
-                for (const type of assessmentTypes) {
-                  const val = (updatedSub.assessments || {})[String(type.id)];
-                  if (val !== undefined && val !== null) {
-                    const contribution = (Number(val) / (Number(type.maxMarks) || 100)) * Number(type.weight);
-                    totalMarks += contribution;
-                    if (type.semester === "1") s1Total += contribution;
-                    else if (type.semester === "2") s2Total += contribution;
-                    else {
-                      s1Total += contribution;
-                      s2Total += contribution;
-                    }
-                  }
-                }
-                
-                updatedSub.sem1 = Math.round(s1Total * 10) / 10;
-                updatedSub.sem2 = Math.round(s2Total * 10) / 10;
-                
-                const hasS1 = assessmentTypes.some(t => t.semester === "1" && (updatedSub.assessments || {})[String(t.id)] !== undefined);
-                const hasS2 = assessmentTypes.some(t => t.semester === "2" && (updatedSub.assessments || {})[String(t.id)] !== undefined);
-                
-                if (hasS1 && hasS2) {
-                  updatedSub.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
-                } else {
-                  updatedSub.marks = Math.round((s1Total + s2Total) * 10) / 10;
-                }
-              }
+              recalculateSubjectMarks(updatedSub, settings, assessmentTypes);
               subMap.set(s.name, updatedSub);
             });
             mergedSubjects = Array.from(subMap.values());
@@ -882,41 +898,7 @@ export const PUT = withApiHandler(async (request, { db, actorRole, actorId }) =>
             // No existing published, just process pending
             mergedSubjects = mergedSubjects.map((s: Subject) => {
               const subj = { ...s } as Subject & Record<string, any>;
-              if (
-                subj.assessments &&
-                Array.isArray(assessmentTypes) &&
-                assessmentTypes.length > 0
-              ) {
-                let s1Total = 0;
-                let s2Total = 0;
-                let totalMarks = 0;
-
-                for (const type of assessmentTypes) {
-                  const val = (subj.assessments || {})[String(type.id)];
-                  if (val !== undefined && val !== null) {
-                    const contribution = (Number(val) / (Number(type.maxMarks) || 100)) * Number(type.weight);
-                    totalMarks += contribution;
-                    if (type.semester === "1") s1Total += contribution;
-                    else if (type.semester === "2") s2Total += contribution;
-                    else {
-                      s1Total += contribution;
-                      s2Total += contribution;
-                    }
-                  }
-                }
-                
-                subj.sem1 = Math.round(s1Total * 10) / 10;
-                subj.sem2 = Math.round(s2Total * 10) / 10;
-                
-                const hasS1 = assessmentTypes.some(t => t.semester === "1" && (subj.assessments || {})[String(t.id)] !== undefined);
-                const hasS2 = assessmentTypes.some(t => t.semester === "2" && (subj.assessments || {})[String(t.id)] !== undefined);
-                
-                if (hasS1 && hasS2) {
-                  subj.marks = Math.round(((s1Total + s2Total) / 2) * 10) / 10;
-                } else {
-                  subj.marks = Math.round((s1Total + s2Total) * 10) / 10;
-                }
-              }
+              recalculateSubjectMarks(subj, settings, assessmentTypes);
               subj.status = "published";
               subj.approvedBy = actorId;
               subj.approvedAt = new Date().toISOString();

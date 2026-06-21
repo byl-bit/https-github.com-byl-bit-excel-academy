@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -87,50 +87,112 @@ export function ResultTable({
     isSubjectPortal ? "average" : "1"
   );
 
+  // Subject portal view: which semester tab is active
+  const [subjectView, setSubjectView] = useState<"sem1" | "sem2" | "annual">("sem1");
+
   // Helper to compute stats for a single subject on the subject portal
   const getSubjectStats = (studentId: string) => {
     const marks = tableMarks[studentId] || {};
     const sub = subjects[0];
-    const s1 = marks[`${sub}_sem1`];
-    const s2 = marks[`${sub}_sem2`];
-    const hasS1 = s1 !== undefined;
-    const hasS2 = s2 !== undefined;
-    const numS1 = hasS1 ? Number(s1) : 0;
-    const numS2 = hasS2 ? Number(s2) : 0;
-    const average = (hasS1 && hasS2) ? (numS1 + numS2) / 2 : (hasS1 ? numS1 : (hasS2 ? numS2 : 0));
-    return { s1: numS1, s2: numS2, average, hasS1, hasS2 };
+    
+    const sem1Config: any[] = (settings as any)?.resultConfig?.["1"] || [];
+    let s1 = 0;
+    let hasS1 = false;
+    if (sem1Config.length > 0) {
+      let hasAllComps = true;
+      let sumComps = 0;
+      sem1Config.forEach((comp) => {
+        const val = marks[`${sub}_sem1_${comp.id}`];
+        if (val !== undefined && val !== null) {
+          sumComps += val;
+        } else {
+          hasAllComps = false;
+        }
+      });
+      s1 = sumComps;
+      hasS1 = hasAllComps && sem1Config.length > 0;
+    } else {
+      const valS1 = marks[`${sub}_sem1`];
+      hasS1 = valS1 !== undefined && valS1 !== null;
+      s1 = hasS1 ? valS1 : 0;
+    }
+
+    const sem2Config: any[] = (settings as any)?.resultConfig?.["2"] || [];
+    let s2 = 0;
+    let hasS2 = false;
+    if (sem2Config.length > 0) {
+      let hasAllComps = true;
+      let sumComps = 0;
+      sem2Config.forEach((comp) => {
+        const val = marks[`${sub}_sem2_${comp.id}`];
+        if (val !== undefined && val !== null) {
+          sumComps += val;
+        } else {
+          hasAllComps = false;
+        }
+      });
+      s2 = sumComps;
+      hasS2 = hasAllComps && sem2Config.length > 0;
+    } else {
+      const valS2 = marks[`${sub}_sem2`];
+      hasS2 = valS2 !== undefined && valS2 !== null;
+      s2 = hasS2 ? valS2 : 0;
+    }
+
+    const average = (hasS1 && hasS2) ? (s1 + s2) / 2 : (hasS1 ? s1 : (hasS2 ? s2 : 0));
+    return { s1, s2, average, hasS1, hasS2 };
   };
 
-  // Validate that all students have both sem1 and sem2 marks
-  const validateResults = () => {
+  // Validate that all students have marks for a given semester
+  const validateResults = (semester: "sem1" | "sem2" | "both" = "both") => {
     const missingStudents: string[] = [];
+    const sub = subjects[0];
+    // Get resultConfig for admin-defined components
+    const semKey = semester === "sem1" ? "1" : "2";
+    const resultConfig: Array<{id: string; label: string; maxMarks: number; weight: number}> =
+      (settings as any)?.resultConfig?.[semKey] || [];
+
     students.forEach((student) => {
       const sid = String(student.id || student.student_id || student.studentId);
       const marks = tableMarks[sid] || {};
-      const sub = subjects[0];
-      const s1 = marks[`${sub}_sem1`];
-      const s2 = marks[`${sub}_sem2`];
-      const hasS1 = s1 !== undefined;
-      const hasS2 = s2 !== undefined;
-      if (!hasS1 || !hasS2) {
+      let missing = false;
+
+      if (semester === "both") {
+        // Check both semesters
+        const s1 = resultConfig.length > 0
+          ? resultConfig.every((c) => marks[`${sub}_sem1_${c.id}`] !== undefined)
+          : marks[`${sub}_sem1`] !== undefined;
+        const s2 = resultConfig.length > 0
+          ? resultConfig.every((c) => marks[`${sub}_sem2_${c.id}`] !== undefined)
+          : marks[`${sub}_sem2`] !== undefined;
+        missing = !s1 || !s2;
+      } else {
+        const semMark = resultConfig.length > 0
+          ? resultConfig.every((c) => marks[`${sub}_${semester}_${c.id}`] !== undefined)
+          : marks[`${sub}_${semester}`] !== undefined;
+        missing = !semMark;
+      }
+
+      if (missing) {
         missingStudents.push(student.fullName || student.name || sid);
       }
     });
     return missingStudents;
   };
 
-  const handleTeacherSubjectSubmit = () => {
-    const missing = validateResults();
+  const handleTeacherSubjectSubmit = (sem: "sem1" | "sem2") => {
+    const missing = validateResults(sem);
+    const semLabel = sem === "sem1" ? "1st Semester" : "2nd Semester";
     if (missing.length > 0) {
       notifyError(
-        `Please insert both 1st and 2nd semester results for all students before submitting. Missing: ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? "..." : ""}`
+        `Please fill in ${semLabel} results for all students before submitting. Missing: ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? "..." : ""}`
       );
       return;
     }
     setConfirmSubmit({
       open: true,
       level: "subject-pending",
-      description: "Are you sure you want to submit the complete 1st and 2nd Semester results to the Admin for approval? This will lock editing once approved.",
+      description: `Are you sure you want to submit the ${semLabel} results to Admin for approval? This will lock ${semLabel} editing once approved.`,
     });
   };
 
@@ -227,10 +289,15 @@ export function ResultTable({
               if (sub.sem2 !== undefined && sub.sem2 !== null) {
                 marksMap[studentId][`${sub.name}_sem2`] = sub.sem2;
               }
-              if (isDynamic && sub.assessments) {
-                Object.keys(sub.assessments).forEach((typeId) => {
-                  marksMap[studentId][`${sub.name}__${typeId}`] = sub
-                    .assessments?.[typeId] as number;
+              if (sub.assessments) {
+                Object.keys(sub.assessments).forEach((compKey) => {
+                  const isSem1Comp = ((settings as any)?.resultConfig?.["1"] || []).some((c: any) => c.id === compKey);
+                  const isSem2Comp = ((settings as any)?.resultConfig?.["2"] || []).some((c: any) => c.id === compKey);
+                  if (isSem1Comp) {
+                    marksMap[studentId][`${sub.name}_sem1_${compKey}`] = sub.assessments?.[compKey] as number;
+                  } else if (isSem2Comp) {
+                    marksMap[studentId][`${sub.name}_sem2_${compKey}`] = sub.assessments?.[compKey] as number;
+                  }
                 });
               }
             });
@@ -239,7 +306,7 @@ export function ResultTable({
       });
       setTableMarks((prev) => ({ ...prev, ...marksMap }));
     }
-  }, [classResults, students, subjects, isDynamic, activeSemester]);
+  }, [classResults, students, subjects, isDynamic, activeSemester, settings]);
 
   const calculateRowStats = (studentId: string) => {
     const marks = tableMarks[studentId] || {};
@@ -273,12 +340,45 @@ export function ResultTable({
           }
         });
       } else {
-        const valS1 = marks[`${sub}_sem1`];
-        const valS2 = marks[`${sub}_sem2`];
-        hasS1 = valS1 !== undefined && valS1 !== null;
-        hasS2 = valS2 !== undefined && valS2 !== null;
-        s1 = hasS1 ? valS1 : 0;
-        s2 = hasS2 ? valS2 : 0;
+        const sem1Config: any[] = (settings as any)?.resultConfig?.["1"] || [];
+        if (sem1Config.length > 0) {
+          let hasAllComps = true;
+          let sumComps = 0;
+          sem1Config.forEach((comp) => {
+            const val = marks[`${sub}_sem1_${comp.id}`];
+            if (val !== undefined && val !== null) {
+              sumComps += val;
+            } else {
+              hasAllComps = false;
+            }
+          });
+          s1 = sumComps;
+          hasS1 = hasAllComps && sem1Config.length > 0;
+        } else {
+          const valS1 = marks[`${sub}_sem1`];
+          hasS1 = valS1 !== undefined && valS1 !== null;
+          s1 = hasS1 ? valS1 : 0;
+        }
+
+        const sem2Config: any[] = (settings as any)?.resultConfig?.["2"] || [];
+        if (sem2Config.length > 0) {
+          let hasAllComps = true;
+          let sumComps = 0;
+          sem2Config.forEach((comp) => {
+            const val = marks[`${sub}_sem2_${comp.id}`];
+            if (val !== undefined && val !== null) {
+              sumComps += val;
+            } else {
+              hasAllComps = false;
+            }
+          });
+          s2 = sumComps;
+          hasS2 = hasAllComps && sem2Config.length > 0;
+        } else {
+          const valS2 = marks[`${sub}_sem2`];
+          hasS2 = valS2 !== undefined && valS2 !== null;
+          s2 = hasS2 ? valS2 : 0;
+        }
       }
 
       const divisor = (hasS1 && hasS2) ? 2 : 1;
@@ -339,11 +439,23 @@ export function ResultTable({
           marks: ps.annualMarks,
           sem1: ps.s1,
           sem2: ps.s2,
-          assessments: Object.fromEntries(
-            gradeAssessmentTypes
-              .filter(t => marks[`${ps.name}__${t.id}`] !== undefined)
-              .map(t => [t.id, marks[`${ps.name}__${t.id}`]])
-          )
+          assessments: {
+            ...Object.fromEntries(
+              gradeAssessmentTypes
+                .filter(t => marks[`${ps.name}__${t.id}`] !== undefined)
+                .map(t => [t.id, marks[`${ps.name}__${t.id}`]])
+            ),
+            ...Object.fromEntries(
+              ((settings as any)?.resultConfig?.["1"] || [])
+                .filter((c: any) => marks[`${ps.name}_sem1_${c.id}`] !== undefined)
+                .map((c: any) => [c.id, marks[`${ps.name}_sem1_${c.id}`]])
+            ),
+            ...Object.fromEntries(
+              ((settings as any)?.resultConfig?.["2"] || [])
+                .filter((c: any) => marks[`${ps.name}_sem2_${c.id}`] !== undefined)
+                .map((c: any) => [c.id, marks[`${ps.name}_sem2_${c.id}`]])
+            ),
+          }
         })),
         total: Math.round(annualTotal * 10) / 10,
         average: Math.round(annualAverage * 10) / 10,
@@ -440,11 +552,23 @@ export function ResultTable({
             marks: ps.annualMarks,
             sem1: ps.s1,
             sem2: ps.s2,
-            assessments: Object.fromEntries(
-              gradeAssessmentTypes
-                .filter(t => marks[`${ps.name}__${t.id}`] !== undefined)
-                .map(t => [t.id, marks[`${ps.name}__${t.id}`]])
-            )
+            assessments: {
+              ...Object.fromEntries(
+                gradeAssessmentTypes
+                  .filter(t => marks[`${ps.name}__${t.id}`] !== undefined)
+                  .map(t => [t.id, marks[`${ps.name}__${t.id}`]])
+              ),
+              ...Object.fromEntries(
+                ((settings as any)?.resultConfig?.["1"] || [])
+                  .filter((c: any) => marks[`${ps.name}_sem1_${c.id}`] !== undefined)
+                  .map((c: any) => [c.id, marks[`${ps.name}_sem1_${c.id}`]])
+              ),
+              ...Object.fromEntries(
+                ((settings as any)?.resultConfig?.["2"] || [])
+                  .filter((c: any) => marks[`${ps.name}_sem2_${c.id}`] !== undefined)
+                  .map((c: any) => [c.id, marks[`${ps.name}_sem2_${c.id}`]])
+              ),
+            }
           })),
           total: Math.round(annualTotal * 10) / 10,
           average: Math.round(annualAverage * 10) / 10,
@@ -722,7 +846,7 @@ export function ResultTable({
     // DEEP LOGIC: We relax locking if the teacher is switching to a semester that hasn't been "finalized" yet.
     // If activeSemester is '2', and the overall status is 'pending' (likely from sem 1), we allow editing for sem 2.
     const isSemesterLockBypassed = 
-      activeSemester === "2" && 
+      ((activeSemester === "2") || (isSubjectPortal && subjectView === "sem2")) && 
       resStatus === "pending" && 
       !isPublished;
 
@@ -795,9 +919,7 @@ export function ResultTable({
                 </Button>
               </div>
             </div>
-          </div>
-
-          {/* Semester controls row - wraps naturally on small screens */}
+          </div>          {/* Semester controls row - wraps naturally on small screens */}
           <div className="flex flex-wrap items-center gap-2">
             {!isSubjectPortal && (
               <select
@@ -863,15 +985,40 @@ export function ResultTable({
                   {editingRows.size > 0 ? "Finish" : "Edit"}
                 </Button>
               )}
+            {/* Subject Portal: View Dropdown + Per-Semester Submit */}
             {isSubjectPortal && (
-              <Button
-                onClick={handleTeacherSubjectSubmit}
-                disabled={loadingFull}
-                className="h-10 px-5 rounded-xl font-black text-xs uppercase tracking-widest bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                Submit Results to Admin
-              </Button>
+              <>
+                <select
+                  title="Semester View"
+                  className="h-10 rounded-xl border-2 border-cyan-200 bg-white px-4 text-sm font-black text-cyan-800 shadow-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 transition-colors"
+                  value={subjectView}
+                  onChange={(e) => setSubjectView(e.target.value as "sem1" | "sem2" | "annual")}
+                >
+                  <option value="sem1">📝 1st Semester</option>
+                  <option value="sem2">📝 2nd Semester</option>
+                  <option value="annual">📊 Annual (Avg)</option>
+                </select>
+                {subjectView === "sem1" && (
+                  <Button
+                    onClick={() => handleTeacherSubjectSubmit("sem1")}
+                    disabled={loadingFull}
+                    className="h-10 px-5 rounded-xl font-black text-xs uppercase tracking-widest bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Submit 1st Semester
+                  </Button>
+                )}
+                {subjectView === "sem2" && (
+                  <Button
+                    onClick={() => handleTeacherSubjectSubmit("sem2")}
+                    disabled={loadingFull}
+                    className="h-10 px-5 rounded-xl font-black text-xs uppercase tracking-widest bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Submit 2nd Semester
+                  </Button>
+                )}
+              </>
             )}
             {!isHomeroomView && !isSubjectPortal && activeSemester !== "average" && (
               <div className="flex gap-2">
@@ -950,8 +1097,70 @@ export function ResultTable({
                           </div>
                         </th>
                       ));
+                    } else if (isSubjectPortal) {
+                      // ── Subject Portal: per-view header ──
+                      const sem1Config = (settings as any)?.resultConfig?.["1"] || [];
+                      const sem2Config = (settings as any)?.resultConfig?.["2"] || [];
+
+                      if (subjectView === "annual") {
+                        return (
+                          <Fragment key={subject}>
+                            <th className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 min-w-[100px] uppercase tracking-[0.15em]">
+                              SEM-1 /100
+                            </th>
+                            <th className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 min-w-[100px] uppercase tracking-[0.15em]">
+                              SEM-2 /100
+                            </th>
+                            <th className="p-5 text-center font-black text-cyan-700 bg-cyan-50/30 text-[10px] border-r border-slate-200/50 min-w-[120px] uppercase tracking-[0.15em]">
+                              ANNUAL AVG
+                            </th>
+                          </Fragment>
+                        );
+                      } else if (subjectView === "sem1") {
+                        if (sem1Config.length > 0) {
+                          return (
+                            <Fragment key={subject}>
+                              {sem1Config.map((comp: any) => (
+                                <th key={`${subject}-sem1-${comp.id}`} className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 min-w-[120px] uppercase tracking-[0.1em]">
+                                  SEM-1: {comp.label} (Max {comp.maxMarks})
+                                </th>
+                              ))}
+                              <th className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 min-w-[120px] uppercase tracking-[0.1em] bg-slate-50">
+                                SEM-1 Total /100
+                              </th>
+                            </Fragment>
+                          );
+                        } else {
+                          return (
+                            <th key={subject} className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 min-w-[150px] uppercase tracking-[0.2em]">
+                              SEM-1 /100
+                            </th>
+                          );
+                        }
+                      } else { // sem2
+                        if (sem2Config.length > 0) {
+                          return (
+                            <Fragment key={subject}>
+                              {sem2Config.map((comp: any) => (
+                                <th key={`${subject}-sem2-${comp.id}`} className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 min-w-[120px] uppercase tracking-[0.1em]">
+                                  SEM-2: {comp.label} (Max {comp.maxMarks})
+                                </th>
+                              ))}
+                              <th className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 min-w-[120px] uppercase tracking-[0.1em] bg-slate-50">
+                                SEM-2 Total /100
+                              </th>
+                            </Fragment>
+                          );
+                        } else {
+                          return (
+                            <th key={subject} className="p-5 text-center font-black text-slate-700 text-[10px] border-r border-slate-200/50 min-w-[150px] uppercase tracking-[0.2em]">
+                              SEM-2 /100
+                            </th>
+                          );
+                        }
+                      }
                     } else {
-                      const showThree = activeSemester === "average" || isSubjectPortal;
+                      const showThree = activeSemester === "average";
                       return (
                         <th
                           key={subject}
@@ -988,7 +1197,7 @@ export function ResultTable({
                   )}
                   {isSubjectPortal && (
                     <th className="p-5 text-center font-black text-cyan-900 bg-cyan-50/50 text-[10px] uppercase tracking-[0.2em] min-w-[110px]">
-                      Subject Rank
+                      {subjectView === "annual" ? "Annual Rank" : subjectView === "sem1" ? "Sem-1 Rank" : "Sem-2 Rank"}
                     </th>
                   )}
                   {isHomeroomView && (
@@ -1136,6 +1345,154 @@ export function ResultTable({
                                 );
                               },
                             );
+                          } else if (isSubjectPortal) {
+                            const { processedSubjects: rowSubjs } = calculateRowStats(sid);
+                            const subStat = rowSubjs.find(ps => ps.name === subject) || { s1: 0, s2: 0, annualMarks: 0, hasS1: false, hasS2: false };
+
+                            const sem1Config = (settings as any)?.resultConfig?.["1"] || [];
+                            const sem2Config = (settings as any)?.resultConfig?.["2"] || [];
+
+                            if (subjectView === "annual") {
+                              const annualFail = subStat.hasS1 && subStat.hasS2 && subStat.annualMarks < 35;
+                              return (
+                                <Fragment key={subject}>
+                                  <td className="p-3 text-center align-middle font-bold text-slate-600">
+                                    {subStat.hasS1 ? subStat.s1.toFixed(1) : "-"}
+                                  </td>
+                                  <td className="p-3 text-center align-middle font-bold text-slate-600">
+                                    {subStat.hasS2 ? subStat.s2.toFixed(1) : "-"}
+                                  </td>
+                                  <td className={cn(
+                                    "p-3 text-center align-middle font-black text-cyan-700 bg-cyan-50/20 ring-1 ring-inset ring-cyan-100/50 rounded-lg",
+                                    annualFail && "text-red-700 bg-red-50 ring-red-100"
+                                  )}>
+                                    {subStat.hasS1 && subStat.hasS2 ? subStat.annualMarks.toFixed(1) : "-"}
+                                  </td>
+                                </Fragment>
+                              );
+                            } else if (subjectView === "sem1") {
+                              if (sem1Config.length > 0) {
+                                return (
+                                  <Fragment key={subject}>
+                                    {sem1Config.map((comp: any) => {
+                                      const val = marks[`${subject}_sem1_${comp.id}`];
+                                      return (
+                                        <td key={`${subject}-sem1-${comp.id}`} className="p-3 text-center align-middle">
+                                          <Input
+                                            type="number"
+                                            inputMode="decimal"
+                                            min="0"
+                                            max={comp.maxMarks}
+                                            step="any"
+                                            value={val ?? ""}
+                                            onChange={(e) =>
+                                              handleMarkChange(
+                                                sid,
+                                                `${subject}_sem1_${comp.id}`,
+                                                e.target.value,
+                                                comp.maxMarks
+                                              )
+                                            }
+                                            className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
+                                            placeholder="-"
+                                            disabled={isLocked}
+                                          />
+                                        </td>
+                                      );
+                                    })}
+                                    <td className="p-3 text-center align-middle font-black text-slate-700 bg-slate-50">
+                                      {subStat.hasS1 ? subStat.s1.toFixed(1) : "-"}
+                                    </td>
+                                  </Fragment>
+                                );
+                              } else {
+                                const val = marks[`${subject}_sem1`];
+                                return (
+                                  <td key={subject} className="p-3 text-center align-middle">
+                                    <Input
+                                      type="number"
+                                      inputMode="decimal"
+                                      min="0"
+                                      max="100"
+                                      step="any"
+                                      value={val ?? ""}
+                                      onChange={(e) =>
+                                        handleMarkChange(
+                                          sid,
+                                          `${subject}_sem1`,
+                                          e.target.value,
+                                          100
+                                        )
+                                      }
+                                      className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
+                                      placeholder="-"
+                                      disabled={isLocked}
+                                    />
+                                  </td>
+                                );
+                              }
+                            } else { // sem2
+                              if (sem2Config.length > 0) {
+                                return (
+                                  <Fragment key={subject}>
+                                    {sem2Config.map((comp: any) => {
+                                      const val = marks[`${subject}_sem2_${comp.id}`];
+                                      return (
+                                        <td key={`${subject}-sem2-${comp.id}`} className="p-3 text-center align-middle">
+                                          <Input
+                                            type="number"
+                                            inputMode="decimal"
+                                            min="0"
+                                            max={comp.maxMarks}
+                                            step="any"
+                                            value={val ?? ""}
+                                            onChange={(e) =>
+                                              handleMarkChange(
+                                                sid,
+                                                `${subject}_sem2_${comp.id}`,
+                                                e.target.value,
+                                                comp.maxMarks
+                                              )
+                                            }
+                                            className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
+                                            placeholder="-"
+                                            disabled={isLocked}
+                                          />
+                                        </td>
+                                      );
+                                    })}
+                                    <td className="p-3 text-center align-middle font-black text-slate-700 bg-slate-50">
+                                      {subStat.hasS2 ? subStat.s2.toFixed(1) : "-"}
+                                    </td>
+                                  </Fragment>
+                                );
+                              } else {
+                                const val = marks[`${subject}_sem2`];
+                                return (
+                                  <td key={subject} className="p-3 text-center align-middle">
+                                    <Input
+                                      type="number"
+                                      inputMode="decimal"
+                                      min="0"
+                                      max="100"
+                                      step="any"
+                                      value={val ?? ""}
+                                      onChange={(e) =>
+                                        handleMarkChange(
+                                          sid,
+                                          `${subject}_sem2`,
+                                          e.target.value,
+                                          100
+                                        )
+                                      }
+                                      className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
+                                      placeholder="-"
+                                      disabled={isLocked}
+                                    />
+                                  </td>
+                                );
+                              }
+                            }
                           } else {
                             const s1 = marks[`${subject}_sem1`];
                             const s2 = marks[`${subject}_sem2`];
@@ -1245,20 +1602,44 @@ export function ResultTable({
                           <td className="p-5 text-center font-black text-cyan-700 bg-cyan-50/30 tabular-nums text-sm">
                             {(() => {
                               const myStats = getSubjectStats(sid);
-                              // Only show rank if marks are inserted, otherwise show "-"
-                              if (!myStats.hasS1 || !myStats.hasS2) return "-";
                               
-                              const myAvg = myStats.average;
-                              const allAverages = students
-                                .map((s) => {
-                                  const otherSid = String(s.id || s.student_id || s.studentId);
-                                  const otherStats = getSubjectStats(otherSid);
-                                  return otherStats.hasS1 && otherStats.hasS2 ? otherStats.average : null;
-                                })
-                                .filter((val): val is number => val !== null);
-                              
-                              const sortedAverages = [...allAverages].sort((a, b) => b - a);
-                              return sortedAverages.indexOf(myAvg) + 1;
+                              if (subjectView === "sem1") {
+                                if (!myStats.hasS1) return "-";
+                                const myVal = myStats.s1;
+                                const allVals = students
+                                  .map((s) => {
+                                    const otherSid = String(s.id || s.student_id || s.studentId);
+                                    const otherStats = getSubjectStats(otherSid);
+                                    return otherStats.hasS1 ? otherStats.s1 : null;
+                                  })
+                                  .filter((val): val is number => val !== null);
+                                const sorted = [...allVals].sort((a, b) => b - a);
+                                return sorted.indexOf(myVal) + 1;
+                              } else if (subjectView === "sem2") {
+                                if (!myStats.hasS2) return "-";
+                                const myVal = myStats.s2;
+                                const allVals = students
+                                  .map((s) => {
+                                    const otherSid = String(s.id || s.student_id || s.studentId);
+                                    const otherStats = getSubjectStats(otherSid);
+                                    return otherStats.hasS2 ? otherStats.s2 : null;
+                                  })
+                                  .filter((val): val is number => val !== null);
+                                const sorted = [...allVals].sort((a, b) => b - a);
+                                return sorted.indexOf(myVal) + 1;
+                              } else { // annual
+                                if (!myStats.hasS1 || !myStats.hasS2) return "-";
+                                const myVal = myStats.average;
+                                const allVals = students
+                                  .map((s) => {
+                                    const otherSid = String(s.id || s.student_id || s.studentId);
+                                    const otherStats = getSubjectStats(otherSid);
+                                    return otherStats.hasS1 && otherStats.hasS2 ? otherStats.average : null;
+                                  })
+                                  .filter((val): val is number => val !== null);
+                                const sorted = [...allVals].sort((a, b) => b - a);
+                                return sorted.indexOf(myVal) + 1;
+                              }
                             })()}
                           </td>
                         )}
