@@ -693,102 +693,221 @@ export function ResultTable({
     }
   };
 
+  // ── CSV helpers scoped to subject portal ──────────────────────────────
+  /** Build the CSV header + per-student row arrays that exactly mirror the
+   *  columns currently visible in the subject portal table.               */
+  const buildSubjectPortalCSVData = () => {
+    const sub = subjects[0];
+    const sem1Config: any[] = (settings as any)?.resultConfig?.["1"] || [];
+    const sem2Config: any[] = (settings as any)?.resultConfig?.["2"] || [];
+
+    // ── header columns that depend on the active view ─────────────────
+    const subjectHeaders: string[] = [];
+    // These are the exact tableMarks keys the teacher inputs go into.
+    // We use them both as CSV headers (display) and as the raw key map.
+    const subjectKeyMap: Array<{ header: string; key: string; readOnly?: boolean }> = [];
+
+    if (subjectView === "sem1") {
+      if (sem1Config.length > 0) {
+        sem1Config.forEach((comp: any) => {
+          const h = `${sub} SEM1: ${comp.label} (Max ${comp.maxMarks})`;
+          subjectHeaders.push(h);
+          subjectKeyMap.push({ header: h, key: `${sub}_sem1_${comp.id}` });
+        });
+        // Total column is read-only calculated
+        subjectHeaders.push(`${sub} SEM1 Total`);
+        subjectKeyMap.push({ header: `${sub} SEM1 Total`, key: `${sub}_sem1`, readOnly: true });
+      } else {
+        const h = `${sub} SEM1`;
+        subjectHeaders.push(h);
+        subjectKeyMap.push({ header: h, key: `${sub}_sem1` });
+      }
+    } else if (subjectView === "sem2") {
+      if (sem2Config.length > 0) {
+        sem2Config.forEach((comp: any) => {
+          const h = `${sub} SEM2: ${comp.label} (Max ${comp.maxMarks})`;
+          subjectHeaders.push(h);
+          subjectKeyMap.push({ header: h, key: `${sub}_sem2_${comp.id}` });
+        });
+        subjectHeaders.push(`${sub} SEM2 Total`);
+        subjectKeyMap.push({ header: `${sub} SEM2 Total`, key: `${sub}_sem2`, readOnly: true });
+      } else {
+        const h = `${sub} SEM2`;
+        subjectHeaders.push(h);
+        subjectKeyMap.push({ header: h, key: `${sub}_sem2` });
+      }
+    } else { // annual – all cols are read-only
+      subjectHeaders.push(`${sub} SEM1`, `${sub} SEM2`, `${sub} Annual Avg`);
+      subjectKeyMap.push(
+        { header: `${sub} SEM1`,       key: `${sub}_sem1`,   readOnly: true },
+        { header: `${sub} SEM2`,       key: `${sub}_sem2`,   readOnly: true },
+        { header: `${sub} Annual Avg`, key: `${sub}_annual`,  readOnly: true },
+      );
+    }
+
+    const headers = ["StudentID", "FullName", "Gender", "RollNumber", ...subjectHeaders];
+    if (subjectView !== "annual") headers.push("[DO NOT EDIT]");
+
+    const rows = [...students]
+      .sort((a, b) => {
+        const ra = parseInt(String(a.rollNumber || "0"));
+        const rb = parseInt(String(b.rollNumber || "0"));
+        return ra - rb;
+      })
+      .map(student => {
+        const sid = String(student.id || student.student_id || student.studentId);
+        const marks = tableMarks[sid] || {};
+        const { processedSubjects } = calculateRowStats(sid);
+        const subStat = processedSubjects.find(ps => ps.name === sub) || { s1: 0, s2: 0, annualMarks: 0, hasS1: false, hasS2: false };
+
+        const row: string[] = [
+          String(student.studentId || student.student_id || sid),
+          String(student.name || student.fullName || ""),
+          String(student.gender || (student as any).sex || ""),
+          String(student.rollNumber || ""),
+        ];
+
+        subjectKeyMap.forEach(({ key, readOnly }) => {
+          if (readOnly) {
+            // Derive read-only values from processedSubjects
+            if (key === `${sub}_sem1`)   row.push(subStat.hasS1 ? String(subStat.s1.toFixed(1)) : "-");
+            else if (key === `${sub}_sem2`) row.push(subStat.hasS2 ? String(subStat.s2.toFixed(1)) : "-");
+            else if (key === `${sub}_annual`) row.push((subStat.hasS1 && subStat.hasS2) ? String(subStat.annualMarks.toFixed(1)) : "-");
+            else row.push("-");
+          } else {
+            const v = marks[key];
+            row.push(v !== undefined ? String(v) : "");
+          }
+        });
+
+        if (subjectView !== "annual") {
+          row.push("Columns to the left are editable. DO NOT edit this column.");
+        }
+
+        return row;
+      });
+
+    return { headers, rows, subjectKeyMap };
+  };
+
   const exportDataCSV = () => {
     const grade = students[0]?.grade || user.grade;
     const section = students[0]?.section || user.section;
-    const filename = `Results_Grade_${grade}_${section}_${new Date().toISOString().split("T")[0]}`;
-    
-    // Convert current table state back to a result-like array for the export utility
-    const resultsToExport = students.map(student => {
-      const sid = String(student.id || student.student_id || student.studentId);
-      const marks = tableMarks[sid] || {};
-      const { total, average } = calculateRowStats(sid);
-      
-      const { processedSubjects } = calculateRowStats(sid);
-      const subjectsArr = processedSubjects.map(ps => ({
-        name: ps.name,
-        sem1: ps.hasS1 ? ps.s1 : "",
-        sem2: ps.hasS2 ? ps.s2 : "",
-        marks: ps.annualMarks
-      }));
+    const viewLabel = subjectView === "sem1" ? "Sem1" : subjectView === "sem2" ? "Sem2" : "Annual";
+    const filename = isSubjectPortal
+      ? `Results_${subjects[0]}_Grade${grade}${section}_${viewLabel}_${new Date().toISOString().split("T")[0]}`
+      : `Results_Grade_${grade}_${section}_${new Date().toISOString().split("T")[0]}`;
 
-      return {
-        ...student,
-        studentId: student.studentId || student.student_id || sid,
-        studentName: student.name || student.fullName,
-        subjects: subjectsArr,
-        total,
-        average,
-        rank: 0, // Rank will be calculated by the app logic usually
-        result: average >= 35 ? "PASS" : "FAIL",
-        promotedOrDetained: average >= 35 ? "PROMOTED" : "DETAINED"
-      };
-    });
-
-    generateClassResultsCSV(resultsToExport, filename, subjects);
+    if (isSubjectPortal) {
+      // ── Subject portal: export exactly what's on screen ──────────────
+      const { headers, rows } = buildSubjectPortalCSVData();
+      exportToCSV(rows, filename, headers);
+    } else {
+      // ── Homeroom / multi-subject view: legacy full-roster export ──────
+      const resultsToExport = students.map(student => {
+        const sid = String(student.id || student.student_id || student.studentId);
+        const { processedSubjects, annualTotal, annualAverage } = calculateRowStats(sid);
+        const subjectsArr = processedSubjects.map(ps => ({
+          name: ps.name,
+          sem1: ps.hasS1 ? ps.s1 : "",
+          sem2: ps.hasS2 ? ps.s2 : "",
+          marks: ps.annualMarks
+        }));
+        return {
+          ...student,
+          studentId: student.studentId || student.student_id || sid,
+          studentName: student.name || student.fullName,
+          subjects: subjectsArr,
+          total: Math.round(annualTotal * 10) / 10,
+          average: Math.round(annualAverage * 10) / 10,
+          rank: 0,
+          result: annualAverage >= 35 ? "PASS" : "FAIL",
+          promotedOrDetained: annualAverage >= 35 ? "PROMOTED" : "DETAINED"
+        };
+      });
+      generateClassResultsCSV(resultsToExport, filename, subjects);
+    }
   };
 
   const importFromCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Reset the input so the same file can be re-imported
+    e.target.value = "";
 
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
       const rows = parseCSV(text);
-      if (rows.length < 1) {
-        setAlert({
-          open: true,
-          title: "Import Failed",
-          description:
-            "The CSV file appears to be empty or in an invalid format.",
-          variant: "error",
-        });
+      if (rows.length < 2) {
+        setAlert({ open: true, title: "Import Failed",
+          description: "The CSV file appears to be empty or in an invalid format.",
+          variant: "error" });
         return;
       }
 
       const headers = rows[0].map((h) => h.trim());
       const newMarksMap = { ...tableMarks };
+      let imported = 0;
 
-      for (let i = 1; i < rows.length; i++) {
-        const values = rows[i].map((v) => v.trim());
-        if (values.length < 1) continue;
+      if (isSubjectPortal) {
+        // ── Subject portal: resolve headers back to tableMarks keys ──────
+        const { subjectKeyMap } = buildSubjectPortalCSVData();
+        // Build a header→key lookup (skip read-only and meta columns)
+        const headerToKey: Record<string, string> = {};
+        subjectKeyMap.forEach(({ header, key, readOnly }) => {
+          if (!readOnly) headerToKey[header] = key;
+        });
 
-        const inputId = values[0];
-        if (!inputId) continue;
-
-        const student = students.find(
-          (s) =>
-            String(s.studentId || s.student_id || s.id).toLowerCase() ===
-            inputId.toLowerCase(),
-        );
-        if (student) {
-          const sid = String(
-            student.id || student.student_id || student.studentId || "",
+        for (let i = 1; i < rows.length; i++) {
+          const values = rows[i].map((v) => v.trim());
+          if (!values[0]) continue;
+          const studentIdInput = values[0];
+          const student = students.find(
+            (s) => String(s.studentId || s.student_id || s.id).toLowerCase() === studentIdInput.toLowerCase(),
           );
-          const studentMarks: Record<string, number> = {
-            ...(newMarksMap[sid] || {}),
-          } as Record<string, number>;
-          headers.forEach((header, index) => {
-            if (
-              header !== "StudentID" &&
-              header !== "FullName" &&
-              header !== "RollNumber" &&
-              header !== "Total" &&
-              header !== "Average"
-            ) {
-              const val = parseFloat(values[index]);
-              if (!isNaN(val)) {
-                studentMarks[header] = val;
-              }
+          if (!student) continue;
+          const sid = String(student.id || student.student_id || student.studentId || "");
+          const studentMarks: Record<string, number> = { ...(newMarksMap[sid] || {}) } as Record<string, number>;
+
+          headers.forEach((header, idx) => {
+            const markKey = headerToKey[header];
+            if (!markKey) return; // skip StudentID, FullName, read-only, meta columns
+            const val = parseFloat(values[idx]);
+            if (!isNaN(val)) {
+              studentMarks[markKey] = val;
             }
           });
+
           newMarksMap[sid] = studentMarks;
+          imported++;
+        }
+      } else {
+        // ── Homeroom / multi-subject: legacy import by raw header key ────
+        const SKIP = new Set(["StudentID", "FullName", "RollNumber", "Total", "Average",
+          "Grand Total", "Average %", "Rank", "Status", "Decision", "Gender",
+          "[DO NOT EDIT]"]);
+        for (let i = 1; i < rows.length; i++) {
+          const values = rows[i].map((v) => v.trim());
+          if (!values[0]) continue;
+          const student = students.find(
+            (s) => String(s.studentId || s.student_id || s.id).toLowerCase() === values[0].toLowerCase(),
+          );
+          if (!student) continue;
+          const sid = String(student.id || student.student_id || student.studentId || "");
+          const studentMarks: Record<string, number> = { ...(newMarksMap[sid] || {}) } as Record<string, number>;
+          headers.forEach((header, index) => {
+            if (SKIP.has(header)) return;
+            const val = parseFloat(values[index]);
+            if (!isNaN(val)) studentMarks[header] = val;
+          });
+          newMarksMap[sid] = studentMarks;
+          imported++;
         }
       }
 
       setTableMarks(newMarksMap);
-      success("Marks imported and autosaving as draft...");
+      success(`${imported} student record${imported !== 1 ? "s" : ""} imported successfully.`);
     };
     reader.readAsText(file);
   };
