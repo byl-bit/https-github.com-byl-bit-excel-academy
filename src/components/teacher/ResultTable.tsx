@@ -67,6 +67,8 @@ export function ResultTable({
   settings,
   isHomeroomView,
 }: ResultTableProps) {
+  const isSubjectPortal = !isHomeroomView && subjects.length === 1 && user?.role === "teacher";
+
   const [editingRows, setEditingRows] = useState<Set<string>>(new Set());
 
   const toggleEditRow = (studentId: string) => {
@@ -81,7 +83,57 @@ export function ResultTable({
     });
   };
 
-  const [activeSemester, setActiveSemester] = useState<"1" | "2" | "average">("1");
+  const [activeSemester, setActiveSemester] = useState<"1" | "2" | "average">(
+    isSubjectPortal ? "average" : "1"
+  );
+
+  // Helper to compute stats for a single subject on the subject portal
+  const getSubjectStats = (studentId: string) => {
+    const marks = tableMarks[studentId] || {};
+    const sub = subjects[0];
+    const s1 = marks[`${sub}_sem1`];
+    const s2 = marks[`${sub}_sem2`];
+    const hasS1 = s1 !== undefined;
+    const hasS2 = s2 !== undefined;
+    const numS1 = hasS1 ? Number(s1) : 0;
+    const numS2 = hasS2 ? Number(s2) : 0;
+    const average = (hasS1 && hasS2) ? (numS1 + numS2) / 2 : (hasS1 ? numS1 : (hasS2 ? numS2 : 0));
+    return { s1: numS1, s2: numS2, average, hasS1, hasS2 };
+  };
+
+  // Validate that all students have both sem1 and sem2 marks
+  const validateResults = () => {
+    const missingStudents: string[] = [];
+    students.forEach((student) => {
+      const sid = String(student.id || student.student_id || student.studentId);
+      const marks = tableMarks[sid] || {};
+      const sub = subjects[0];
+      const s1 = marks[`${sub}_sem1`];
+      const s2 = marks[`${sub}_sem2`];
+      const hasS1 = s1 !== undefined;
+      const hasS2 = s2 !== undefined;
+      if (!hasS1 || !hasS2) {
+        missingStudents.push(student.fullName || student.name || sid);
+      }
+    });
+    return missingStudents;
+  };
+
+  const handleTeacherSubjectSubmit = () => {
+    const missing = validateResults();
+    if (missing.length > 0) {
+      notifyError(
+        `Please insert both 1st and 2nd semester results for all students before submitting. Missing: ${missing.slice(0, 3).join(", ")}${missing.length > 3 ? "..." : ""}`
+      );
+      return;
+    }
+    setConfirmSubmit({
+      open: true,
+      level: "subject-pending",
+      description: "Are you sure you want to submit the complete 1st and 2nd Semester results to the Admin for approval? This will lock editing once approved.",
+    });
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
@@ -747,19 +799,21 @@ export function ResultTable({
 
           {/* Semester controls row - wraps naturally on small screens */}
           <div className="flex flex-wrap items-center gap-2">
-            <select
-              title="Active Semester"
-              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
-              value={activeSemester}
-              onChange={(e) => {
-                const nextSemester = e.target.value as any;
-                setActiveSemester(nextSemester);
-              }}
-            >
-              <option value="1">1st Semester</option>
-              <option value="2">2nd Semester</option>
-              <option value="average">Annual Average</option>
-            </select>
+            {!isSubjectPortal && (
+              <select
+                title="Active Semester"
+                className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
+                value={activeSemester}
+                onChange={(e) => {
+                  const nextSemester = e.target.value as any;
+                  setActiveSemester(nextSemester);
+                }}
+              >
+                <option value="1">1st Semester</option>
+                <option value="2">2nd Semester</option>
+                <option value="average">Annual Average</option>
+              </select>
+            )}
             {!isHomeroomView &&
               (settings?.allowTeacherEditAfterSubmission ||
                 classResults.some((r) => r.status === "draft") ||
@@ -809,7 +863,17 @@ export function ResultTable({
                   {editingRows.size > 0 ? "Finish" : "Edit"}
                 </Button>
               )}
-            {!isHomeroomView && activeSemester !== "average" && (
+            {isSubjectPortal && (
+              <Button
+                onClick={handleTeacherSubjectSubmit}
+                disabled={loadingFull}
+                className="h-10 px-5 rounded-xl font-black text-xs uppercase tracking-widest bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Submit Results to Admin
+              </Button>
+            )}
+            {!isHomeroomView && !isSubjectPortal && activeSemester !== "average" && (
               <div className="flex gap-2">
                 <Button
                   onClick={() => {
@@ -860,7 +924,7 @@ export function ResultTable({
                     Sex
                   </th>
                   {subjects.map((subject) => {
-                    if (isDynamic && activeSemester !== "average") {
+                    if (isDynamic && activeSemester !== "average" && !isSubjectPortal) {
                       if (activeAssessmentTypes.length === 0) {
                         return (
                           <th key={subject} className="p-5 text-center font-black text-slate-400 text-[10px] border-r border-slate-200/50 last:border-0 min-w-[150px]">
@@ -887,6 +951,7 @@ export function ResultTable({
                         </th>
                       ));
                     } else {
+                      const showThree = activeSemester === "average" || isSubjectPortal;
                       return (
                         <th
                           key={subject}
@@ -895,18 +960,18 @@ export function ResultTable({
                           <div className="flex flex-col mb-3 text-xs uppercase tracking-[0.15em] text-cyan-700 font-black truncate" title={subject}>
                             {subject}
                           </div>
-                          <div className={`grid ${activeSemester === "average" ? "grid-cols-3" : "grid-cols-1"} gap-2 w-full border-t border-slate-200 pt-3`}>
-                            {(activeSemester === "1" || activeSemester === "average") && (
+                          <div className={`grid ${showThree ? "grid-cols-3" : "grid-cols-1"} gap-2 w-full border-t border-slate-200 pt-3`}>
+                            {(activeSemester === "1" || showThree) && (
                               <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
                                 SEM-1
                               </span>
                             )}
-                            {(activeSemester === "2" || activeSemester === "average") && (
+                            {(activeSemester === "2" || showThree) && (
                               <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
                                 SEM-2
                               </span>
                             )}
-                            {activeSemester === "average" && (
+                            {showThree && (
                               <span className="text-[9px] text-cyan-600 font-black uppercase tracking-widest bg-cyan-50/50 py-1 rounded-md">
                                 AVG
                               </span>
@@ -916,9 +981,16 @@ export function ResultTable({
                       );
                     }
                   })}
-                  <th className="p-5 text-center font-black text-slate-900 bg-slate-100/50 text-[10px] uppercase tracking-[0.2em] min-w-[110px]">
-                    Aggregate {activeSemester !== "average" ? `(Sem-${activeSemester})` : "(Annual)"}
-                  </th>
+                  {!isSubjectPortal && (
+                    <th className="p-5 text-center font-black text-slate-900 bg-slate-100/50 text-[10px] uppercase tracking-[0.2em] min-w-[110px]">
+                      Aggregate {activeSemester !== "average" ? `(Sem-${activeSemester})` : "(Annual)"}
+                    </th>
+                  )}
+                  {isSubjectPortal && (
+                    <th className="p-5 text-center font-black text-cyan-900 bg-cyan-50/50 text-[10px] uppercase tracking-[0.2em] min-w-[110px]">
+                      Subject Rank
+                    </th>
+                  )}
                   {isHomeroomView && (
                     <th className="p-5 text-center font-black text-cyan-900 bg-cyan-50/50 text-[10px] uppercase tracking-[0.2em]">
                       Acc %
@@ -1020,7 +1092,7 @@ export function ResultTable({
                         </td>
 
                         {subjects.map((subject) => {
-                          if (isDynamic && activeSemester !== "average") {
+                          if (isDynamic && activeSemester !== "average" && !isSubjectPortal) {
                             if (activeAssessmentTypes.length === 0) {
                               return <td key={subject} className="p-3 border-r border-slate-50 last:border-0 text-center">-</td>;
                             }
@@ -1075,7 +1147,7 @@ export function ResultTable({
                             const isFail = hasBoth && sAvg < 35;
 
                             let subTotalValue = 0;
-                            if (isDynamic && activeSemester === "average") {
+                            if (isDynamic && activeSemester === "average" && !isSubjectPortal) {
                                 // SubTotal calculation when dynamic in average view: average of semesters
                                 let s1Sub = 0;
                                 let s2Sub = 0;
@@ -1095,13 +1167,15 @@ export function ResultTable({
                                 subTotalValue = (s1Sub + s2Sub) / 2;
                             }
 
+                            const showThree = activeSemester === "average" || isSubjectPortal;
+
                             return (
                               <td
                                 key={subject}
                                 className="p-3 relative border-r border-slate-50 last:border-0 text-center align-top"
                               >
-                                <div className={`grid ${activeSemester === "average" ? "grid-cols-3" : "grid-cols-1"} gap-2`}>
-                                  {(activeSemester === "1" || activeSemester === "average") && (
+                                <div className={`grid ${showThree ? "grid-cols-3" : "grid-cols-1"} gap-2`}>
+                                  {(activeSemester === "1" || showThree) && (
                                     <Input
                                       type="number"
                                       inputMode="decimal"
@@ -1118,10 +1192,10 @@ export function ResultTable({
                                       }
                                       className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
                                       placeholder="-"
-                                      disabled={isLocked || isHomeroomView || isDynamic}
+                                      disabled={isLocked || isHomeroomView || (isDynamic && !isSubjectPortal)}
                                     />
                                   )}
-                                  {(activeSemester === "2" || activeSemester === "average") && (
+                                  {(activeSemester === "2" || showThree) && (
                                     <Input
                                       type="number"
                                       inputMode="decimal"
@@ -1138,21 +1212,21 @@ export function ResultTable({
                                       }
                                       className="w-full text-center h-10 bg-slate-50/50 hover:bg-white focus:bg-white border-transparent hover:border-slate-200 focus:border-cyan-500 focus:ring-8 focus:ring-cyan-500/10 rounded-xl font-black transition-all text-xs tabular-nums text-slate-800"
                                       placeholder="-"
-                                      disabled={isLocked || isHomeroomView || isDynamic}
+                                      disabled={isLocked || isHomeroomView || (isDynamic && !isSubjectPortal)}
                                     />
                                   )}
-                                  {activeSemester === "average" && (
+                                  {showThree && (
                                     <div
                                       className={cn(
                                         "flex items-center justify-center h-10 rounded-xl font-black text-xs tabular-nums ring-1 ring-inset",
-                                        isDynamic ? "bg-cyan-50 text-cyan-700 ring-cyan-100" : (isFail
+                                        (isDynamic && !isSubjectPortal) ? "bg-cyan-50 text-cyan-700 ring-cyan-100" : (isFail
                                           ? "text-red-700 bg-red-50 ring-red-100"
                                           : hasBoth
                                             ? "text-cyan-700 bg-cyan-50/50 ring-cyan-100"
                                             : "text-slate-300 ring-slate-100"),
                                       )}
                                     >
-                                      {isDynamic ? subTotalValue.toFixed(1) : (hasBoth ? sAvg.toFixed(1) : "-")}
+                                      {(isDynamic && !isSubjectPortal) ? subTotalValue.toFixed(1) : (hasBoth ? sAvg.toFixed(1) : "-")}
                                     </div>
                                   )}
                                 </div>
@@ -1160,11 +1234,34 @@ export function ResultTable({
                             );
                           }
                         })}
-                        <td className="p-5 text-center">
-                          <span className="inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-slate-900 font-black text-white text-[11px] shadow-lg shadow-slate-200 tabular-nums">
-                            {Number.isInteger(total) ? total : total.toFixed(1)}
-                          </span>
-                        </td>
+                        {!isSubjectPortal && (
+                          <td className="p-5 text-center">
+                            <span className="inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-slate-900 font-black text-white text-[11px] shadow-lg shadow-slate-200 tabular-nums">
+                              {Number.isInteger(total) ? total : total.toFixed(1)}
+                            </span>
+                          </td>
+                        )}
+                        {isSubjectPortal && (
+                          <td className="p-5 text-center font-black text-cyan-700 bg-cyan-50/30 tabular-nums text-sm">
+                            {(() => {
+                              const myStats = getSubjectStats(sid);
+                              // Only show rank if marks are inserted, otherwise show "-"
+                              if (!myStats.hasS1 || !myStats.hasS2) return "-";
+                              
+                              const myAvg = myStats.average;
+                              const allAverages = students
+                                .map((s) => {
+                                  const otherSid = String(s.id || s.student_id || s.studentId);
+                                  const otherStats = getSubjectStats(otherSid);
+                                  return otherStats.hasS1 && otherStats.hasS2 ? otherStats.average : null;
+                                })
+                                .filter((val): val is number => val !== null);
+                              
+                              const sortedAverages = [...allAverages].sort((a, b) => b - a);
+                              return sortedAverages.indexOf(myAvg) + 1;
+                            })()}
+                          </td>
+                        )}
                         {isHomeroomView && (
                           <td className="p-5 text-center font-black text-cyan-700 bg-cyan-50/30 tabular-nums text-sm">
                             {average.toFixed(1)}%
@@ -1196,6 +1293,46 @@ export function ResultTable({
                             ) : submitStatus[sid] === "saved" ? (
                               <div className="h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner border border-emerald-100">
                                 <CheckCircle2 className="h-4 w-4" />
+                              </div>
+                            ) : isSubjectPortal ? (
+                              <div className="flex items-center gap-2">
+                                {isPublished ? (
+                                  <span className="text-[9px] font-black uppercase px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg shadow-sm border border-emerald-100 tracking-[0.15em]">
+                                    Live Result
+                                  </span>
+                                ) : isPendingAdmin ? (
+                                  <span className="text-[9px] font-black uppercase px-3 py-1 bg-amber-50 text-amber-700 rounded-lg shadow-sm border border-amber-100 tracking-[0.15em]">
+                                    In Review
+                                  </span>
+                                ) : isLocked ? (
+                                  <span className="text-[9px] font-black uppercase px-3 py-1 bg-slate-100 text-slate-500 rounded-lg shadow-sm border border-slate-200 tracking-[0.15em]">
+                                    Locked
+                                  </span>
+                                ) : (() => {
+                                  const stats = getSubjectStats(sid);
+                                  const isComplete = stats.hasS1 && stats.hasS2;
+                                  return (
+                                    <span className={cn(
+                                      "text-[9px] font-black uppercase px-3 py-1 rounded-lg shadow-sm tracking-[0.15em] border",
+                                      isComplete 
+                                        ? "bg-cyan-50 text-cyan-700 border-cyan-100" 
+                                        : "bg-slate-50 text-slate-400 border-slate-100"
+                                    )}>
+                                      {isComplete ? "Draft (Ready)" : "Draft (Incomplete)"}
+                                    </span>
+                                  );
+                                })()}
+                                {allowEditSubmitted && (isPublished || isPendingAdmin) && (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-slate-400 hover:text-cyan-600 hover:bg-white rounded-xl transition-all"
+                                    onClick={() => toggleEditRow(sid)}
+                                    title="Edit Marks"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                )}
                               </div>
                             ) : isLocalEditing ? (
                               <Button
