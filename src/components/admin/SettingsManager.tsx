@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -65,6 +65,19 @@ export function SettingsManager({
     maxMarks: 50,
   });
 
+  const [localResultConfig, setLocalResultConfig] = useState<{
+    "1": Array<{ id: string; label: string; maxMarks: number }>;
+    "2": Array<{ id: string; label: string; maxMarks: number }>;
+  }>({ "1": [], "2": [] });
+
+  const labelInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (settings?.resultConfig) {
+      setLocalResultConfig(settings.resultConfig);
+    }
+  }, [settings?.resultConfig]);
+
   const handleAddResultConfig = () => {
     if (!resultConfigForm.label.trim()) return;
 
@@ -102,6 +115,86 @@ export function SettingsManager({
       label: "",
       maxMarks: 50,
     });
+    
+    // Auto-focus back on Component Label
+    setTimeout(() => {
+      labelInputRef.current?.focus();
+    }, 50);
+  };
+
+  const handleLocalUpdate = (semester: "1" | "2", id: string, field: "label" | "maxMarks", val: string | number) => {
+    setLocalResultConfig(prev => {
+      const semList = prev[semester] || [];
+      const updated = semList.map(item => {
+        if (item.id === id) {
+          return {
+            ...item,
+            [field]: field === "maxMarks" ? (val === "" ? "" : Number(val)) : val
+          } as any;
+        }
+        return item;
+      });
+      return {
+        ...prev,
+        [semester]: updated
+      };
+    });
+  };
+
+  const handleSaveItem = (semester: "1" | "2", id: string) => {
+    const item = localResultConfig[semester]?.find(x => x.id === id);
+    if (!item) return;
+
+    const cleanLabel = item.label.trim();
+    if (!cleanLabel) {
+      // Revert local state
+      if (settings?.resultConfig) {
+        setLocalResultConfig(settings.resultConfig);
+      }
+      setAlert({
+        open: true,
+        title: "Validation Error",
+        description: "Component label cannot be empty.",
+        variant: "error"
+      });
+      return;
+    }
+
+    const cleanMax = Math.min(100, Math.max(1, Number(item.maxMarks) || 0));
+
+    const currentConfig = settings?.resultConfig || {};
+    const semesterList = currentConfig[semester] || [];
+    const duplicate = semesterList.some((x: any) => x.id !== id && x.label.toLowerCase() === cleanLabel.toLowerCase());
+    if (duplicate) {
+      if (settings?.resultConfig) {
+        setLocalResultConfig(settings.resultConfig);
+      }
+      setAlert({
+        open: true,
+        title: "Duplicate Component",
+        description: `A component with label "${cleanLabel}" already exists for Semester ${semester}.`,
+        variant: "error"
+      });
+      return;
+    }
+
+    const updatedSemesterList = semesterList.map((x: any) => {
+      if (x.id === id) {
+        return {
+          ...x,
+          label: cleanLabel,
+          maxMarks: cleanMax,
+        };
+      }
+      return x;
+    });
+
+    const newResultConfig = {
+      ...currentConfig,
+      [semester]: updatedSemesterList,
+    };
+
+    onUpdateSettings("resultConfig", newResultConfig);
   };
 
   const handleDeleteResultConfig = (semester: "1" | "2", componentId: string) => {
@@ -231,77 +324,6 @@ export function SettingsManager({
     }
   };
 
-  const [assessmentForm, setAssessmentForm] = useState({
-    label: "",
-    weight: 30,
-    maxMarks: 100,
-    grade: "all",
-    semester: "1",
-  });
-
-  const handleAddAssessment = () => {
-    const currentTypes = settings?.assessmentTypes || [];
-    
-    // Validate if this label already exists for this grade/semester
-    const exists = currentTypes.some((t: any) => 
-      t.grade === assessmentForm.grade && 
-      t.semester === assessmentForm.semester && 
-      t.label.toLowerCase() === assessmentForm.label.toLowerCase()
-    );
-
-    if (exists) {
-      setAlert({
-        open: true,
-        title: "Duplicate Assessment",
-        description: `An assessment with label "${assessmentForm.label}" already exists for this grade and semester.`,
-        variant: "error"
-      });
-      return;
-    }
-
-    const newType = {
-      id: `${assessmentForm.grade}-${assessmentForm.semester}-${assessmentForm.label.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
-      label: assessmentForm.label,
-      weight: assessmentForm.weight,
-      maxMarks: assessmentForm.maxMarks,
-      grade: assessmentForm.grade,
-      semester: assessmentForm.semester,
-    };
-    onUpdateSettings("assessmentTypes", [...currentTypes, newType]);
-    setAssessmentForm({ ...assessmentForm, label: "", weight: 30, maxMarks: 100 });
-  };
-
-  const handleDeleteAssessment = (index: number) => {
-    const types = settings?.assessmentTypes || [];
-    const typeToDelete = types[index];
-    if (!typeToDelete) return;
-
-    setConfirmAction({
-      open: true,
-      title: "Delete Assessment Type",
-      description: `Are you sure you want to delete "${typeToDelete.label || "this assessment"}"? This will affect how results are calculated for all students.`,
-      variant: "destructive",
-      onConfirm: () => {
-        const updatedTypes = types.filter((_: any, i: number) => i !== index);
-        onUpdateSettings("assessmentTypes", updatedTypes);
-        setConfirmAction((prev) => ({ ...prev, open: false }));
-      },
-    });
-  };
-
-  const handleDeleteAllAssessments = () => {
-    setConfirmAction({
-      open: true,
-      title: "Delete All Assessments",
-      description:
-        "CRITICAL: Are you sure you want to delete ALL assessment types? This will clear all grading structures for all students.",
-      variant: "destructive",
-      onConfirm: () => {
-        onUpdateSettings("assessmentTypes", []);
-        setConfirmAction((prev) => ({ ...prev, open: false }));
-      },
-    });
-  };
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
@@ -354,214 +376,7 @@ export function SettingsManager({
         </CardContent>
       </Card>
 
-      {/* Assessment Configuration */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-purple-600" />
-              Assessment Types
-            </CardTitle>
-            {(settings?.assessmentTypes || []).length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-2 h-8"
-                onClick={handleDeleteAllAssessments}
-              >
-                <Trash2 className="h-3 w-3" />
-                Clear All
-              </Button>
-            )}
-          </div>
-          <CardDescription>
-            Define assessments and their weights (Total should be 100%).
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <div className="flex-1 space-y-1">
-                <Label className="text-xs">Class/Grade</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={assessmentForm.grade}
-                  onChange={(e) => setAssessmentForm({ ...assessmentForm, grade: e.target.value })}
-                >
-                  <option value="all">All Grades</option>
-                  {[...Array(12)].map((_, i) => (
-                    <option key={i + 1} value={String(i + 1)}>Grade {i + 1}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex-1 space-y-1">
-                <Label className="text-xs">Semester</Label>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={assessmentForm.semester}
-                  onChange={(e) => setAssessmentForm({ ...assessmentForm, semester: e.target.value })}
-                >
-                  <option value="1">Semester 1</option>
-                  <option value="2">Semester 2</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex gap-2 items-end">
-            <div className="flex-1 space-y-1">
-              <Label className="text-xs">Label</Label>
-              <Input
-                placeholder="e.g. Midterm"
-                value={assessmentForm.label}
-                onChange={(e) =>
-                  setAssessmentForm({
-                    ...assessmentForm,
-                    label: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="w-20 space-y-1">
-              <Label className="text-xs">Weight %</Label>
-              <Input
-                type="number"
-                value={assessmentForm.weight}
-                onChange={(e) =>
-                  setAssessmentForm({
-                    ...assessmentForm,
-                    weight: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <div className="w-20 space-y-1">
-              <Label className="text-xs">Max Marks</Label>
-              <Input
-                type="number"
-                value={assessmentForm.maxMarks}
-                onChange={(e) =>
-                  setAssessmentForm({
-                    ...assessmentForm,
-                    maxMarks: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <Button
-              onClick={handleAddAssessment}
-              disabled={!assessmentForm.label}
-            >
-              Add
-            </Button>
-            </div>
-          </div>
 
-          <div className="space-y-6 pt-2">
-            {/* Group assessments by Grade and Semester */}
-            {(() => {
-              const types = settings?.assessmentTypes || [];
-              const groups: Record<string, any[]> = {};
-              
-              types.forEach((t: any) => {
-                const key = `Grade: ${t.grade === "all" ? "All" : t.grade} - Semester: ${t.semester}`;
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(t);
-              });
-
-              return Object.entries(groups).map(([groupKey, groupTypes]) => {
-                const groupTotal = groupTypes.reduce((acc, curr) => acc + (curr.weight || 0), 0);
-                const isInvalid = groupTotal !== 100;
-
-                return (
-                  <div key={groupKey} className="space-y-2 border-l-4 border-cyan-100 pl-4 py-2">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                        {groupKey}
-                      </span>
-                      <span className={cn(
-                        "text-[10px] font-bold px-2 py-0.5 rounded-full",
-                        isInvalid ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
-                      )}>
-                        Total: {groupTotal}% {isInvalid && "(Must be 100%)"}
-                      </span>
-                    </div>
-                    {groupTypes.map((type, groupIdx) => {
-                      // Find actual index in settings.assessmentTypes
-                      const actualIdx = types.findIndex((t: any) => t.id === type.id);
-                      return (
-                        <div
-                          key={type.id || actualIdx}
-                          className="flex items-center gap-2 p-2 bg-slate-50 rounded-md border text-sm"
-                        >
-                          <div className="flex-1 flex items-center gap-2">
-                            <Input
-                              className="h-8 flex-1 font-semibold"
-                              value={type.label}
-                              onChange={(e) => {
-                                const updated = [...types];
-                                updated[actualIdx] = { ...updated[actualIdx], label: e.target.value };
-                                onUpdateSettings("assessmentTypes", updated);
-                              }}
-                              placeholder="Label"
-                            />
-                            <div className="flex items-center gap-1">
-                              <Input
-                                type="number"
-                                className="h-8 w-16 text-center"
-                                value={type.weight}
-                                onChange={(e) => {
-                                  const updated = [...types];
-                                  updated[actualIdx] = {
-                                    ...updated[actualIdx],
-                                    weight: Number(e.target.value),
-                                  };
-                                  onUpdateSettings("assessmentTypes", updated);
-                                }}
-                                placeholder="%"
-                              />
-                              <span className="text-xs text-muted-foreground">%</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Input
-                                type="number"
-                                className="h-8 w-16 text-center"
-                                value={type.maxMarks}
-                                onChange={(e) => {
-                                  const updated = [...types];
-                                  updated[actualIdx] = {
-                                    ...updated[actualIdx],
-                                    maxMarks: Number(e.target.value),
-                                  };
-                                  onUpdateSettings("assessmentTypes", updated);
-                                }}
-                                placeholder="Max"
-                              />
-                              <span className="text-xs text-muted-foreground">max</span>
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-500 hover:bg-red-50"
-                            onClick={() => handleDeleteAssessment(actualIdx)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              });
-            })()}
-            
-            {(settings?.assessmentTypes || []).length === 0 && (
-              <div className="text-center py-8 text-slate-400 text-xs italic border-2 border-dashed border-slate-100 rounded-xl">
-                No assessment types defined yet.
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Result Configuration */}
       <Card>
@@ -604,6 +419,7 @@ export function SettingsManager({
               <div className="flex-[2] space-y-1">
                 <Label className="text-xs font-bold text-slate-600">Component Label</Label>
                 <Input
+                  ref={labelInputRef}
                   placeholder="e.g. Test 1, Final Exam"
                   value={resultConfigForm.label}
                   onChange={(e) =>
@@ -612,6 +428,11 @@ export function SettingsManager({
                       label: e.target.value,
                     })
                   }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleAddResultConfig();
+                    }
+                  }}
                 />
               </div>
               <div className="w-24 space-y-1">
@@ -627,6 +448,11 @@ export function SettingsManager({
                       maxMarks: Math.min(100, Math.max(1, Number(e.target.value) || 0)),
                     })
                   }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleAddResultConfig();
+                    }
+                  }}
                 />
               </div>
               <div className="pt-5 flex items-end">
@@ -643,46 +469,99 @@ export function SettingsManager({
 
           <div className="space-y-6 pt-2">
             {(["1", "2"] as const).map((sem) => {
-              const semConfig = settings?.resultConfig?.[sem] || [];
+              const semConfig = localResultConfig[sem] || [];
               const semTotal = semConfig.reduce((acc: number, curr: any) => acc + (Number(curr.maxMarks) || 0), 0);
               const isInvalid = semTotal !== 100;
 
               return (
-                <div key={sem} className="space-y-2 border-l-4 border-indigo-100 pl-4 py-1">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                      Semester {sem} Configuration
-                    </span>
-                    <span className={cn(
-                      "text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider",
-                      isInvalid ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    )}>
-                      Total Max: {semTotal}/100 {isInvalid ? "⚠️ Must equal 100" : "✅ Valid"}
-                    </span>
-                  </div>
-                  {semConfig.map((comp: any) => (
-                    <div
-                      key={comp.id}
-                      className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border text-sm"
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="font-bold text-slate-700">{comp.label}</span>
-                        <span className="text-xs text-muted-foreground bg-white px-2 py-0.5 rounded-md border font-black">
-                          Max Marks: {comp.maxMarks}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:bg-red-50"
-                        onClick={() => handleDeleteResultConfig(sem, comp.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                <div key={sem} className="space-y-3 border-l-4 border-indigo-100 pl-4 py-1">
+                  <div className="flex flex-col gap-1.5 mb-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-500">
+                        Semester {sem} Configuration
+                      </span>
+                      <span className={cn(
+                        "text-[10px] font-black px-2.5 py-0.5 rounded-full border uppercase tracking-wider transition-colors duration-300",
+                        isInvalid
+                          ? semTotal > 100
+                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      )}>
+                        {isInvalid
+                          ? semTotal > 100
+                            ? `⚠️ Exceeds limit: ${semTotal}/100`
+                            : `ℹ️ Incomplete: ${semTotal}/100`
+                          : `✅ Validated: 100/100`
+                        }
+                      </span>
                     </div>
-                  ))}
+                    {/* Animated Progress Bar */}
+                    <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden relative border border-slate-200/40">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all duration-500 ease-out",
+                          isInvalid
+                            ? semTotal > 100
+                              ? "bg-gradient-to-r from-rose-500 to-red-500"
+                              : "bg-gradient-to-r from-amber-500 to-amber-600"
+                            : "bg-gradient-to-r from-emerald-500 to-teal-500"
+                        )}
+                        style={{ width: `${Math.min(100, semTotal)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    {semConfig.map((comp: any) => (
+                      <div
+                        key={comp.id}
+                        className="flex items-center gap-2 p-2 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-xl transition-all text-sm group"
+                      >
+                        <Input
+                          className="h-8 flex-1 font-semibold bg-white border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                          value={comp.label}
+                          onChange={(e) => handleLocalUpdate(sem, comp.id, "label", e.target.value)}
+                          onBlur={() => handleSaveItem(sem, comp.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          placeholder="Component Label"
+                        />
+                        <div className="flex items-center gap-1.5 w-32 shrink-0">
+                          <Input
+                            type="number"
+                            className="h-8 text-center bg-white border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                            value={comp.maxMarks}
+                            onChange={(e) => handleLocalUpdate(sem, comp.id, "maxMarks", e.target.value)}
+                            onBlur={() => handleSaveItem(sem, comp.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                            placeholder="Max"
+                            min="1"
+                            max="100"
+                          />
+                          <span className="text-xs text-slate-400 font-medium select-none">max</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                          onClick={() => handleDeleteResultConfig(sem, comp.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+
                   {semConfig.length === 0 && (
-                    <div className="text-xs text-slate-400 italic py-1">
+                    <div className="text-xs text-slate-400 italic py-2 text-center border border-dashed border-slate-100 rounded-xl bg-slate-50/20">
                       No components configured. Falls back to single 100-mark input.
                     </div>
                   )}
